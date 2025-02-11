@@ -1,9 +1,38 @@
-const express = require('express')
-const app = express()
-require('dotenv').config()
-const Port = process.env.PORT || 3000
-const db = require('./config/db')
-db()
-app.listen(Port || 3000,()=>console.log(`THE PORT HAS BEEN RUNNING ON ${Port}`))
+import express, { urlencoded } from "express";
+const app = express();
+import dotEnv from "dotenv";
+const Port = process.env.PORT || 3000;
+import { fileURLToPath } from "url";
+import db from "./config/db.js";
+import path from "path";
+import userRouter from "./router/userRouter/userRouter.js";
+import { error } from "console";
 
-module.exports = app
+// ENV config
+dotEnv.config();
+// connect to Database
+db();
+
+// setup filename
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+// body parser
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
+// view engine setup
+app.set('views', path.join(__dirname, 'views')) 
+app.set('view engine', 'ejs') 
+app.use(express.static(path.join(__dirname, "public")));
+app.use("/", userRouter);
+
+// Error handling
+app.use((err , req , res, next)=>{
+  res.status(500).send({error:err.message})
+})
+
+app.listen(Port, () =>
+  console.log(`THE PORT HAS BEEN RUNNING ON ${Port}`)
+);
+
+export default app;
