@@ -1,7 +1,3 @@
-document.getElementById('menu-toggle').addEventListener('click', function() {
-    const menu = document.getElementById('navbar-search');
-    menu.classList.toggle('hidden');
-});
 
 var swiper = new Swiper(".mySwiper", {
     spaceBetween: 30,

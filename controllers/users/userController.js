@@ -1,6 +1,18 @@
+import User from "../../models/userSchema.js"
+
+
+// Setup Signup page
+const loadSignUp = (req, res)=>{
+    try {
+        res.render('user/signup')
+    } catch (err) {
+        console.log(`request error ${err.message}`)
+        res.status(500).send('Sever Error')
+    }
+}
 
 // page not found
-const pageNoteFound = async (req,res) =>{
+const pageNoteFound =  (req,res) =>{
     try {
         res.render("user/page404")
     } catch (error) {
@@ -21,7 +33,24 @@ const loadHome = async (req , res) =>{
     }
 }
 
+// Signup Setup
+
+const Signup = async  (req,res) =>{
+    const {name , email , password , confirmPassword } = req.body
+    try {
+        const newUser = new User({name,email,password,confirmPassword})
+       await newUser.save()
+        res.redirect('/signup')
+        
+    } catch (error) {
+        console.log(`Some Error ${error.message}`)
+        res.status(500).send("Internal Sever error")
+    }
+}
+
 export default  {
     loadHome,
-    pageNoteFound
+    pageNoteFound,
+    loadSignUp,
+    Signup
 }
