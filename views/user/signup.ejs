@@ -44,6 +44,13 @@
                 </div>
                 <span id="cmpasswordError" class="error text-red-500"></span>
             </div>
+
+            <% if (locals.message && locals.message.length > 0) { %>
+                <div class="text-red-500 text-sm">
+                    <span><%= locals.message %></span>
+                </div>
+            <% } %>
+            
             
             <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg hover:from-purple-600 hover:to-blue-500 transition duration-300 shadow-md font-bold">Sign Up</button>
         </form>
@@ -54,7 +61,7 @@
             <img src="https://www.svgrepo.com/show/355037/google.svg" class="h-5 w-5 mr-2"> Sign up with Google
         </a>
         
-        <p class="text-white text-sm mt-2">Already have an account? <a href="#" class="underline font-semibold">Login</a></p>
+        <p class="text-white text-sm mt-2">Already have an account? <a href="/login" class="underline font-semibold">Login</a></p>
     </div>
 </body>
 </html>
