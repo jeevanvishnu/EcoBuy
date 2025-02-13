@@ -172,11 +172,14 @@ const resendOtp = async (req , res) =>{
     }
 }
 
+
+
 export default  {
     loadHome,
     pageNoteFound,
     loadSignUp,
     Signup,
     verifyOtp,
-    resendOtp
+    resendOtp,
+   
 }

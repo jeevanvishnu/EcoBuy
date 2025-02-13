@@ -7,6 +7,7 @@ import db from "./config/db.js";
 import path from "path";
 import userRouter from "./router/userRouter/userRouter.js";
 import session from "express-session";
+import passport from "./config/passport.js";
 
 
 // ENV config
@@ -50,6 +51,10 @@ app.use((err , req , res, next)=>{
   res.status(500).send({error:err.message})
   next()
 })
+
+// passport middleware
+app.use(passport.initialize())
+app.use(passport.session())
 
 app.listen(Port, () =>
   console.log(`THE PORT HAS BEEN RUNNING ON ${Port}`)
