@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Page</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center h-screen bg-gradient-to-r from-blue-500 to-purple-600">
+    <div class="bg-white/30 backdrop-blur-lg shadow-2xl rounded-xl p-6 max-w-md w-full text-center border border-white/20">
+        <h2 class="text-3xl font-extrabold text-white mb-4 drop-shadow-lg">Welcome Back</h2>
+        <p class="text-white text-sm mb-4">Login to continue your journey!</p>
+
+        <form id="loginForm" method="post" action="/login" class="space-y-4">
+            <label for="email" class="block text-white text-left font-semibold">Email Address</label>
+            <input id="email" name="email" type="email" placeholder="Enter your email"
+                class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 border-none focus:ring-2 focus:ring-blue-400" required>
+            <span id="emailError" class="error text-red-500 text-sm"></span>
+
+            <div class="relative w-full">
+                <label for="password" class="block text-white text-left font-semibold">Password</label>
+                <div class="relative">
+                    <input id="password" name="password" type="password" placeholder="Enter your password"
+                        class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 border-none focus:ring-2 focus:ring-blue-400 pr-10" required>
+                    <span id="togglePassword" class="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-600">👁️</span>
+                </div>
+                <span id="passwordError" class="error text-red-500 text-sm"></span>
+            </div>
+              
+            <% if (locals.message && locals.message.length > 0) { %>
+                <div class="text-red-500 text-sm">
+                    <span><%= message %></span>
+                </div>
+            <% } %>
+            
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg hover:from-purple-600 hover:to-blue-500 transition duration-300 shadow-md font-bold">
+                Login
+            </button>
+        </form>
+
+        <div class="my-2 text-white text-sm">OR</div>
+
+        <a href="/auth/google" class="w-full flex items-center justify-center bg-white text-gray-900 py-2 rounded-lg shadow-md hover:bg-gray-200 transition duration-300 font-semibold">
+            <img src="https://www.svgrepo.com/show/355037/google.svg" class="h-5 w-5 mr-2"> Sign in with Google
+        </a>
+
+        <p class="text-white text-sm mt-2">Don't have an account? <a href="/signup" class="underline font-semibold">Sign up</a></p>
+    </div>
+
+    <script>
+        const  password = document.getElementById('password')
+        document.getElementById('togglePassword').addEventListener('click',()=>{
+            if(password.type == 'password'){
+                password.type = 'text'
+            }else{
+                password.type = 'password'
+            }
+        })
+
+ 
+    document.getElementById('loginForm').addEventListener('submit',(e)=>{
+
+        e.preventDefault()
+
+        clearErrors()
+
+        const password = document.getElementById('password').value.trim()
+        const email = document.getElementById('email').value.trim()
+    
+
+        // password validation
+
+        let isValue =true 
+
+        if(password == ""){
+        showError('passwordError','password is requires')
+        isValue = false
+    }else if(password.length < 8){
+        showError('passwordError','password must be 8 character')
+        isValue = false
+    }else if(!/[A-Z]/.test(password)){
+        showError('passwordError','Atlist one upperCase')
+        isValue = false
+    }else if(!/[0-9]/.test(password)){
+        showError('passwordError','password must one number')
+        isValue = false
+    }
+
+    // email validation
+    if(email === ""){
+        showError("emailError","Email is required")
+        isValue = false
+    }else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError('emailError','Email should be valid')
+        isValue = false
+    }
+
+    if(isValue){
+       e.target.submit()
+    }
+})
+
+
+
+    function showError(elementId, message) {
+    document.getElementById(elementId).textContent = message;
+}
+
+
+const clearErrors =() =>{
+    const error =  document.querySelectorAll('.error')
+    error.forEach((error)=>error.textContent = "")
+}
+
+
+    </script>
+
+</body>
+</html>
+
