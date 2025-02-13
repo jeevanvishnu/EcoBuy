@@ -11,7 +11,7 @@ const userSchema = new Schema ({
         required:true,
         unique:true
     },
-    phone:{
+    mobile:{
         type:String,
         required:false,
         unique: false,
