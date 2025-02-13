@@ -6,7 +6,8 @@ import { fileURLToPath } from "url";
 import db from "./config/db.js";
 import path from "path";
 import userRouter from "./router/userRouter/userRouter.js";
-import { error } from "console";
+import session from "express-session";
+
 
 // ENV config
 dotEnv.config();
@@ -20,6 +21,24 @@ const __dirname = path.dirname(__filename);
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+// Setup Session
+app.use(session({
+  secret:process.env.SECRECT_KEY,
+  resave:false,
+  saveUninitialized:true,
+  cookie:{
+    secure:false,
+    httpOnly:true,
+    maxAge:72*60*60*1000
+  }
+}))
+
+// set cache control
+app.use((req,res,next)=>{
+  res.set('cache-control','no-store')
+  next()
+})
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views')) 
 app.set('view engine', 'ejs') 
@@ -29,6 +48,7 @@ app.use("/", userRouter);
 // Error handling
 app.use((err , req , res, next)=>{
   res.status(500).send({error:err.message})
+  next()
 })
 
 app.listen(Port, () =>

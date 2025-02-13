@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+</head>
+<body class="flex items-center justify-center h-screen bg-white">
+    <div class="bg-white shadow-2xl rounded-xl p-6 max-w-md w-full text-center border border-gray-200">
+        <h2 class="text-3xl font-extrabold text-gray-900 mb-4 drop-shadow-lg">Verify OTP</h2>
+        <p class="text-gray-700 text-sm mb-4">Enter the 6-digit code sent to your phone</p>
+        <p class="text-red-500 mb-4" id="timer">Time remaining: 30s</p>
+        <form id="otpForm" method="post" action="/verify-otp" class="space-y-4" onsubmit="return validateOtpForm()">
+            <div class="flex justify-center gap-2">
+                <input id="otp1" name="otp" type="text" maxlength="1" class="w-12 h-12 text-center text-xl bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400" oninput="moveFocus(this, 1)"/>
+                <input id="otp2" name="otp" type="text" maxlength="1" class="w-12 h-12 text-center text-xl bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400" oninput="moveFocus(this, 2)"/>
+                <input id="otp3" name="otp" type="text" maxlength="1" class="w-12 h-12 text-center text-xl bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400" oninput="moveFocus(this, 3)"/>
+                <input id="otp4" name="otp" type="text" maxlength="1" class="w-12 h-12 text-center text-xl bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400" oninput="moveFocus(this, 4)"/>
+                <input id="otp5" name="otp" type="text" maxlength="1" class="w-12 h-12 text-center text-xl bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400" oninput="moveFocus(this, 5)"/>
+                <input id="otp6" name="otp" type="text" maxlength="1" class="w-12 h-12 text-center text-xl bg-gray-100 text-gray-900 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-400" oninput="moveFocus(this, 6)"/>
+            </div>
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg hover:from-purple-600 hover:to-blue-500 transition duration-300 shadow-md font-bold">Submit</button>
+            <p class="text-gray-700 text-sm mt-2">
+                Didn't receive the code? 
+                <button id="resendOtpBtn" class="underline font-semibold text-blue-600 hover:text-blue-800 focus:outline-none" onclick="resendOtp()" >
+                    Resend OTP
+                </button>
+            </p>
+            
+            <p class="text-gray-700 text-sm mt-2">Already verified? <a href="/login" class="underline font-semibold" >Login now</a></p>
+        </form>
+    </div>
+    
+    <script>
+        function moveFocus(currentInput, nextIndex) {
+            if (currentInput.value.length === 1) {
+                let nextInput = document.querySelectorAll('input')[nextIndex];
+                if (nextInput) {
+                    nextInput.focus();
+                }
+            }
+        }
+        let interval
+        let timeLeft = 30;
+        function startTimer(duration, display) {
+            let timer = duration, seconds;
+             interval = setInterval(function () {
+                seconds = parseInt(timer, 10);
+                display.textContent = "Time remaining: " + seconds + "s";
+                
+                if (--timer < 0) {
+                    clearInterval(interval);
+                    display.textContent = "Time expired!";
+                }
+            }, 1000);
+        }
+
+        window.onload = function () {
+            let display = document.getElementById('timer');
+            startTimer(timeLeft, display);
+        };
+        document.addEventListener("DOMContentLoaded", function () {
+    document.getElementById("resendOtpBtn").addEventListener("click", function (event) {
+        event.preventDefault();
+        window.location.reload();
+    });
+});
+
+        function validateOtpForm () {
+            let otpInput = '';
+    document.querySelectorAll('input[name^="otp"]').forEach(input => {
+        otpInput += input.value;
+        console.log(otpInput)
+    });
+    $.ajax({
+    type: 'POST',
+    url: 'verify-otp',
+    data: { otp: otpInput },
+    success: function(response) {
+        if (response.success) {
+            Swal.fire({
+                icon: 'success',
+                title: 'OTP verified successfully',
+                showConfirmButton: false,
+                timer: 1500
+            }).then(() => {
+                window.location.href = response.redirectUrl;
+            });
+        } else {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: response.message,
+            });
+        }
+    },
+    error: function() {
+        Swal.fire({
+            icon: 'error',
+            title: 'Invalid OTP',
+            text: 'Please try again'
+        });
+    }
+    });
+    return false;
+        }
+
+        // resend otp setup
+        function resendOtp() {
+    clearInterval(interval);
+    timeLeft = 60; // Reset timeLeft to 60 seconds
+    let display = document.getElementById('timer');
+    startTimer(timeLeft, display);
+
+    document.querySelectorAll('input[name^="otp"]').forEach(input => {
+        input.disabled = false;
+    });
+
+    $.ajax({
+        type: 'POST',
+        url: "resend-otp",
+        success: function(response) {
+            if (response.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'OTP Resent Successfully',
+                    timer: 1500,
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: "Error",
+                    text: 'An error occurred while resending OTP, please try again'
+                });
+            }
+        }
+    });
+    return false;
+}
+    </script>
+    <script src="https://code.jquery.com/jquery-3.6.4.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+</body>
+</html>

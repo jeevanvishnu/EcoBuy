@@ -11,25 +11,46 @@
         <h2 class="text-3xl font-extrabold text-white mb-4 drop-shadow-lg">Create an Account</h2>
         <p class="text-white text-sm mb-4">Join us and start shopping today!</p>
         
-        <form method="post" action="/signup" class="space-y-3">
-            <label for="full-name" class="block text-white text-left font-semibold">Full Name</label>
-            <input id="full-name" name="name" type="text" placeholder="Enter your name" class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 border-none focus:ring-2 focus:ring-blue-400" required>
-            
+           <form id="regestration" method="post" action="/signup" class="space-y-3">
+            <label for="name" class="block text-white text-left font-semibold">Full Name</label>
+            <input id="name" name="name" type="text" placeholder="Enter your name" class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 border-none focus:ring-2 focus:ring-blue-400" required>
+            <span id="nameError" class="error text-red-500 text-sm"></span>
+
             <label for="email" class="block text-white text-left font-semibold">Email Address</label>
             <input id="email" name="email" type="email" placeholder="Enter your email" class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 border-none focus:ring-2 focus:ring-blue-400" required>
+            <span id="emailError"class="error text-red-500"></span>
+
+            <label for="mobile" class="block text-white text-left font-semibold">Mobile</label>
+            <input id="mobile" name="mobile" type="mobile" placeholder="Enter your Moble No" class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 border-none focus:ring-2 focus:ring-blue-400" required>
+            <span id="mobileError"class="error text-red-500"></span>
+
+            <div class="relative w-full">
+                <label for="password" class="block text-white text-left font-semibold">Password</label>
+                <div class="relative">
+                    <input id="password" name="password" type="password" placeholder="Enter your password" 
+                        class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 border-none focus:ring-2 focus:ring-blue-400 pr-10" required>
+                    <span id="togglePassword" class="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-600">👁️</span>
+                </div>
+                <span id="passwordError" class="error text-red-500"></span>
+            </div>
             
-            <label for="password" class="block text-white text-left font-semibold">Password</label>
-            <input id="password" name="password" type="password" placeholder="Enter your password" class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 border-none focus:ring-2 focus:ring-blue-400" required>
+
+            <div class="relative w-full">
+                <label for="cmpassword" class="block text-white text-left font-semibold">Confirm Password</label>
+                <div class="relative">
+                    <input id="cmpassword" name="confirmPassword" type="password" placeholder="Re-enter your password" 
+                        class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 border-none focus:ring-2 focus:ring-blue-400 pr-10" required>
+                    <span id="toggleConfirmPassword" class="absolute inset-y-0 right-3 flex items-center cursor-pointer text-gray-600">👁️</span>
+                </div>
+                <span id="cmpasswordError" class="error text-red-500"></span>
+            </div>
             
-            <label for="confirm-password" class="block text-white text-left font-semibold">Confirm Password</label>
-            <input id="confirm-password" name="confirmPassword" type="password" placeholder="Re-enter your password" class="w-full px-4 py-2 rounded-lg bg-white/80 text-gray-900 border-none focus:ring-2 focus:ring-blue-400" required>
-            
-            <button class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg hover:from-purple-600 hover:to-blue-500 transition duration-300 shadow-md font-bold">Sign Up</button>
+            <button type="submit" class="w-full bg-gradient-to-r from-blue-500 to-purple-600 text-white py-2 rounded-lg hover:from-purple-600 hover:to-blue-500 transition duration-300 shadow-md font-bold">Sign Up</button>
         </form>
         
         <div class="my-2 text-white text-sm">OR</div>
         
-        <button class="w-full flex items-center justify-center bg-white text-gray-900 py-2 rounded-lg shadow-md hover:bg-gray-200 transition duration-300 font-semibold">
+        <button type="submit" class="w-full flex items-center justify-center bg-white text-gray-900 py-2 rounded-lg shadow-md hover:bg-gray-200 transition duration-300 font-semibold">
             <img src="https://www.svgrepo.com/show/355037/google.svg" class="h-5 w-5 mr-2"> Sign up with Google
         </button>
         
@@ -37,3 +58,113 @@
     </div>
 </body>
 </html>
+
+<script>
+    document.getElementById('regestration').addEventListener("submit",(e)=>{
+        e.preventDefault()
+    
+
+    // clear previous error
+    clearErrors()
+
+    // Get form values
+    const name = document.getElementById('name').value.trim()
+    const password = document.getElementById('password').value.trim()
+    const email = document.getElementById('email').value.trim()
+    const cmpassword = document.getElementById('cmpassword').value.trim()
+    const mobile = document.getElementById('mobile').value.trim()
+
+    // validation flag
+
+    let isValue = true
+
+    // check name validation
+    if(name == ""){
+        showError('nameError','Name is required')
+        isValue = false
+    }else if (!/^[A-Za-z\s]+$/.test(name)){
+        showError('nameError','Name Should be letter')
+        isValue =  false
+        
+    }
+
+    // check email validation
+    if(email === ""){
+        showError("emailError","Email is required")
+        isValue = false
+    }else if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+        showError('emailError','Email should be valid')
+        isValue = false
+    }
+    // check password validation
+    if(password == ""){
+        showError('passwordError','password is requires')
+        isValue = false
+    }else if(password.length < 8){
+        showError('passwordError','password must be 8 character')
+        isValue = false
+    }else if(!/[A-Z]/.test(password)){
+        showError('passwordError','Atlist one upperCase')
+        isValue = false
+    }else if(!/[0-9]/.test(password)){
+        showError('passwordError','password must one number')
+        isValue = false
+    }
+    // check conform password validation
+    if(cmpassword == ""){
+        showError("cmpasswordError","Confirm password is requires")
+        isValue = false
+    }else if(password !== cmpassword){
+        showError("cmpasswordError","password does not match")
+        isValue = false
+    }
+    // check mobile number 
+    if(mobile === ''){
+        showError('mobileError','Mobile number is required')
+        isValue = false
+    }else if(mobile.length !== 10){
+        showError('mobileError','Mobile number Shoud be 10 number')
+        isValue = false
+    }else if(!/^\d{10}$/.test(mobile)){
+        showError('mobileError','Only using number not character')
+    }
+
+    if(isValue){
+      document.getElementById('regestration').submit()
+    }
+
+})
+    // help function on error dispplay
+    const showError = (elementId, message) =>{
+        document.getElementById(elementId).textContent = message
+    }
+    
+
+    // clear function 
+
+    const clearErrors = () =>{
+        const error = document.querySelectorAll('.error')
+        error.forEach((value) => value.textContent = "")
+    }
+
+
+    // setup on showPassword
+    const password = document.getElementById('password')
+    document.getElementById('togglePassword').addEventListener('click',()=>{
+        if(password.type == "password"){
+            password.type = 'text'
+        }else{
+            password.type = 'password'
+        }
+    })
+
+    // show conform password setup
+    const cmpassword = document.getElementById('cmpassword')
+    document.getElementById('toggleConfirmPassword').addEventListener('click',()=>{
+        if(cmpassword.type == 'password'){
+            cmpassword.type = 'text'
+        }else{
+            cmpassword.type ='password'
+        }
+    })
+</script>
