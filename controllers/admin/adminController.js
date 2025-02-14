@@ -21,7 +21,8 @@ const login = async (req,res) =>{
 
     try {
 
-        const {email , password} = req.boady
+        const {email , password} = req.body
+        console.log(email,password)
         const admin = await User.findOne({email,isAdmin:true})
         
 
