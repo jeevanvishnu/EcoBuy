@@ -1,14 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
+<head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EcoBuy</title>
-    <!-- tailwind css config link -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- tailwind css config link -->
     <link rel="stylesheet" href="./style.css" />
-    <!-- fontanswonm link -->
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css"
@@ -16,73 +13,123 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <!-- fontanswonm link -->
-    <!-- swiper slider -->
-    <link
-      rel="stylesheet"
-      href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"
-    />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-    <!-- swiper slider -->
-  </head>
-  <body">
-    <!-- navbar starting -->
-    
+</head>
+<body>
     <nav class="bg-gray-700 shadow-lg fixed top-0 left-0 w-full z-50">
-      <div class="max-w-screen-xl mx-auto px-4">
-          <div class="flex justify-between items-center py-4">
-              <!-- Logo -->
-              <a href="#" class="flex items-center space-x-3 text-white text-2xl font-bold">
-                  <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="EcoBuy Logo">
-                  <span>EcoBuy</span>
-              </a>
-  
-              <!-- Search Bar -->
-              <div class="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 w-72">
-                  <input type="text" placeholder="Search..." class="bg-transparent outline-none text-gray-700 w-full">
-                  <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
-              </div>
-  
-              <!-- Menu Button (Mobile) -->
-              <button id="menu-toggle" class="md:hidden text-white text-xl">
-                  <i class="fa-solid fa-bars"></i>
-              </button>
-  
-              <!-- Navigation Links -->
-              <ul class="hidden md:flex space-x-6 text-white font-medium">
-                  <li><a href="#" class="hover:text-gray-300">Home</a></li>
-                  <li><a href="#" class="hover:text-gray-300">About</a></li>
-                  <li><a href="#" class="hover:text-gray-300">Contact</a></li>
-                  <li class="relative">
-                      <a href="#" class="hover:text-gray-300">
-                          <i class="fa-solid fa-cart-shopping"></i> Cart
-                          <span class="absolute -top-2 -right-2 bg-red-500 text-xs text-white rounded-full px-1">3</span>
-                      </a>
+        <div class="max-w-screen-xl mx-auto px-4">
+            <div class="flex justify-between items-center py-4">
+                <!-- Logo -->
+                <a href="#" class="flex items-center space-x-3 text-white text-2xl font-bold">
+                    <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="EcoBuy Logo">
+                    <span>EcoBuy</span>
+                </a>
+
+                <!-- Search Bar -->
+                <div class="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 w-72">
+                    <input type="text" placeholder="Search..." class="bg-transparent outline-none text-gray-700 w-full">
+                    <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
+                </div>
+
+                <!-- Menu Button (Mobile) -->
+                <button id="menu-toggle" class="md:hidden text-white text-xl">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+
+                <!-- Navigation Links -->
+                <ul class="hidden md:flex space-x-6 text-white font-medium items-center">
+                    <li><a href="#" class="hover:text-gray-300">Home</a></li>
+                    <li><a href="#" class="hover:text-gray-300">About</a></li>
+                    <li><a href="#" class="hover:text-gray-300">Contact</a></li>
+                    <li class="relative">
+                        <a href="#" class="hover:text-gray-300">
+                            <i class="fa-solid fa-cart-shopping"></i> Cart
+                            <span class="absolute -top-2 -right-2 bg-red-500 text-xs text-white rounded-full px-1">3</span>
+                        </a>
+                    </li>
+                    <li class="relative">
+                        <a href="#" class="hover:text-gray-300">
+                            <i class="fa-regular fa-heart"></i> Wishlist
+                            <span class="absolute -top-2 -right-2 bg-red-500 text-xs text-white rounded-full px-1">5</span>
+                        </a>
+                    </li>
+
+                    <!-- User Dropdown -->
+                    <% if(locals.user){ %>
+
+                    <li class="relative" id="dropdownContainer">
+                      <button 
+                          id="dropdownButton"
+                          class="flex items-center space-x-1 text-white hover:text-gray-300 focus:outline-none">
+                          <i class="fa-regular fa-user"></i>
+                          <span class="ml-1"><%= locals.user.name || "Guest" %></span>
+                          <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
+                      </button>
+                      
+                      <!-- Dropdown Menu -->
+                      <div id="dropdownMenu" class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden z-50">
+                          <div class="py-1">
+                              <a href="/userprofile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                  <i class="fa-regular fa-user mr-2"></i>Profile
+                              </a>
+                              <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                                  <i class="fa-solid fa-sign-out-alt mr-2"></i>Logout
+                              </a>
+                          </div>
+                      </div>
                   </li>
-                  <li class="relative">
-                      <a href="#" class="hover:text-gray-300">
-                          <i class="fa-regular fa-heart"></i> Wishlist
-                          <span class="absolute -top-2 -right-2 bg-red-500 text-xs text-white rounded-full px-1">5</span>
-                      </a>
-                  </li>
-                  <li><a href="/login" class="hover:text-gray-300"><i class="fa-regular fa-user"></i> Login</a></li>
-                  <li><a href="/signup" class="hover:text-gray-300"><i class="fa-solid fa-right-to-bracket"></i> Signup</a></li>
-              </ul>
-          </div>
-      </div>
-  
-      <!-- Mobile Menu -->
-      <div id="mobile-menu" class="hidden md:hidden bg-blue-800 text-white py-3 px-4 space-y-2">
-          <a href="#" class="block hover:text-gray-300">Home</a>
-          <a href="#" class="block hover:text-gray-300">About</a>
-          <a href="#" class="block hover:text-gray-300">Contact</a>
-          <a href="#" class="block hover:text-gray-300"><i class="fa-solid fa-cart-shopping"></i> Cart</a>
-          <a href="#" class="block hover:text-gray-300"><i class="fa-regular fa-heart"></i> Wishlist</a>
+                  
+                    
+                </ul>
+            </div>
+        </div>
+        <% }else {%>
           <a href="/login" class="block hover:text-gray-300"><i class="fa-regular fa-user"></i> Login</a>
           <a href="/signup" class="block hover:text-gray-300"><i class="fa-solid fa-right-to-bracket"></i> Signup</a>
-      </div>
-  </nav>
+
+          <% } %>
+        <!-- Mobile Menu -->
+         <!-- Mobile Menu Button -->
+
+
+<!-- Mobile Menu -->
+<div id="mobile-menu" class="hidden md:hidden bg-gray-800 text-white py-3 px-4 space-y-2 absolute w-full left-0 top-[72px]">
+  <a href="#" class="block hover:text-gray-300 py-2">Home</a>
+  <a href="#" class="block hover:text-gray-300 py-2">About</a>
+  <a href="#" class="block hover:text-gray-300 py-2">Contact</a>
+  <a href="#" class="block hover:text-gray-300 py-2">
+      <i class="fa-solid fa-cart-shopping mr-2"></i> Cart
+      <span class="bg-red-500 text-xs rounded-full px-2 py-1 ml-2">3</span>
+  </a>
+  <a href="#" class="block hover:text-gray-300 py-2">
+      <i class="fa-regular fa-heart mr-2"></i> Wishlist
+      <span class="bg-red-500 text-xs rounded-full px-2 py-1 ml-2">5</span>
+  </a>
   
+  <!-- Mobile User Menu -->
+  <div class="border-t border-gray-700 mt-2 pt-2">
+      <button id="mobile-user-toggle" class="flex items-center w-full py-2 hover:text-gray-300">
+          <i class="fa-regular fa-user mr-2"></i>
+          <span>John Doe</span>
+          <i class="fa-solid fa-chevron-down ml-auto"></i>
+      </button>
+      
+      <div id="mobile-user-dropdown" class="hidden bg-gray-900 mt-1 rounded-md">
+          <a href="#" class="block px-4 py-2 hover:bg-gray-700">
+              <i class="fa-regular fa-user mr-2"></i>Profile
+          </a>
+          <a href="#" class="block px-4 py-2 hover:bg-gray-700">
+              <i class="fa-solid fa-sign-out-alt mr-2"></i>Logout
+          </a>
+      </div>
+  </div>
+</div>
+
+        
+    </nav>
+</body>
+</html>
   <!-- Add margin-top to content to prevent overlapping -->
    <div class="mt-16 p-4">
      
@@ -93,6 +140,44 @@
 
 
     <script>
+ 
+ // Close dropdown when clicking outside
+ document.addEventListener('DOMContentLoaded', function() {
+    const dropdownButton = document.getElementById('dropdownButton');
+    const dropdownMenu = document.getElementById('dropdownMenu');
+    const dropdownContainer = document.getElementById('dropdownContainer');
+
+    // Toggle dropdown when button is clicked
+    dropdownButton.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdownMenu.classList.toggle('hidden');
+    });
+
+    // Close dropdown when clicking outside
+    document.addEventListener('click', function(e) {
+        if (!dropdownContainer.contains(e.target)) {
+            dropdownMenu.classList.add('hidden');
+        }
+    });
+
+    // Prevent dropdown from closing when clicking inside it
+    dropdownMenu.addEventListener('click', function(e) {
+        e.stopPropagation();
+    });
+});
+
+
+// moble resposive
+const mobileUserToggle = document.getElementById("mobile-user-toggle");
+const mobileUserDropdown = document.getElementById("mobile-user-dropdown");
+
+// Toggle the dropdown on button click
+mobileUserToggle.addEventListener("click", () => {
+    mobileUserDropdown.classList.toggle("hidden");
+});
+
+
+
       const menuToggle = document.getElementById('menu-toggle');
       const mobileMenu = document.getElementById('mobile-menu');
 

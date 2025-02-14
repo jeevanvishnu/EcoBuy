@@ -4,6 +4,7 @@ import dotenv from "dotenv";
 dotenv.config();
 import bcrypt from "bcrypt";
 
+
 // Setup Signup page
 const loadSignUp = (req, res) => {
   try {
@@ -19,13 +20,30 @@ const pageNoteFound = (req, res) => {
   try {
     res.render("user/page404");
   } catch (error) {
-    res.redirect("/pageNotFound");
+    res.redirect("/page");
   }
 };
 
 const loadHome = async (req, res) => {
   try {
-    await res.render("user/home");
+
+
+   const user =  req.session.user
+   
+
+    if(user){
+
+      const userData = await User.findOne({ _id: user });
+      
+      
+      console.log(userData)
+      return res.render('user/home',{user:userData})
+
+    }else{
+      console.log("...............Hello")
+      return res.render("user/home")
+    }
+   
   } catch (error) {
     console.log(`Home page rendering error ${error.message}`);
     res.status(500).send("Internal Server Error");
@@ -186,8 +204,7 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const findUser = await User.findOne({ isAdmin: 0, email: email });
-    console.log(findUser.password);
-    console.log(password);
+  
 
     if (!findUser) {
       return res.render("user/login", { message: "User not found" });
@@ -211,6 +228,30 @@ const login = async (req, res) => {
   }
 };
 
+// setup logout 
+
+const logout = async  (req,res) =>{
+  try {
+
+    req.session.destroy((err)=>{
+      if(err){
+        console.log("session error",err)
+
+        return res.redirect('/page')
+      }
+      return res.redirect('/login')
+    })
+
+    
+  } catch (error) {
+    
+    console.log(error.message)
+    res.redirect('page')
+  }
+}
+
+
+
 export default {
   loadHome,
   pageNoteFound,
@@ -220,4 +261,5 @@ export default {
   resendOtp,
   Loadlogin,
   login,
+  logout
 };

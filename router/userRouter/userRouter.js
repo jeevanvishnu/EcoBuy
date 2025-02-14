@@ -2,7 +2,7 @@ import express from "express"
 const router = express.Router()
 import userController from "../../controllers/users/userController.js"
 import passport from "../../config/passport.js"
-
+import userMiddleWare  from  "../../middlewares/user/userMiddle.js"
 router.get('/',userController.loadHome)
 router.get('/signup',userController.loadSignUp)
 router.get('/page',userController.pageNoteFound)
@@ -13,7 +13,8 @@ router.get('/auth/google',passport.authenticate('google',{scope:['profile','emai
 router.get('/auth/google/callback',passport.authenticate('google',{failureRedirect:'/signup'}),(req,res)=>{
     res.redirect('/')
 })
-router.get('/login',userController.Loadlogin)
+router.get('/login',userMiddleWare.loginMiddle,userController.Loadlogin)
 router.post('/login',userController.login)
+router.get('/logout',userController.logout)
 
 export default router
