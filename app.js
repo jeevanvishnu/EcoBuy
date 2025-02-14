@@ -8,7 +8,7 @@ import path from "path";
 import userRouter from "./router/userRouter/userRouter.js";
 import session from "express-session";
 import passport from "./config/passport.js";
-
+import adminRouter from './router/adminRouter/adminRouter.js'
 
 // ENV config
 dotEnv.config();
@@ -46,7 +46,7 @@ app.set('view engine', 'ejs')
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", userRouter);
-
+app.use('/admin',adminRouter)
 
 // Error handling
 app.use((err , req , res, next)=>{
