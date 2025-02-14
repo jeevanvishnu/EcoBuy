@@ -45,7 +45,23 @@ const login = async (req,res) =>{
     }
 }
 
+// Setup on admin dashboard
+const loadDashboard = async (req,res) =>{
+    
+    if(res.session.admin){
+        try {
+            
+            res.render('admin/dashboard')
+
+        } catch (error) {
+            
+            res.redirect('/pageerror')
+        }
+    }
+}
+
 export default {
     loadLogin,
-    login
+    login,
+    loadDashboard
 }
