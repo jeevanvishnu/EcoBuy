@@ -21,7 +21,7 @@ const login = async (req,res) =>{
 
     try {
 
-        const {email , password} = req.boady
+        const {email , password} = req.body
         const admin = await User.findOne({email,isAdmin:true})
         
 
@@ -47,8 +47,8 @@ const login = async (req,res) =>{
 
 // Setup on admin dashboard
 const loadDashboard = async (req,res) =>{
-    
-    if(res.session.admin){
+   
+    if(req.session.admin){
         try {
             
             res.render('admin/dashboard')
