@@ -22,10 +22,6 @@ const login = async (req,res) =>{
     try {
 
         const {email , password} = req.body
-<<<<<<< HEAD
-        console.log(email,password)
-=======
->>>>>>> feature/admin
         const admin = await User.findOne({email,isAdmin:true})
         
 
