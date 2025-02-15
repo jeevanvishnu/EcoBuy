@@ -1,9 +1,6 @@
 import User from "../../models/userSchema.js";
 
 
-
-
-
 const customerInfo =async (req ,res) =>{
 
     try {
@@ -81,6 +78,8 @@ const customerInfo =async (req ,res) =>{
         
     }
  }
+
+
 
 export default {
     customerInfo,

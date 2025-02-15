@@ -4,6 +4,7 @@ import adminController from "../../controllers/admin/adminController.js"
 import auth from '../../middlewares/auth.js'
 import customerController from '../../controllers/admin/customerController.js'
 const {userAuth , adminAuth} = auth
+import categoryController from "../../controllers/admin/categoryControll.js"
 
 router.get('/pageerror',adminController.pageerror)
 router.get('/login',adminController.loadLogin)
@@ -16,7 +17,11 @@ router.get('/Users',adminAuth,customerController.customerInfo)
 router.get('/blockCustomer',customerController.customerBlocked)
 router.get('/unblockCustomer',customerController.customerUnBlocked)
 
-
+// Category Managment
+router.get('/category',adminAuth,categoryController.categeoryinfo)
+router.post('/addCategory',categoryController.addCategory)
+router.post('/addCategoryOffer',adminAuth,categoryController.addCategoryOffer)
+router.post ('/removeCategoryOffer',adminAuth,categoryController.removeCategoryOffer)
 
 
 
