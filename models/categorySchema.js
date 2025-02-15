@@ -13,7 +13,7 @@ const categorySchema = new Schema({
     },
     isListed:{
         type:Boolean,
-        default:trusted,
+        default:true,
     },
     categoryOffer:{
         type:Number,

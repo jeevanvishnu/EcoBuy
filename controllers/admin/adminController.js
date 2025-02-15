@@ -5,11 +5,18 @@ import bcrypt from 'bcrypt'
 
 
 
+// create on page error page
+
+const pageerror = (req , res) =>{
+
+    res.render('admin/admin-error')
+}
+
 // setup on login page
 const loadLogin = async (req,res) =>{
 
     if(req.session.admin){
-        
+      
         return res.redirect('/admin/dashboard')
     }
 
@@ -20,12 +27,8 @@ const loadLogin = async (req,res) =>{
 const login = async (req,res) =>{
 
     try {
-
+        
         const {email , password} = req.body
-<<<<<<< HEAD
-        console.log(email,password)
-=======
->>>>>>> feature/admin
         const admin = await User.findOne({email,isAdmin:true})
         
 
@@ -44,7 +47,7 @@ const login = async (req,res) =>{
     } catch (error) {
 
         console.log('login error',error.message)
-        return res.redirect('/pageerror')
+        return res.redirect('pageerror')
         
     }
 }
@@ -59,13 +62,36 @@ const loadDashboard = async (req,res) =>{
 
         } catch (error) {
             
-            res.redirect('/pageerror')
+            res.redirect('pageerror')
         }
+    }
+}
+
+// create logout 
+
+const logout = (req , res) =>{
+
+    try {
+
+        req.session.destroy(err =>{
+            if(err){
+                return res.redirect('/pageerror')
+            }
+            return res.redirect('login')
+        })
+        
+        
+    } catch (error) {
+        console.log("Session destroy error",error.message)
+        res.redirect('pageerror')
+        
     }
 }
 
 export default {
     loadLogin,
     login,
-    loadDashboard
+    loadDashboard,
+    pageerror,
+    logout
 }
