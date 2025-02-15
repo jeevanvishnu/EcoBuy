@@ -46,10 +46,17 @@
               <td class="px-6 py-4 text-sm text-gray-900"><%= category.categoryOffer ? category.categoryOffer + '%' : 'No Offer' %></td>
               <td class="px-6 py-4">
                 
-                <span class="px-2 py-1 text-xs font-semibold rounded-full <%= category.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
-                  <%= category.status %>
+                 <% if(category.isListed) {%>
+
+                 <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                    Listed
                 </span>
-              </td>
+                <% }else {%>
+                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                    Unlisted
+                </span>
+                <% } %> 
+              </td> 
              
               <td class="px-6 py-4 flex flex-wrap justify-center gap-2">
                 <!-- Edit button -->
@@ -79,12 +86,19 @@
                 </button>
                 <% } %>
                 <!-- Status management buttons -->
-                <button class="text-blue-600 hover:text-blue-900 p-1 <%= category.status === 'active' ? 'hidden' : '' %>" title="List">
+                 <% if(category.isListed){ %>
+                <button class="text-blue-600 hover:text-blue-900 p-1 title="List">
+                    <a href="/admin/listCategory?id=<%=category._id %>">
                   <i class="fas fa-toggle-on"></i>
+                  </a>
                 </button>
-                <button class="text-gray-600 hover:text-gray-900 p-1 <%= category.status !== 'active' ? 'hidden' : '' %>" title="Unlist">
-                  <i class="fas fa-toggle-off"></i>
+                <% } else {%>
+                <button class="text-gray-600 hover:text-gray-900 p-1  title="Unlist">
+                    <a href="/admin/unListeCategory?id=<%=category._id %>">
+                        <i class="fas fa-toggle-off"></i>
+                    </a>
                 </button>
+                <% } %>
               </td>
 
 
@@ -166,7 +180,7 @@ async function addOffer(categoryId) {
         inputPlaceholder: "%"
     });
     
-    if (amount) {  // Fixed: was 'amout' instead of 'amount'
+    if (amount) {  
         try {
             const response = await fetch('/admin/addCategoryOffer', {
                 method: "POST",

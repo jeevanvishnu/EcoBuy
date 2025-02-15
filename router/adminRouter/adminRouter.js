@@ -22,6 +22,8 @@ router.get('/category',adminAuth,categoryController.categeoryinfo)
 router.post('/addCategory',categoryController.addCategory)
 router.post('/addCategoryOffer',adminAuth,categoryController.addCategoryOffer)
 router.post ('/removeCategoryOffer',adminAuth,categoryController.removeCategoryOffer)
+router.get('/listCategory',adminAuth,categoryController.getListCategory)
+router.get('/unListeCategory',adminAuth,categoryController.getUnlistCategory)
 
 
 

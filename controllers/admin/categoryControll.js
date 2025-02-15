@@ -130,9 +130,37 @@ const removeCategoryOffer = async (req,res) =>{
     }
 }
 
+const getListCategory = async (req,res) =>{
+    try {
+
+        let id = req.query.id
+        await Category.updateOne({_id:id},{$set:{isListed:false}})
+        res.redirect('/admin/category')
+        
+    } catch (error) {
+        res.redirect('/pagerror')
+        
+    }
+}
+
+const getUnlistCategory = async (req,res)=>{
+
+    try {
+        
+        let id = req.query.id
+        await Category.updateOne({_id:id},{$set:{isListed:true}})
+        res.redirect('/admin/category')
+    } catch (error) {
+        console.log(error.message,"getulistecategory error")
+        
+    }
+}
+
 export default {
     categeoryinfo,
     addCategory,
     addCategoryOffer,
-    removeCategoryOffer
+    removeCategoryOffer,
+    getListCategory,
+    getUnlistCategory
 }
