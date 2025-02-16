@@ -1,0 +1,41 @@
+<%- include('../partials/admin/header.ejs') %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+ <body class="bg-gray-100   min-h-screen p-4">
+    <div class="bg-white p-6 rounded-lg shadow-lg w-full "> 
+        <h2 class="text-2xl font-semibold text-gray-700 mb-4">Edit Category</h2>
+        <form action="/admin/editCategory/<%=category._id %>" method="POST" id="editCategoryForm">
+           
+            <div class="mb-4">
+                <label class="block text-gray-600 text-sm mb-2" for="category-name">Category Name</label>
+                <input 
+                    value="<%= category.name %>" 
+                    type="text" 
+                    id="category-name" 
+                    name="category" 
+                    class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    required
+                >
+            </div>
+            <div class="mb-6">
+                <label class="block text-gray-600 text-sm mb-2" for="description">Description</label>
+                <textarea 
+                    id="description" 
+                    name="description" 
+                    rows="3" 
+                    class="w-full p-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                ><%= category.description %></textarea>
+            </div>
+            <div class="flex justify-end space-x-4">
+                <a href="/admin/categories" class="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500">Cancel</a>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600">Save</button>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
+
+
+
+
+
