@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <%- include('../partials/admin/header.ejs') %>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
+  <title>Add Product</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    .preview-image {
+      max-width: 100px;
+      max-height: 100px;
+      object-fit: cover;
+    }
+  </style>
+</head>
+<body class="bg-gray-100">
+  <div class="min-h-screen flex items-center justify-center p-4">
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-2xl">
+      <h2 class="text-2xl font-bold mb-6 text-gray-800">Add Product</h2>
+      <form id="productForm" method="post" action="/admin/addProducts" enctype="multipart/form-data" onsubmit="return validateForm(event)">
+        <!-- Product Name -->
+        <div class="mb-6">
+          <label for="productName" class="block text-sm font-medium text-gray-700 mb-2">Product Name</label>
+          <input type="text" id="productName" name="productName" 
+                 class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                 placeholder="Enter product name" />
+          <span id="productNameError" class="text-red-500 text-sm mt-1"></span>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-6">
+          <label for="description" class="block text-sm font-medium text-gray-700 mb-2">Description</label>
+          <textarea id="description" name="description" rows="4" 
+                    class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                    placeholder="Enter product description"></textarea>
+          <span id="descriptionError" class="text-red-500 text-sm mt-1"></span>
+        </div>
+
+        <!-- Category -->
+        <div class="mb-6">
+          <label for="category" class="block text-sm font-medium text-gray-700 mb-2">Category</label>
+          <select id="category" name="category"
+                  class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none">
+            <option value="" disabled selected>Select a category</option>
+            <% for(let i = 0; i < cat.length; i++) { %>
+              <option value="<%= cat[i].name %>"><%= cat[i].name %></option>
+            <% } %>
+          </select>
+          <span id="categoryError" class="text-red-500 text-sm mt-1"></span>
+        </div>
+        <!-- Color Selection -->
+<div class="mb-6">
+    <label for="color" class="block text-sm font-medium text-gray-700 mb-2">Color</label>
+    <input type="text" id="color" name="color"
+           class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+           placeholder="Enter product color (e.g., Red, Blue, Black)" />
+    <span id="colorError" class="text-red-500 text-sm mt-1"></span>
+  </div>
+  
+        <!-- Prices -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+          <!-- Regular Price -->
+          <div>
+            <label for="regularPrice" class="block text-sm font-medium text-gray-700 mb-2">Regular Price</label>
+            <input type="number" id="regularPrice" name="regularPrice" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                   placeholder="Enter regular price" />
+            <span id="regularPriceError" class="text-red-500 text-sm mt-1"></span>
+          </div>
+          <!-- Sale Price -->
+          <div>
+            <label for="salePrice" class="block text-sm font-medium text-gray-700 mb-2">Sale Price</label>
+            <input type="number" id="salePrice" name="salePrice" 
+                   class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                   placeholder="Enter sale price" />
+            <span id="salePriceError" class="text-red-500 text-sm mt-1"></span>
+          </div>
+        </div>
+
+        <!-- Image Upload -->
+        <div class="space-y-6">
+          <!-- Image 1 -->
+          <div class="flex flex-col items-center space-y-3">
+            <img src="" alt="" id="imgView1" class="max-w-full h-auto rounded-lg">
+            <input type="file" name="images" id="input1"
+                   class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                   accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, 1)">
+            <div id="images-error" class="text-red-500 text-xs"></div>
+            <div class="image-cropper flex items-center space-x-4 hidden w-[300px] h-[200px]">
+              <img src="" id="croppedImg1" alt="" class="rounded-lg">
+              <button type="button" id="saveButton1"
+                      class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Save</button>
+            </div>
+          </div>
+
+          <!-- Image 2 -->
+          <div class="flex flex-col items-center space-y-3">
+            <img src="" alt="" id="imgView2" class="max-w-full h-auto rounded-lg">
+            <input type="file" name="images" id="input2"
+                   class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                   accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, 2)">
+            <div class="image-cropper flex items-center space-x-4 hidden w-[300px] h-[200px]">
+              <img src="" id="croppedImg2" alt="" class="rounded-lg">
+              <button type="button" id="saveButton2"
+                      class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Save</button>
+            </div>
+          </div>
+
+          <!-- Image 3 -->
+          <div class="flex flex-col items-center space-y-3">
+            <img src="" alt="" id="imgView3" class="max-w-full h-auto rounded-lg">
+            <input type="file" name="images" id="input3"
+                   class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                   accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, 3)">
+            <div class="image-cropper flex items-center space-x-4 hidden w-[300px] h-[200px]">
+              <img src="" id="croppedImg3" alt="" class="rounded-lg">
+              <button type="button" id="saveButton3"
+                      class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Save</button>
+            </div>
+          </div>
+
+          <!-- Image 4 -->
+          <div class="flex flex-col items-center space-y-3 mb-10">
+            <img src="" alt="" id="imgView4" class="max-w-full h-auto rounded-lg">
+            <input type="file" name="images" id="input4"
+                   class="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none file:mr-4 file:py-2 file:px-4 file:border-0 file:text-sm file:bg-blue-600 file:text-white hover:file:bg-blue-700"
+                   accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, 4)">
+            <div class="image-cropper flex items-center space-x-4 hidden w-[300px] h-[200px]">
+              <img src="" id="croppedImg4" alt="" class="rounded-lg">
+              <button type="button" id="saveButton4"
+                      class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700">Save</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="submit" style="margin-top: 16px;"
+                class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition duration-200">
+          Add Product
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+  <script>
+    // Image Preview and Cropping Function
+    function viewImage(event, index) {
+  const input = event.target;
+  const reader = new FileReader();
+  const imgView = document.getElementById(`imgView${index}`);
+  const cropperContainer = document.querySelector(`#croppedImg${index}`).parentNode;
+  let cropperInstance = null; // Store Cropper instance
+
+  reader.onload = function () {
+    imgView.src = reader.result;
+
+    // Destroy previous Cropper instance if exists
+    if (cropperInstance) {
+      cropperInstance.destroy();
+    }
+
+    // Initialize Cropper.js
+    cropperInstance = new Cropper(imgView, {
+      aspectRatio: 1,
+      viewMode: 1,
+      autoCropArea: 1,
+    });
+
+    // Show the cropper container
+    cropperContainer.classList.remove("hidden");
+
+    // Save Button Logic
+    const saveButton = document.getElementById(`saveButton${index}`);
+    saveButton.onclick = () => {
+      const croppedCanvas = cropperInstance.getCroppedCanvas();
+      const croppedImage = document.getElementById(`croppedImg${index}`);
+      croppedImage.src = croppedCanvas.toDataURL("image/jpeg", 1.0);
+
+      // Hide the cropper container and destroy the Cropper instance
+      cropperContainer.classList.add("hidden");
+      cropperInstance.destroy();
+      cropperInstance = null;
+    };
+  };
+
+  if (input.files && input.files[0]) {
+    reader.readAsDataURL(input.files[0]);
+  }
+}
+
+
+    // Form Validation Function
+    function validateForm(event) {
+      event.preventDefault();
+
+      // Reset all error messages
+      const errorSpans = document.querySelectorAll('[id$="Error"]');
+      errorSpans.forEach(span => span.textContent = '');
+
+      let isValid = true;
+
+      // Product Name Validation
+      const productName = document.getElementById('productName').value;
+      if (!productName.trim()) {
+        document.getElementById('productNameError').textContent = 'Product name is required';
+        isValid = false;
+      }
+
+      // Description Validation
+      const description = document.getElementById('description').value;
+      if (!description.trim()) {
+        document.getElementById('descriptionError').textContent = 'Description is required';
+        isValid = false;
+      }
+
+      // Regular Price Validation
+      const regularPrice = document.getElementById('regularPrice').value;
+      if (!regularPrice || regularPrice <= 0) {
+        document.getElementById('regularPriceError').textContent = 'Please enter a valid regular price';
+        isValid = false;
+      }
+
+      // Sale Price Validation
+      const salePrice = document.getElementById('salePrice').value;
+      if (!salePrice || salePrice <= 0) {
+        document.getElementById('salePriceError').textContent = 'Please enter a valid sale price';
+        isValid = false;
+      }
+
+      // Category Validation
+        const category = document.getElementById("category").value;
+        if (!category) {
+        document.getElementById("categoryError").textContent = "Please select a category";
+        isValid = false;
+        }
+
+
+      // Compare Prices
+      if (regularPrice && salePrice && parseFloat(salePrice) >= parseFloat(regularPrice)) {
+        document.getElementById('salePriceError').textContent = 'Sale price must be less than regular price';
+        isValid = false;
+      }
+
+      // Image Validation
+      for (let i = 1; i <= 4; i++) {
+        const imageInput = document.getElementById(`input${i}`);
+        if (!imageInput.files || !imageInput.files[0]) {
+          document.getElementById('images-error').textContent = `Image ${i} is required`;
+          isValid = false;
+        }
+      }
+
+      if (isValid) {
+        // If form is valid, submit it
+        document.getElementById('productForm').submit();
+      }
+
+      return isValid;
+    }
+  </script>
+</body>
+</html>
