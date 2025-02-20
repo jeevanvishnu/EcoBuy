@@ -57,13 +57,13 @@
 
                     <!-- User Dropdown -->
                     <% if(locals.user){ %>
-
+                        
                     <li class="relative" id="dropdownContainer">
                       <button 
                           id="dropdownButton"
                           class="flex items-center space-x-1 text-white hover:text-gray-300 focus:outline-none">
                           <i class="fa-regular fa-user"></i>
-                          <span class="ml-1"><%= locals.user.name || "Guest" %></span>
+                          <span class="ml-1"><%= locals.user.name  %></span>
                           <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
                       </button>
                       
@@ -86,7 +86,7 @@
         </div>
         <% }else {%>
           <a href="/login" class="block hover:text-gray-300"><i class="fa-regular fa-user"></i> Login</a>
-          <a href="/signup" class="block hover:text-gray-300"><i class="fa-solid fa-right-to-bracket"></i> Signup</a>
+          
 
           <% } %>
         <!-- Mobile Menu -->

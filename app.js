@@ -9,11 +9,15 @@ import userRouter from "./router/userRouter/userRouter.js";
 import session from "express-session";
 import passport from "./config/passport.js";
 import adminRouter from './router/adminRouter/adminRouter.js'
+import morgan from "morgan";
 
 // ENV config
 dotEnv.config();
 // connect to Database
 db();
+
+// setUp on morgan
+app.use(morgan('tiny'))
 
 // setup filename
 const __filename = fileURLToPath(import.meta.url);

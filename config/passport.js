@@ -3,11 +3,12 @@ import dotEnv  from 'dotenv'
 import User from '../models/userSchema.js'
 dotEnv.config()
 import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
-
+console.log("Client id",process.env.GOOGLE_CLIENT_SECRET )
+console.log("Client screct",process.env.GOOGLE_CLIENT_SECERT)
 
 passport.use(new GoogleStrategy({
-    clientID:process.env.Google_CLIENT_ID,
-    clientSecret:process.env.GOOGLE_CLIENT_SECRECT,
+    clientID:process.env.GOOGLE_CLIENT_ID,
+    clientSecret:process.env.GOOGLE_CLIENT_SECERT,
     callbackURL:'http://localhost:4001/auth/google/callback'
 },
  async function(accessToken , refreshToken , profile, done) {
@@ -25,6 +26,8 @@ passport.use(new GoogleStrategy({
             await user.save()
             return done(null , user)
         }
+
+        
     } catch (error) {
        
         return done(error,null)

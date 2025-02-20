@@ -26,24 +26,17 @@ const pageNoteFound = (req, res) => {
 
 const loadHome = async (req, res) => {
   try {
-
-
-   const user =  req.session.user
+    const user = req.session.user;
    
-
-    if(user){
-
+    if (user) {
       const userData = await User.findOne({ _id: user });
-      
-      
-      console.log(userData)
-      return res.render('user/home',{user:userData})
 
-    }else{
-      console.log("...............Hello")
-      return res.render("user/home")
+      console.log(userData);
+      return res.render("user/home", { user: userData });
+    } else {
+    
+      return res.render("user/home");
     }
-   
   } catch (error) {
     console.log(`Home page rendering error ${error.message}`);
     res.status(500).send("Internal Server Error");
@@ -84,20 +77,20 @@ const sendVerificationEmail = async (email, otp) => {
   }
 };
 
-// Signup Setup
+
 
 const Signup = async (req, res) => {
   const { name, mobile, email, password, confirmPassword } = req.body;
 
   try {
     if (password !== confirmPassword) {
-      res.redirect("user/signup", { message: "Password donot match" });
+      return res.render("user/signup", { message: "Password donot match" });
     }
 
     const findUser = await User.findOne({ email });
 
     if (findUser) {
-      res.render("user/signup", "User with this email already exists");
+      return res.render("user/signup", { message: "User with this email already exists" })
     }
 
     const otp = generateOtp();
@@ -105,7 +98,7 @@ const Signup = async (req, res) => {
     const emailSend = await sendVerificationEmail(email, otp);
 
     if (!emailSend) {
-      return res.json("email-error");
+      return res.json({error:"email-error"});
     }
 
     req.session.userOtp = otp;
@@ -115,9 +108,12 @@ const Signup = async (req, res) => {
     console.log("otp send", otp);
   } catch (error) {
     console.log(`Signup error ${error.message}`);
-    res.redirect("/page");
+    return res.render("user/signup", { message: "Something went wrong. Please try again." });
   }
 };
+
+
+
 const securePassword = async (password) => {
   try {
     const passwordHash = await bcrypt.hash(password, 10);
@@ -139,7 +135,7 @@ const verifyOtp = async (req, res) => {
         mobile: user.mobile,
         password: passwordHash,
       });
-      
+
       await saveUserData.save();
       req.session.user = saveUserData._id;
       return res.json({ success: true, redirectUrl: "/" });
@@ -165,19 +161,17 @@ const resendOtp = async (req, res) => {
     const otp = generateOtp();
     req.session.userOtp = otp;
 
-    const emailSend = await sendVerificationEmail(email.otp);
+    const emailSend = await sendVerificationEmail(email,otp);
     if (emailSend) {
       console.log("Resend otp", otp);
       return res
         .status(200)
         .json({ sucess: true, message: "Resend Sucessfull" });
     } else {
-      return res
-        .status(500)
-        .json({
-          sucess: false,
-          message: "Failed to resend otp Please try again",
-        });
+      return res.status(500).json({
+        sucess: false,
+        message: "Failed to resend otp Please try again",
+      });
     }
   } catch (error) {
     console.error("Error resending OTP");
@@ -204,7 +198,6 @@ const login = async (req, res) => {
   try {
     const { email, password } = req.body;
     const findUser = await User.findOne({ isAdmin: 0, email: email });
-  
 
     if (!findUser) {
       return res.render("user/login", { message: "User not found" });
@@ -224,33 +217,27 @@ const login = async (req, res) => {
     res.redirect("/");
   } catch (error) {
     console.log("login error", error);
-    res.render("user/login", { message: "Login Failed Please Try Again",});
+    res.render("user/login", { message: "Login Failed Please Try Again" });
   }
 };
 
-// setup logout 
+// setup logout
 
-const logout = async  (req,res) =>{
+const logout = async (req, res) => {
   try {
+    req.session.destroy((err) => {
+      if (err) {
+        console.log("session error", err);
 
-    req.session.destroy((err)=>{
-      if(err){
-        console.log("session error",err)
-
-        return res.redirect('/page')
+        return res.redirect("/page");
       }
-      return res.redirect('/login')
-    })
-
-    
+      return res.redirect("/login");
+    });
   } catch (error) {
-    
-    console.log(error.message)
-    res.redirect('page')
+    console.log(error.message);
+    res.redirect("page");
   }
-}
-
-
+};
 
 export default {
   loadHome,
@@ -261,5 +248,5 @@ export default {
   resendOtp,
   Loadlogin,
   login,
-  logout
+  logout,
 };

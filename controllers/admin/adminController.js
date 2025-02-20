@@ -17,10 +17,10 @@ const loadLogin = async (req,res) =>{
 
     if(req.session.admin){
       
-        return res.redirect('/admin/dashboard')
+        return res.redirect('/admin')
     }
 
-    res.render('admin/admin-login',{messag:null})
+    res.render('admin/admin-login')
 }
 
 

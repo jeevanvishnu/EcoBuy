@@ -6,18 +6,20 @@ import sharp from 'sharp'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { fileURLToPath } from 'url';
+import mongoose from 'mongoose'
+console.log(__dirname)
 
-const getProductAddPage = async  (req,res) =>{
+const getProductAddPage = async (req, res) => {
     try {
 
-        const category = await Category.find({isListed:true})
-        res.render('admin/product-add',{
-            cat:category
+        const category = await Category.find({ isListed: true })
+        res.render('admin/product-add', {
+            cat: category
         })
-        
+
     } catch (error) {
         res.render('pageerror')
-        console.log("getProductAddPage",error.message)
+        console.log("getProductAddPage", error.message)
     }
 }
 
@@ -25,44 +27,39 @@ const addProducts = async (req, res) => {
     try {
         const products = req.body;
 
-        
+
         const productExists = await Product.findOne({ productName: products.productName });
 
         if (!productExists) {
             const images = [];
+            const uploadDir = path.join(process.cwd(), "public/uploads/product-image");
+            console.log("Upload Directory Path:", uploadDir);
 
-            
-            const uploadDir = path.join(__dirname, "..", "public", "uploads", "images");
             if (!fs.existsSync(uploadDir)) {
                 fs.mkdirSync(uploadDir, { recursive: true });
             }
 
-            
             if (req.files && req.files.length > 0) {
-                for (let i = 0; i < req.files.length; i++) {
-                    const originalImagePath = req.files[i].path;
-                    const resizedImagePath = path.join(uploadDir, req.files[i].filename);
+                for (let file of req.files) {
+                    const originalImagePath = file.path;
+                    const resizedFilename = `resized-${file.filename}`;
+                    const resizedImagePath = path.join(uploadDir, resizedFilename);
 
-                    try {
-                        await sharp(originalImagePath)
-                            .resize({ width: 400, height: 400 })
-                            .toFile(resizedImagePath);
-                        
-                        images.push(req.files[i].filename);
-                    } catch (error) {
-                        console.error("Error resizing image:", error);
-                        return res.status(500).json({ error: "Error processing images" });
-                    }
+                    await sharp(originalImagePath)
+                        .resize({ width: 400, height: 400 })
+                        .toFile(resizedImagePath);
+
+                    images.push(`/uploads/product-image/${resizedFilename}`);
                 }
             }
 
-            
+
             const categoryId = await Category.findOne({ name: products.category });
             if (!categoryId) {
                 return res.status(400).json("Invalid Category name");
             }
 
-           
+
             const newProduct = new Product({
                 productName: products.productName,
                 description: products.description,
@@ -84,51 +81,52 @@ const addProducts = async (req, res) => {
         }
     } catch (error) {
         console.error("Error saving product:", error.message);
-        return res.status(500).json({ error: "Internal Server Error" });
+        return res.status(500).json({ success: false, error: "Internal Server Error" });
     }
 };
 
-const getAllProducts = async (req,res) =>{
+const getAllProducts = async (req, res) => {
 
     try {
         const search = req.query.search || ""
         const page = req.query.page || 1
         const limit = 4
         const productData = await Product.find({
-            $or:[
-                {productName:{$regex:new RegExp(".*"+search+".*","i")}},
+            $or: [
+                { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
 
             ]
 
-        }).limit(limit*1)
-        .skip((page-1)* limit)
-        .populate('category')
-        .exec();
+        }).limit(limit * 1)
+            .skip((page - 1) * limit)
+            .populate('category')
+            .exec();
 
         const count = await Product.find({
-            $or:[
-                {productName:{$regex:new RegExp(".*"+search+".*","i")}},
+            $or: [
+                { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
             ]
         }).countDocuments()
 
-        const category = await Category.find({isListed:true})
-        
-        if(category ){
-            res.render('admin/products',{
-                data:productData,
-                currentPage:page,
-                totalPages:page,
-                totalPages:Math.ceil(count/limit),
-                cat:category,
+        const category = await Category.find({ isListed: true })
+
+        if (category) {
+            res.render('admin/products', {
+                data: productData,
+                currentPage: page,
+                totalPages: page,
+                totalPages: Math.ceil(count / limit),
+                cat: category,
+
 
             })
-        }else{
-            res.render('pageerror')
+        } else {
+            res.render('/pageerror')
         }
 
     } catch (error) {
-        console.log("getallproduct error",error.message)
-        res.redirect('pageerror')
+        console.log("getallproduct error", error.message)
+        res.redirect('/pageerror')
     }
 }
 
@@ -185,7 +183,7 @@ const removeProductOffer = async (req, res) => {
     }
 };
 
-const blockProduct = async (req,res) =>{
+const blockProduct = async (req, res) => {
     try {
         let id = req.query.id
         await Product.updateOne({ _id: id }, { $set: { isBlocked: true } });
@@ -193,13 +191,13 @@ const blockProduct = async (req,res) =>{
 
     } catch (error) {
         res.redirect('pageerror')
-        
+
     }
 }
 
-const unblockProduct = async (req,res) =>{
+const unblockProduct = async (req, res) => {
     try {
-        
+
         let id = req.query.id;
         console.log(id)
         await Product.updateOne({ _id: id }, { $set: { isBlocked: false } });
@@ -210,12 +208,113 @@ const unblockProduct = async (req,res) =>{
     }
 }
 
-export default{
+const getEditProduct = async (req, res) => {
+    try {
+
+        const id = req.query.id
+        const product = await Product.findOne({ _id: id })
+        const category = await Category.find({})
+        res.render("admin/edit-product", {
+            cat: category,
+            product: product,
+        })
+
+    } catch (error) {
+        console.log(error.message, "getEditProduct")
+        res.redirect('pageerror')
+
+    }
+}
+
+
+const editProduct = async (req, res) => {
+    try {
+        const id = req.params.id;
+        const product = await Product.findOne({ _id: id });
+        const data = req.body;
+
+
+        const existingProduct = await Product.findOne({
+            productName: data.productName,
+            _id: { $ne: id }
+        });
+
+        if (existingProduct) {
+            return res.status(400).json({ error: "Product with this name already exists. Please try with another name" });
+        }
+
+        const images = [];
+        if (req.files && req.files.length > 0) {
+            for (let i = 0; i < req.files.length; i++) {
+                images.push(req.files[i].filename);
+            }
+        }
+
+        const updateField = {
+            productName: data.productName,
+            description: data.description,
+            category: data.category ? new mongoose.Types.ObjectId(data.category) : null,
+            regularPrice: data.regularPrice,
+            salePrice: data.salePrice,
+            quantity: data.quantity,
+            size: data.size,
+            color: data.color
+        };
+
+        if (images.length > 0) {
+            updateField.$push = { productImage: { $each: images } };
+        }
+
+        await Product.findByIdAndUpdate(id, updateField, { new: true });
+        res.redirect('/admin/products');
+
+    } catch (error) {
+        console.log(error.message);
+        res.redirect('/admin/pageerror');
+    }
+};
+
+
+
+
+
+
+const deleteSingleImage = async (req, res) => {
+    try {
+        const { imageNameToServer, productToServer } = req.body;
+
+
+        const product = await Product.findByIdAndUpdate(productToServer, { $pull: { productImage: imageNameToServer } });
+
+
+        const imagePath = path.join(process.cwd(), "/public/uploads/product-image", imageNameToServer);
+        if (fs.existsSync(imagePath)) {
+            try {
+                fs.unlinkSync(imagePath);
+                console.log(`Image ${imageNameToServer} deleted successfully`);
+            } catch (err) {
+                console.error(`Error deleting file: ${err.message}`);
+            }
+        } else {
+            console.log(`Image ${imageNameToServer} not found`);
+        }
+
+        res.json({ status: true });
+    } catch (error) {
+        console.error("Delete image error:", error);
+        res.status(500).json({ status: false, error: "Internal server error" });
+    }
+};
+
+export default {
     getProductAddPage,
     addProducts,
     getAllProducts,
     productOffer,
     removeProductOffer,
     blockProduct,
-    unblockProduct
+    unblockProduct,
+    getEditProduct,
+    editProduct,
+    deleteSingleImage
 } 
