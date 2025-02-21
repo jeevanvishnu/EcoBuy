@@ -66,12 +66,12 @@
                  </a>
                  
                 
-                <!-- Delete button -->
-                 <!-- <form action="/admin/deleteCategory/?id=<%=category._id %>" method="post">
+                
+                <form onsubmit="return confirmDelete(event)" action="/admin/deleteCategory/?id=<%=category._id %>" method="post" >
                 <button class="text-red-600 hover:text-red-900 p-1" title="Delete">
                     <i class="fas fa-trash-alt"></i>
                 </button>
-                </form> -->
+                </form>
                 
                 <!-- Offer management buttons -->
                 <% if(category.categoryOffer === 0) { %>
@@ -136,7 +136,6 @@
           </ul>
         </nav>
       </div>
-      
     </div>
     </div>
     
@@ -416,6 +415,25 @@ function confirmRemoveOffer(categoryId) {
         }
     });
 }
+
+
+function confirmDelete(event) {
+        event.preventDefault(); // Prevent form submission
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                event.target.submit(); // Proceed with form submission
+            }
+        });
+    }
+
 
     </script>
   </body>

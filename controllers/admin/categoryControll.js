@@ -208,6 +208,27 @@ const editCategory = async (req, res) => {
     }
 }
 
+// delete Category
+
+const deleteCategory = async(req,res) =>{
+
+    try {
+
+        const categoryId = req.query.id
+
+        if(!categoryId){
+          return  res.status(400).send("Category id is required")
+        }
+
+        await Category.findByIdAndDelete(categoryId)
+        res.redirect('/admin/category')
+        
+    } catch (error) {
+        console.log(error.message,"Error is delete Category")
+        res.status(500).send("Internal Server issue")
+        
+    }
+}
 
 export default {
     categeoryinfo,
@@ -218,5 +239,6 @@ export default {
     getUnlistCategory,
     getEditCategory,
     editCategory,
+    deleteCategory
 
 }

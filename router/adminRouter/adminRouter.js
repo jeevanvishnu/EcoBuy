@@ -39,6 +39,7 @@ router.get("/listCategory", adminAuth, categoryController.getListCategory);
 router.get("/unListeCategory", adminAuth, categoryController.getUnlistCategory);
 router.get("/editCategory", adminAuth, categoryController.getEditCategory);
 router.post("/editCategory/:id", adminAuth, categoryController.editCategory);
+router.post('/deleteCategory',adminAuth,categoryController.deleteCategory)
 
 // Product Managment
 router.get("/addProducts", adminAuth, productController.getProductAddPage);
