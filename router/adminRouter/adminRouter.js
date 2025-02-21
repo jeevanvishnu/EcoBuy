@@ -7,7 +7,7 @@ const { userAuth, adminAuth } = auth;
 import categoryController from "../../controllers/admin/categoryControll.js";
 import productController from "../../controllers/admin/productControll.js";
 import upload from "../../public/upload.js";
-
+import bannerController from "../../controllers/admin/bannerController.js"
 
 
 
@@ -61,4 +61,7 @@ router.get("/editProduct", adminAuth, productController.getEditProduct);
 router.post('/editProduct/:id',adminAuth,upload.array('images',4),productController.editProduct)
 router.post('/deleteImage',adminAuth,productController.deleteSingleImage)
 
+// Banner Managment 
+router.get('/banner',adminAuth,bannerController.getBannerPage)
+// router.get('/addBanner',adminAuth,bannerController)
 export default router;

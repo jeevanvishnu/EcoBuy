@@ -28,3 +28,16 @@
     </div>
 </body>
 </html>
+
+<script>
+    // Simulate successful signup (This should be replaced with actual logic)
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('signup') === 'success') {
+        Swal.fire({
+            title: 'Signup Successful!',
+            text: 'Your admin account has been created successfully.',
+            icon: 'success',
+            confirmButtonText: 'OK'
+        });
+    }
+</script>

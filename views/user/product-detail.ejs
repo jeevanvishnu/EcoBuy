@@ -1,0 +1,173 @@
+<%- include("../partials/users/header.ejs") %>
+
+<style>
+    .image-box {
+  position: relative;
+  width: 350px; 
+  height: 350px; 
+  overflow: hidden;
+  border: 1px solid #ddd;
+}
+
+.image-box img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.zoom-lens {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid #ccc;
+  pointer-events: none;
+  display: none;
+}
+
+.zoom-result {
+  width: 400px;
+  height: 350px;
+  overflow: hidden;
+  border: 1px solid #ddd;
+  display: none;
+  background-repeat: no-repeat;
+}
+
+</style>
+
+<main class="main">
+    <div class="bg-gray-100 py-4">
+        <div class="container mx-auto px-4">
+            <div class="breadcrumb text-gray-600">
+                <a href="#" class="text-blue-500">Home</a>
+                <span class="mx-2">/</span>
+                <span>Electronic</span>
+                <span class="mx-2">/</span>
+                <span class="font-semibold">Product Details</span>
+            </div>
+        </div>
+    </div>
+
+    <section class="mt-12 mb-12">
+        <div class="container mx-auto px-4">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+                <!-- Product Images -->
+                <div>
+                    <div class="relative flex gap-4">
+                      <!-- Main Image & Zoom Lens -->
+                      <div class="relative">
+                        <figure style="margin-left: 68px;" class="rounded-lg overflow-hidden border border-gray-300 image-box cursor-zoom-in">
+                          <img id="mainImage" class="w-full h-auto object-cover" 
+                              src="<%= product.productImage[0] %>" 
+                              alt="Product Image">
+                          <div class="zoom-lens"></div>
+                        </figure>
+                      </div>
+                  
+                      <!-- Zoom Result -->
+                      <div class="zoom-result"></div>
+                    </div>
+                  
+                    <!-- Thumbnails -->
+                    <div class="flex space-x-2 mt-4" style="margin-left: 68px;">
+                      <% for(let i = 0; i < product.productImage.length; i++) { %>
+                        <img class="object-contain w-16 h-16 border p-1 cursor-pointer hover:opacity-70"
+                            src="<%= product.productImage[i] %>"
+                            alt="Thumbnail"
+                            onclick="changeImage('<%= product.productImage[i] %>')">
+                      <% } %>
+                    </div>
+                  </div>
+                  
+                <!-- Product Details -->
+                <div>
+                    <h2 class="text-2xl font-bold"><%= product.productName %></h2>
+    
+                    <div class="flex items-center mt-4">
+                        <span class="text-xl font-semibold text-red-500"><%= product.salePrice %></span>
+                        <span class="ml-4 text-gray-500 line-through"><%= product.regularPrice %></span>
+                        <% if (totalOffer) { %>
+                            <span class="ml-4 text-green-500 font-semibold"><%= totalOffer %>%</span>
+                        <% } else { %>
+                            No Offer
+                        <% } %>
+                    </div>
+    
+                    <p class="text-gray-600">
+                        <%= product.description %>
+                    </p>
+    
+                    <ul class="mt-4 text-sm text-gray-600">
+                        <li class="mb-2 flex items-center"><i class="fi-rs-refresh mr-2"></i> 30 Day Return Policy</li>
+                        <li class="flex items-center"><i class="fi-rs-credit-card mr-2"></i> Cash on Delivery available</li>
+                    </ul>
+    
+                    <!-- Quantity Selector and Add to Cart -->
+                    <div class="border-t mt-6 pt-6 flex items-center">
+                        <div class="flex items-center border px-3 py-1 rounded-md">
+                            <button class="text-gray-600 px-2">-</button>
+                            <span id="quantity" class="px-4">1</span>
+                            <button class="text-gray-600 px-2">+</button>
+                        </div>
+                        <button class="ml-4 bg-blue-500 text-white px-6 py-2 rounded-md">Add to Cart</button>
+                        <a href="#" class="ml-4 text-red-500 text-xl"><i class="fi-rs-heart"></i></a>
+                    </div>
+    
+                    <ul class="mt-6 text-sm text-gray-600">
+                        <li>Stock Code: <span class="text-blue-500">FWM15VKT</span></li>
+                        <li>Category: <%= category?.name || "Unknown" %></li>
+                        <li>Availability: <span class="text-green-500 ml-2"><%= quantity %></span></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+</main>
+
+  
+  <%- include('../partials/users/footer.ejs') %>
+
+  <script>
+     const mainImage = document.getElementById("mainImage");
+const zoomLens = document.querySelector(".zoom-lens");
+const zoomResult = document.querySelector(".zoom-result");
+
+mainImage.addEventListener("mousemove", zoom);
+mainImage.addEventListener("mouseenter", () => {
+  zoomLens.style.display = "block";
+  zoomResult.style.display = "block";
+});
+mainImage.addEventListener("mouseleave", () => {
+  zoomLens.style.display = "none";
+  zoomResult.style.display = "none";
+});
+
+function zoom(event) {
+  const { left, top, width, height } = mainImage.getBoundingClientRect();
+  let x = event.pageX - left - window.scrollX;
+  let y = event.pageY - top - window.scrollY;
+
+  let lensSize = 80;
+  x = Math.max(0, Math.min(x - lensSize / 2, width - lensSize));
+  y = Math.max(0, Math.min(y - lensSize / 2, height - lensSize));
+
+  zoomLens.style.transform = `translate(${x}px, ${y}px)`;
+
+  let zoomScale = 2; // Adjust zoom level
+  zoomResult.style.backgroundImage = `url(${mainImage.src})`;
+  zoomResult.style.backgroundSize = `${width * zoomScale}px ${height * zoomScale}px`;
+  zoomResult.style.backgroundPosition = `-${x * zoomScale}px -${y * zoomScale}px`;
+}
+
+// Function to change main image when clicking a thumbnail
+function changeImage(imageSrc) {
+  mainImage.src = imageSrc;
+}
+
+  </script>
+
+
+
+  
