@@ -214,7 +214,7 @@ const login = async (req, res) => {
       return res.render("user/login", { message: "User not found" });
     }
 
-    if (findUser.isBlocked) {
+    if (findUser.isBlock) {
       return res.render("user/login", { message: "user is blocked by admin" });
     }
 

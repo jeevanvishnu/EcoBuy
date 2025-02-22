@@ -9,6 +9,7 @@ import { fileURLToPath } from 'url';
 import mongoose from 'mongoose'
 console.log(__dirname)
 
+// SetUp on getProduct Page
 const getProductAddPage = async (req, res) => {
     try {
 
@@ -23,6 +24,7 @@ const getProductAddPage = async (req, res) => {
     }
 }
 
+// Step up on addProducts
 const addProducts = async (req, res) => {
     try {
         const products = req.body;
