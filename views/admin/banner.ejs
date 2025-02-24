@@ -19,37 +19,38 @@
           </tr>
         </thead>
         <tbody>
-          <% if (locals.data) { %>
-            <% for(let i = 0; i <data.length;i++){ %>
+          <% if (data.length > 0) { %>
+            <% for(let i = 0; i < data.length; i++){ %>
               <tr class="border-t">
                 <td class="px-4 py-2">
-                  <img src="/uploads/banner-images/<%= banner.image %>" 
+                  <img src="/uploads/banner-images/<%= data[i].images %>" 
                        alt="Banner" 
                        class="h-8 w-12 object-cover rounded-md" />
                 </td>
-                <td class="px-4 py-2"><%= banner.title %></td>
-                <td class="px-4 py-2"><%= banner.description %></td>
+                <td class="px-4 py-2"><%= data[i].title %></td>
+                <td class="px-4 py-2"><%= data[i].description %></td>
                 <td class="px-4 py-2">
                   <% if (data[i].startDate < Date.now() && data[i].endDate > Date.now()) { %>
                     <span class="bg-green-500 text-white text-xs px-2 py-1 rounded-full">Active</span>
                   <% } else { %>
-                    <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">No Active</span>
+                    <span class="bg-red-500 text-white text-xs px-2 py-1 rounded-full">Not Active</span>
                   <% } %>
                 </td>
                 <td class="px-4 py-2">
-                  <a href="/admin/deleteBanner?id=<%= banner._id %>" 
+                  <a href="/admin/deleteBanner?id=<%= data[i]._id %>" 
                      class="text-red-600 hover:text-red-800 transition">
                     <i class="material-icons">delete</i>
                   </a>
                 </td>
               </tr>
-            <% }; %>
+            <% } %>
           <% } else { %>
             <tr>
               <td colspan="5" class="text-center py-4 text-gray-500">No Banners Available</td>
             </tr>
           <% } %>
         </tbody>
+        
       </table>
     </div>
   

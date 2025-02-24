@@ -64,5 +64,6 @@ router.post('/deleteImage',adminAuth,productController.deleteSingleImage)
 
 // Banner Managment 
 router.get('/banner',adminAuth,bannerController.getBannerPage)
-// router.get('/addBanner',adminAuth,bannerController)
+router.get('/addBanner',adminAuth,bannerController.addgetBannerPage)
+router.post('/addBanner',adminAuth,upload.single('images'),bannerController.addBanner)
 export default router;

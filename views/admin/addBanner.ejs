@@ -1,0 +1,160 @@
+<%- include('../partials/admin/header.ejs') %>
+
+<head>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-blue-100 font-[Poppins]">
+    <header class="bg-white shadow-md flex justify-between items-center p-4 fixed w-full top-0 left-0 z-10">
+        <button id="menu-button" class="md:hidden text-gray-800">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+            </svg>
+        </button>
+        <h1 class="text-xl font-semibold">Dashboard</h1>
+        <div class="flex items-center space-x-4">
+            <span>Admin</span>
+            <img src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full">
+            <a href="/admin/logout" class="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600">Logout</a>
+        </div>
+    </header>
+
+    <section class="p-6 mt-16">
+        <div class="max-w-4xl mx-auto">
+            <div class="mb-6">
+                <h2 class="text-2xl font-semibold">Add New Banner</h2>
+            </div>
+            <div class="bg-white p-6 rounded-lg shadow-lg">
+                <form method="post" action="/admin/addBanner" onsubmit="return validateAndSubmit(event)" enctype="multipart/form-data">
+                    <div class="mb-4">
+                        <label for="product_name" class="block text-sm font-medium">Banner Title</label>
+                        <input type="text" name="title" id="product_name" placeholder="Type here"
+                            class="w-full p-2 border rounded-md">
+                        <div id="productName-error" class="text-red-500 text-sm mt-1"></div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium">Description</label>
+                        <textarea name="description" rows="4" placeholder="Type here"
+                            class="w-full p-2 border rounded-md"></textarea>
+                        <div id="description-error" class="text-red-500 text-sm mt-1"></div>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label for="startingDate" class="block text-sm font-medium">Start Date</label>
+                            <input type="date" name="startDate" id="startingDate" class="w-full p-2 border rounded-md" required>
+                            <div id="error-start-date" class="text-red-500 text-sm mt-1"></div>
+                        </div>
+                        <div>
+                            <label for="expiringDate" class="block text-sm font-medium">End Date</label>
+                            <input type="date" name="endDate" id="expiringDate" class="w-full p-2 border rounded-md" required>
+                            <div id="error-end-date" class="text-red-500 text-sm mt-1"></div>
+                        </div>
+                    </div>
+                    <div class="mb-4">
+                        <label class="block text-sm font-medium">Link</label>
+                        <input type="text" name="link" class="w-full p-2 border rounded-md">
+                        <div id="link-error" class="text-red-500 text-sm mt-1"></div>
+                    </div>
+
+                    <!-- Image Upload and Cropper -->
+                    <div class="mb-4">
+                        <h4 class="text-lg font-medium">Choose Banner Image</h4>
+                        <input type="file" id="inputFile" accept="image/png, image/jpeg, image/jpg" class="w-full p-2 border rounded-md">
+                        <div id="image-error" class="text-red-500 text-sm mt-1"></div>
+                    </div>
+
+                    <!-- Image Preview and Cropper Container -->
+                    <div class="mb-4">
+                        <div class="border p-2 rounded-lg flex justify-center">
+                            <img id="previewImage" class="max-h-60 object-cover hidden">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-end">
+                        <button type="submit" 
+                            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Publish</button>
+                    </div>
+
+                    <!-- Hidden Input for Cropped Image -->
+                    <input type="hidden" name="croppedImage" id="croppedImage">
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.js"></script>
+</body>
+
+<script>
+    let cropper;
+    let previewImage = document.getElementById("previewImage");
+    let inputFile = document.getElementById("inputFile");
+    let croppedImageInput = document.getElementById("croppedImage");
+
+    inputFile.addEventListener("change", function (event) {
+        let file = event.target.files[0];
+        if (file) {
+            let reader = new FileReader();
+            reader.onload = function (e) {
+                previewImage.src = e.target.result;
+                previewImage.classList.remove("hidden");
+
+                if (cropper) {
+                    cropper.destroy();
+                }
+                
+                cropper = new Cropper(previewImage, {
+                    aspectRatio: 16 / 9,
+                    viewMode: 2,
+                    autoCropArea: 1
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+    });
+
+    function validateAndSubmit(event) {
+        event.preventDefault();
+
+        let title = document.getElementById("product_name").value.trim();
+        let description = document.querySelector("textarea[name='description']").value.trim();
+        let startDate = document.getElementById("startingDate").value;
+        let endDate = document.getElementById("expiringDate").value;
+
+        let isValid = true;
+
+        // Clear previous errors
+        document.getElementById("productName-error").innerText = "";
+        document.getElementById("description-error").innerText = "";
+        document.getElementById("error-start-date").innerText = "";
+        document.getElementById("error-end-date").innerText = "";
+        document.getElementById("image-error").innerText = "";
+
+        // Validate title and description
+        if (title === "") {
+            document.getElementById("productName-error").innerText = "Title is required.";
+            isValid = false;
+        }
+        if (description === "") {
+            document.getElementById("description-error").innerText = "Description is required.";
+            isValid = false;
+        }
+
+        // Validate dates
+        if (endDate < startDate) {
+            document.getElementById("error-end-date").innerText = "End date must be after the start date.";
+            isValid = false;
+        }
+
+        // Validate image
+        if (!cropper) {
+            document.getElementById("image-error").innerText = "Please upload an image.";
+            isValid = false;
+        }
+
+        if (isValid) {
+            croppedImageInput.value = cropper.getCroppedCanvas().toDataURL();
+            event.target.submit();
+        }
+    }
+</script>
