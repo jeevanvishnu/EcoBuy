@@ -4,7 +4,7 @@
     .image-box {
   position: relative;
   width: 350px; 
-  height: 350px; 
+  height: 400px; 
   overflow: hidden;
   border: 1px solid #ddd;
 }
@@ -35,137 +35,171 @@
 }
 
 </style>
-
 <main class="main">
-    <div class="bg-gray-100 py-4">
-        <div class="container mx-auto px-4">
-            <div class="breadcrumb text-gray-600">
-                <a href="#" class="text-blue-500">Home</a>
-                <span class="mx-2">/</span>
-                <span>Electronic</span>
-                <span class="mx-2">/</span>
-                <span class="font-semibold">Product Details</span>
-            </div>
+  <div class="bg-gray-100 py-4">
+      <div class="container mx-auto px-4">
+          <div class="breadcrumb text-gray-600">
+              <a href="#" class="text-blue-500">Home</a>
+              <span class="mx-2">/</span>
+              <span>Electronic</span>
+              <span class="mx-2">/</span>
+              <span class="font-semibold">Product Details</span>
+          </div>
+      </div>
+  </div>
+
+  <section class="mt-12 mb-12">
+      <div class="container mx-auto px-4">
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
+              <!-- Product Images -->
+              <div>
+                  <div class="relative flex gap-4">
+                    <div class="relative">
+                      <figure style="margin-left: 68px;" class="rounded-lg overflow-hidden border border-gray-300 image-box cursor-zoom-in">
+                        <img id="mainImage" class="w-full h-auto object-cover" 
+                            src="/uploads/re-image/<%= product.productImage[0] %>" 
+                            alt="Product Image">
+                        <div class="zoom-lens"></div>
+                      </figure>
+                    </div>
+                    <div class="zoom-result"></div>
+                  </div>
+                
+                  <!-- Thumbnails -->
+                  <div class="flex space-x-2 mt-4" style="margin-left: 68px;">
+                    <% for(let i = 0; i < product.productImage.length; i++) { %>
+                      <img class="object-contain w-16 h-16 border p-1 cursor-pointer hover:opacity-70"
+                          src="/uploads/re-image/<%= product.productImage[i] %>"
+                          alt="Thumbnail"
+                          onclick="changeImage('<%= product.productImage[i] %>')">
+                    <% } %>
+                  </div>
+                </div>
+                
+              <!-- Product Details -->
+              <div>
+                  <h2 class="text-2xl font-bold"><%= product.productName %></h2>
+  
+                  <div class="flex items-center mt-4">
+                      <span class="text-xl font-semibold text-red-500">₹<%= product.salePrice %></span>
+                      <span class="ml-4 text-gray-500 line-through">₹<%= product.regularPrice %></span>
+                      <% if (totalOffer) { %>
+                          <span class="ml-4 text-green-500 font-semibold"><%= totalOffer %>% Off</span>
+                      <% } else { %>
+                          No Offer
+                      <% } %>
+                  </div>
+  
+                  <p class="text-gray-600">
+                      <%= product.description %>
+                  </p>
+  
+                  <ul class="mt-4 text-sm text-gray-600">
+                      <li class="mb-2 flex items-center"><i class="fi-rs-refresh mr-2"></i> 30 Day Return Policy</li>
+                      <li class="flex items-center"><i class="fi-rs-credit-card mr-2"></i> Cash on Delivery available</li>
+                  </ul>
+  
+                  <!-- Quantity Selector and Add to Cart -->
+                  <div class="border-t mt-6 pt-6 flex items-center">
+                      <div class="flex items-center border px-3 py-1 rounded-md">
+                          <button class="text-gray-600 px-2">-</button>
+                          <span id="quantity" class="px-4">1</span>
+                          <button class="text-gray-600 px-2">+</button>
+                      </div>
+                      <button class="ml-4 bg-blue-500 text-white px-6 py-2 rounded-md">Add to Cart</button>
+                      <a href="#" class="ml-4 text-red-500 text-xl"><i class="fi-rs-heart"></i></a>
+                  </div>
+  
+                  <ul class="mt-6 text-sm text-gray-600">
+                      <li>Stock Code: <span class="text-blue-500">FWM15VKT</span></li>
+                      <li>Category: <%= category?.name || "Unknown" %></li>
+                      <li>Availability: <span class="text-green-500 ml-2"><%= quantity %></span></li>
+                  </ul>
+              </div>
+          </div>
+      </div>
+  </section>
+
+  <!-- Recommended Products Section -->
+  <section class="mt-12 mb-12">
+    <div class="container mx-auto px-4">
+        <h2 class="text-2xl font-bold mb-6 text-gray-800">Recommended Products</h2>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <% recommendedProducts.forEach(function(recommendedProduct) { %>
+                <div class="border rounded-lg overflow-hidden shadow-md bg-white transform transition duration-300 hover:scale-105 hover:shadow-lg min-h-[400px] flex flex-col">
+                    <div class="relative overflow-hidden">
+                        <img src="/uploads/re-image/<%= recommendedProduct.productImage[0] %>" 
+                             class="w-full h-64 object-cover transition-transform duration-300 hover:scale-110" 
+                             alt="<%= recommendedProduct.productName %>">
+                    </div>
+
+                    <div class="p-4 text-center flex-grow flex flex-col justify-between">
+                        <h3 class="text-lg font-semibold text-gray-800"><%= recommendedProduct.productName %></h3>
+                        <p class="text-red-500 font-semibold text-sm mt-2">₹<%= recommendedProduct.salePrice %></p>
+                        
+                        <a href="/productDatails?id=<%= recommendedProduct._id %>" 
+                           class="mt-3 inline-block bg-blue-500 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:bg-blue-600">
+                            View Product
+                        </a>
+                    </div>
+                </div>
+            <% }); %>
         </div>
     </div>
+</section>
 
-    <section class="mt-12 mb-12">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-10">
-                <!-- Product Images -->
-                <div>
-                    <div class="relative flex gap-4">
-                      <!-- Main Image & Zoom Lens -->
-                      <div class="relative">
-                        <figure style="margin-left: 68px;" class="rounded-lg overflow-hidden border border-gray-300 image-box cursor-zoom-in">
-                          <img id="mainImage" class="w-full h-auto object-cover" 
-                              src="<%= product.productImage[0] %>" 
-                              alt="Product Image">
-                          <div class="zoom-lens"></div>
-                        </figure>
-                      </div>
-                  
-                      <!-- Zoom Result -->
-                      <div class="zoom-result"></div>
-                    </div>
-                  
-                    <!-- Thumbnails -->
-                    <div class="flex space-x-2 mt-4" style="margin-left: 68px;">
-                      <% for(let i = 0; i < product.productImage.length; i++) { %>
-                        <img class="object-contain w-16 h-16 border p-1 cursor-pointer hover:opacity-70"
-                            src="<%= product.productImage[i] %>"
-                            alt="Thumbnail"
-                            onclick="changeImage('<%= product.productImage[i] %>')">
-                      <% } %>
-                    </div>
-                  </div>
-                  
-                <!-- Product Details -->
-                <div>
-                    <h2 class="text-2xl font-bold"><%= product.productName %></h2>
-    
-                    <div class="flex items-center mt-4">
-                        <span class="text-xl font-semibold text-red-500"><%= product.salePrice %></span>
-                        <span class="ml-4 text-gray-500 line-through"><%= product.regularPrice %></span>
-                        <% if (totalOffer) { %>
-                            <span class="ml-4 text-green-500 font-semibold"><%= totalOffer %>%</span>
-                        <% } else { %>
-                            No Offer
-                        <% } %>
-                    </div>
-    
-                    <p class="text-gray-600">
-                        <%= product.description %>
-                    </p>
-    
-                    <ul class="mt-4 text-sm text-gray-600">
-                        <li class="mb-2 flex items-center"><i class="fi-rs-refresh mr-2"></i> 30 Day Return Policy</li>
-                        <li class="flex items-center"><i class="fi-rs-credit-card mr-2"></i> Cash on Delivery available</li>
-                    </ul>
-    
-                    <!-- Quantity Selector and Add to Cart -->
-                    <div class="border-t mt-6 pt-6 flex items-center">
-                        <div class="flex items-center border px-3 py-1 rounded-md">
-                            <button class="text-gray-600 px-2">-</button>
-                            <span id="quantity" class="px-4">1</span>
-                            <button class="text-gray-600 px-2">+</button>
-                        </div>
-                        <button class="ml-4 bg-blue-500 text-white px-6 py-2 rounded-md">Add to Cart</button>
-                        <a href="#" class="ml-4 text-red-500 text-xl"><i class="fi-rs-heart"></i></a>
-                    </div>
-    
-                    <ul class="mt-6 text-sm text-gray-600">
-                        <li>Stock Code: <span class="text-blue-500">FWM15VKT</span></li>
-                        <li>Category: <%= category?.name || "Unknown" %></li>
-                        <li>Availability: <span class="text-green-500 ml-2"><%= quantity %></span></li>
-                    </ul>
-                </div>
-            </div>
-        </div>
-    </section>
-    
+
+
 </main>
+
 
   
   <%- include('../partials/users/footer.ejs') %>
 
   <script>
-     const mainImage = document.getElementById("mainImage");
-const zoomLens = document.querySelector(".zoom-lens");
-const zoomResult = document.querySelector(".zoom-result");
+   const mainImage = document.getElementById("mainImage");
+    const zoomLens = document.querySelector(".zoom-lens");
+    const zoomResult = document.querySelector(".zoom-result");
 
-mainImage.addEventListener("mousemove", zoom);
-mainImage.addEventListener("mouseenter", () => {
-  zoomLens.style.display = "block";
-  zoomResult.style.display = "block";
-});
-mainImage.addEventListener("mouseleave", () => {
-  zoomLens.style.display = "none";
-  zoomResult.style.display = "none";
-});
+    mainImage.addEventListener("mousemove", zoom);
+    mainImage.addEventListener("mouseenter", () => {
+        zoomLens.style.display = "block";
+        zoomResult.style.display = "block";
+    });
+    mainImage.addEventListener("mouseleave", () => {
+        zoomLens.style.display = "none";
+        zoomResult.style.display = "none";
+    });
 
-function zoom(event) {
-  const { left, top, width, height } = mainImage.getBoundingClientRect();
-  let x = event.pageX - left - window.scrollX;
-  let y = event.pageY - top - window.scrollY;
+    function zoom(event) {
+        const { left, top, width, height } = mainImage.getBoundingClientRect();
+        let x = event.pageX - left - window.scrollX;
+        let y = event.pageY - top - window.scrollY;
 
-  let lensSize = 80;
-  x = Math.max(0, Math.min(x - lensSize / 2, width - lensSize));
-  y = Math.max(0, Math.min(y - lensSize / 2, height - lensSize));
+        let lensSize = 80;
+        x = Math.max(0, Math.min(x - lensSize / 2, width - lensSize));
+        y = Math.max(0, Math.min(y - lensSize / 2, height - lensSize));
 
-  zoomLens.style.transform = `translate(${x}px, ${y}px)`;
+        zoomLens.style.transform = `translate(${x}px, ${y}px)`;
 
-  let zoomScale = 2; // Adjust zoom level
-  zoomResult.style.backgroundImage = `url(${mainImage.src})`;
-  zoomResult.style.backgroundSize = `${width * zoomScale}px ${height * zoomScale}px`;
-  zoomResult.style.backgroundPosition = `-${x * zoomScale}px -${y * zoomScale}px`;
-}
+        let zoomScale = 2;
+        zoomResult.style.backgroundImage = `url(${mainImage.src})`;
+        zoomResult.style.backgroundSize = `${width * zoomScale}px ${height * zoomScale}px`;
+        zoomResult.style.backgroundPosition = `-${x * zoomScale}px -${y * zoomScale}px`;
+    }
 
-// Function to change main image when clicking a thumbnail
-function changeImage(imageSrc) {
-  mainImage.src = imageSrc;
-}
+    function changeImage(imageSrc) {
+        let newSrc = `/uploads/re-image/${imageSrc}`;
 
+        // Preload Image Before Updating
+        let img = new Image();
+        img.src = newSrc;
+        img.onload = () => {
+            mainImage.src = newSrc;
+            zoomResult.style.backgroundImage = `url(${newSrc})`;
+        };
+    }
   </script>
 
 

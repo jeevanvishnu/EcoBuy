@@ -5,7 +5,7 @@ import passport from "../../config/passport.js"
 import userMiddleWare  from  "../../middlewares/user/userMiddle.js"
 import productController from "../../controllers/users/productController.js";
 
-router.get('/',userController.loadHome)
+router.get('/',userMiddleWare.checkBlockedUser,userController.loadHome)
 router.get('/signup',userMiddleWare.loginMiddle,userController.loadSignUp)
 router.get('/page',userController.pageNoteFound)
 router.post('/signup',userController.Signup)

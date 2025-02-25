@@ -5,7 +5,7 @@ dotenv.config();
 import bcrypt from "bcrypt";
 import Category from "../../models/categorySchema.js";
 import Product from "../../models/productSchema.js";
-
+import Banner from "../../models/bannerSchema.js";
 // Setup Signup page
 const loadSignUp = (req, res) => {
   try {
@@ -27,8 +27,12 @@ const pageNoteFound = (req, res) => {
 
 const loadHome = async (req, res) => {
   try {
+    const today = new Date().toISOString();
+    const findBanner = await Banner.find({
+      startDate:{$lt:new Date(today)},
+      endDate:{$gt:new Date(today)}
+    })
     const user = req.session.user;
-
     const categories = await Category.find({ isListed: true });
     let productData = await Product.find({
       isBlocked: false,
@@ -44,15 +48,20 @@ const loadHome = async (req, res) => {
       const userData = await User.findOne({ _id: user });
 
       console.log(userData);
-      return res.render("user/home", { user: userData, products: productData });
+      return res.render("user/home", { user: userData, products: productData ,banner:findBanner || []});
     } else {
-      return res.render("user/home", { products: productData });
+      return res.render("user/home", { products: productData ,banner:findBanner || [] });
     }
   } catch (error) {
     console.log(`Home page rendering error ${error.message}`);
     res.status(500).send("Internal Server Error");
   }
 };
+
+
+
+
+
 // create a function on generate otp
 const generateOtp = () => {
   return Math.floor(100000 + Math.random() * 900000).toString();

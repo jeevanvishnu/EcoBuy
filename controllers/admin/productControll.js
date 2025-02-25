@@ -32,28 +32,19 @@ const addProducts = async (req, res) => {
 
         const productExists = await Product.findOne({ productName: products.productName });
 
+
         if (!productExists) {
             const images = [];
-            const uploadDir = path.join(process.cwd(), "public/uploads/product-image");
-            console.log("Upload Directory Path:", uploadDir);
-
-            if (!fs.existsSync(uploadDir)) {
-                fs.mkdirSync(uploadDir, { recursive: true });
-            }
-
             if (req.files && req.files.length > 0) {
-                for (let file of req.files) {
-                    const originalImagePath = file.path;
-                    const resizedFilename = `resized-${file.filename}`;
-                    const resizedImagePath = path.join(uploadDir, resizedFilename);
+                for (let i = 0; i < req.files.length; i++) {
+                    const originalImagePath = req.files[i].path;
+                    const resizedImagePath = path.join("public", "uploads", "product-images", req.files[i].filename);
 
-                    await sharp(originalImagePath)
-                        .resize({ width: 400, height: 400 })
-                        .toFile(resizedImagePath);
-
-                    images.push(`/uploads/product-image/${resizedFilename}`);
+                    await sharp(originalImagePath).resize({ width: 440, height: 440 }).toFile(resizedImagePath);
+                    images.push(req.files[i].filename);
                 }
             }
+
 
 
             const categoryId = await Category.findOne({ name: products.category });
@@ -232,9 +223,12 @@ const getEditProduct = async (req, res) => {
 const editProduct = async (req, res) => {
     try {
         const id = req.params.id;
-        const product = await Product.findOne({ _id: id });
+        const product = await Product.findById(id);
         const data = req.body;
-        console.log(data.description)
+
+        if (!product) {
+            return res.status(404).json({ error: "Product not found" });
+        }
 
         const existingProduct = await Product.findOne({
             productName: data.productName,
@@ -245,11 +239,12 @@ const editProduct = async (req, res) => {
             return res.status(400).json({ error: "Product with this name already exists. Please try with another name" });
         }
 
-        const images = [];
+        let images = product.productImage || []; // Keep old images
+
+        // If new images are uploaded, merge them
         if (req.files && req.files.length > 0) {
-            for (let i = 0; i < req.files.length; i++) {
-                images.push(req.files[i].filename);
-            }
+            const newImages = req.files.map(file => file.filename);
+            images = [...images, ...newImages]; // Combine old and new images
         }
 
         const updateField = {
@@ -260,12 +255,9 @@ const editProduct = async (req, res) => {
             salePrice: data.salePrice,
             quantity: data.quantity,
             size: data.size,
-            color: data.color
+            color: data.color,
+            productImage: images, 
         };
-
-        if (images.length > 0) {
-            updateField.$push = { productImage: { $each: images } };
-        }
 
         await Product.findByIdAndUpdate(id, updateField, { new: true });
         res.redirect('/admin/products');
@@ -275,9 +267,6 @@ const editProduct = async (req, res) => {
         res.redirect('/admin/pageerror');
     }
 };
-
-
-
 
 
 
@@ -308,6 +297,20 @@ const deleteSingleImage = async (req, res) => {
     }
 };
 
+
+const deleteProduct =  async (req,res) =>{
+    try {
+        
+        const id = req.query.id
+        await Product.findByIdAndDelete(id)
+
+        res.redirect('/admin/products')
+    } catch (error) {
+        console.log("Delete Error",error.message)
+        res.redirect('/admin/pageerror')
+    }
+}
+
 export default {
     getProductAddPage,
     addProducts,
@@ -318,5 +321,6 @@ export default {
     unblockProduct,
     getEditProduct,
     editProduct,
-    deleteSingleImage
+    deleteSingleImage,
+    deleteProduct
 } 

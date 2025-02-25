@@ -4,6 +4,7 @@
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs/dist/cropper.min.css">
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
+
 <body class="bg-blue-100 font-[Poppins]">
     <header class="bg-white shadow-md flex justify-between items-center p-4 fixed w-full top-0 left-0 z-10">
         <button id="menu-button" class="md:hidden text-gray-800">
@@ -28,16 +29,16 @@
                 <form method="post" action="/admin/addBanner" onsubmit="return validateAndSubmit(event)" enctype="multipart/form-data">
                     <div class="mb-4">
                         <label for="product_name" class="block text-sm font-medium">Banner Title</label>
-                        <input type="text" name="title" id="product_name" placeholder="Type here"
-                            class="w-full p-2 border rounded-md">
+                        <input type="text" name="title" id="product_name" placeholder="Type here" class="w-full p-2 border rounded-md">
                         <div id="productName-error" class="text-red-500 text-sm mt-1"></div>
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium">Description</label>
-                        <textarea name="description" rows="4" placeholder="Type here"
-                            class="w-full p-2 border rounded-md"></textarea>
+                        <textarea name="description" rows="4" placeholder="Type here" class="w-full p-2 border rounded-md"></textarea>
                         <div id="description-error" class="text-red-500 text-sm mt-1"></div>
                     </div>
+
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label for="startingDate" class="block text-sm font-medium">Start Date</label>
@@ -50,6 +51,7 @@
                             <div id="error-end-date" class="text-red-500 text-sm mt-1"></div>
                         </div>
                     </div>
+
                     <div class="mb-4">
                         <label class="block text-sm font-medium">Link</label>
                         <input type="text" name="link" class="w-full p-2 border rounded-md">
@@ -59,7 +61,7 @@
                     <!-- Image Upload and Cropper -->
                     <div class="mb-4">
                         <h4 class="text-lg font-medium">Choose Banner Image</h4>
-                        <input type="file" id="inputFile" accept="image/png, image/jpeg, image/jpg" class="w-full p-2 border rounded-md">
+                        <input name="images" type="file" id="inputFile" accept="image/png, image/jpeg, image/jpg" class="w-full p-2 border rounded-md">
                         <div id="image-error" class="text-red-500 text-sm mt-1"></div>
                     </div>
 
@@ -71,8 +73,7 @@
                     </div>
 
                     <div class="flex justify-end">
-                        <button type="submit" 
-                            class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Publish</button>
+                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Publish</button>
                     </div>
 
                     <!-- Hidden Input for Cropped Image -->
@@ -102,11 +103,12 @@
                 if (cropper) {
                     cropper.destroy();
                 }
-                
+
                 cropper = new Cropper(previewImage, {
                     aspectRatio: 16 / 9,
-                    viewMode: 2,
-                    autoCropArea: 1
+                    viewMode: 1,
+                    autoCropArea: 1,
+                    cropBoxResizable: true
                 });
             };
             reader.readAsDataURL(file);
@@ -123,14 +125,12 @@
 
         let isValid = true;
 
-        // Clear previous errors
         document.getElementById("productName-error").innerText = "";
         document.getElementById("description-error").innerText = "";
         document.getElementById("error-start-date").innerText = "";
         document.getElementById("error-end-date").innerText = "";
         document.getElementById("image-error").innerText = "";
 
-        // Validate title and description
         if (title === "") {
             document.getElementById("productName-error").innerText = "Title is required.";
             isValid = false;
@@ -139,22 +139,24 @@
             document.getElementById("description-error").innerText = "Description is required.";
             isValid = false;
         }
-
-        // Validate dates
         if (endDate < startDate) {
             document.getElementById("error-end-date").innerText = "End date must be after the start date.";
             isValid = false;
         }
-
-        // Validate image
         if (!cropper) {
             document.getElementById("image-error").innerText = "Please upload an image.";
             isValid = false;
         }
 
         if (isValid) {
-            croppedImageInput.value = cropper.getCroppedCanvas().toDataURL();
-            event.target.submit();
+            cropper.getCroppedCanvas().toBlob((blob) => {
+                let reader = new FileReader();
+                reader.readAsDataURL(blob);
+                reader.onload = () => {
+                    croppedImageInput.value = reader.result;
+                    event.target.submit();
+                };
+            }, "image/jpeg", 0.7);
         }
     }
 </script>

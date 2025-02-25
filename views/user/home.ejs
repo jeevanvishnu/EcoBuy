@@ -2,34 +2,22 @@
 
 
     <!-- Swiper Slider -->
-    <!-- <div
-      class="swiper mySwiper w-full max-w-screen-xl sm:max-w-screen-lg xs:max-w-screen-md mx-auto"
-    >
-      <div class="swiper-wrapper pt-16">
-        <div class="swiper-slide">
-          <img
-            class="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover"
-            src="/assets/Work-File-iPhone-16-Blog-Banner-scaled.jpg"
-            alt="Slide 1"
-          />
-        </div>
-        <div class="swiper-slide">
-          <img
-            class="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover"
-            src="./assets/Work-File-iPhone-16-Blog-Banner-scaled.jpg"
-            alt="Slide 2"
-          />
-        </div>
-        <div class="swiper-slide">
-          <img
-            class="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover"
-            src="./assets/Work-File-iPhone-16-Blog-Banner-scaled.jpg"
-            alt="Slide 3"
-          />
-        </div>
+    <div
+  class="swiper mySwiper w-full max-w-screen-xl sm:max-w-screen-lg xs:max-w-screen-md mx-auto"
+>
+  <div class="swiper-wrapper pt-16">
+    <% for(let i = 0; i < banner.length; i++) { %>
+      <div class="swiper-slide">
+        <img
+          class="w-full h-48 sm:h-64 md:h-80 lg:h-96 object-cover"
+          src="/banners/<%= banner[i].image %>"
+          alt="Slide <%= i + 1 %>"
+        />
       </div>
-      <div class="swiper-pagination"></div>
-    </div> -->
+    <% } %>
+  </div>
+  <div class="swiper-pagination"></div>
+</div>
 
     <!-- Swiper CSS and JS -->
     <section class="py-16">
@@ -40,7 +28,7 @@
                   <div class="bg-white shadow-lg rounded-lg p-4 relative hover:shadow-2xl transition-transform transform hover:-translate-y-1">
                       <div class="relative">
                         <a href="/shop">
-                              <img src="<%= product.productImage[0] %>" alt="<%= product.productName %>" class="w-full h-56 object-cover rounded-md">
+                              <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>" class="w-full h-56 object-cover rounded-md">
                           </a>
                           <button class="absolute top-2 right-2 bg-white bg-opacity-75 p-2 rounded-full text-red-500 hover:bg-opacity-100 hover:text-red-600 transition">
                               <i class="fas fa-heart"></i>

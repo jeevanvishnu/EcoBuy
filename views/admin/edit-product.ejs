@@ -84,31 +84,34 @@ https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css
         <h4 class="text-lg font-medium text-gray-800 mb-4">Choose Images</h4>
         <div id="addedImagesContainer" class="flex flex-wrap gap-4">
           <% let images = product.productImage ? product.productImage : []; %>
-          <% images.forEach((image, index) => { %>
+          <% for (let i = 0; i < images.length; i++) { %>
           <div class="flex flex-col items-center">
             <!-- Original Image Preview -->
-            <img id="imgView<%= index %>" src="<%=images[index] %>" class="w-20 h-20 rounded-md border border-gray-300" />
-
+            <img id="imgView<%= i %>" src="/uploads/re-image/<%= images[i] %>" class="w-20 h-20 rounded-md border border-gray-300" />
+      
             <!-- Cropped Image Preview -->
-            <img id="croppedImg<%= index %>" class="w-20 h-20 rounded-md border border-gray-300 mt-2 hidden" />
-
+            <img id="croppedImg<%= i %>" class="w-20 h-20 rounded-md border border-gray-300 mt-2 hidden" />
+      
             <!-- File Input -->
-            <input class="imageName mt-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-700" type="file" name="images" id="input<%= index %>" accept="image/png, image/jpeg, image/jpg" onchange="viewImage(event, <%= index %>)" />
-
+            <input class="imageName mt-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-700" 
+            type="file" name="images" id="input<%= i %>" 
+            accept="image/png, image/jpeg, image/jpg" 
+            onchange="viewImage(event, <%= i %>)" />
+     
             <!-- "Save" Button for Cropping -->
-            <button type="button" id="saveButton<%= index %>" class="bg-green-500 text-white px-3 py-2 mt-2 hidden">
+            <button type="button" id="saveButton<%= i %>" class="bg-green-500 text-white px-3 py-2 mt-2 hidden">
               Save
             </button>
-
+      
             <!-- Delete Button -->
-            <button type="button" class="delete-btn bg-red-500 text-white px-3 py-2 mt-2" data-image="<%= image %>" data-product="<%= product._id %>">
+            <button type="button" class="delete-btn bg-red-500 text-white px-3 py-2 mt-2" data-image="<%= images[i] %>" data-product="<%= product._id %>">
               Delete
             </button>
           </div>
-          <% }); %>
+          <% } %>
         </div>
       </div>
-
+      
 
 
       <!-- Submit Button -->

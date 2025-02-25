@@ -153,50 +153,136 @@
   <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
   <script>
     // Image Preview and Cropping Function
-    function viewImage(event, index) {
-  const input = event.target;
-  const reader = new FileReader();
-  const imgView = document.getElementById(`imgView${index}`);
-  const cropperContainer = document.querySelector(`#croppedImg${index}`).parentNode;
-  let cropperInstance = null; // Store Cropper instance
-
-  reader.onload = function () {
-    imgView.src = reader.result;
-
-    // Destroy previous Cropper instance if exists
-    if (cropperInstance) {
-      cropperInstance.destroy();
+    function validateAndSubmit(){
+        if(validateForm()){
+                document.forms[0].submit();
+         }
+    }
+    function viewImage1(event){
+        document.getElementById("imgView1").src=URL.createObjectURL(event.target.files[0])
+    }
+    function viewImage2(event){
+        document.getElementById("imgView2").src=URL.createObjectURL(event.target.files[0])
+    }
+    function viewImage3(event){
+        document.getElementById("imgView3").src=URL.createObjectURL(event.target.files[0])
+    }
+    function viewImage4(event){
+        document.getElementById("imgView4").src=URL.createObjectURL(event.target.files[0])
     }
 
-    // Initialize Cropper.js
-    cropperInstance = new Cropper(imgView, {
-      aspectRatio: 1,
-      viewMode: 1,
-      autoCropArea: 1,
-    });
+    function viewImage(event,index){
+        let input=event.target;
+        const file=input.files[0];
+        if(!VALID_FILE_TYPES.includes(file.type)){
+                alert("Invalid file type,Please upload png or jpeg images");
+                input.value="";
+                return;
+            }
+            if(file.size>MAX_FILE_SIZE){
+                alert("File size exceeds 2mb.Please upload a smaller file");
+                input.value="";
+                return;
+            }
+        let reader = new FileReader();
+        reader.onload=function(){
+            let dataURL =reader.result;
+            let image=document.getElementById("imgView"+index);
+            image.src=dataURL;
+    
+            
+            let cropper =new Cropper(image,{
+                aspectRatio:1,
+                viewMode:1,
+                guides:true,
 
-    // Show the cropper container
-    cropperContainer.classList.remove("hidden");
+                background:false,
+                autoCropArea:1,
+                zoomable:true
+            })
+            const cropperContainer=document.querySelector("#croppedImg"+index).parentNode;
+            cropperContainer.style.display="block"
 
-    // Save Button Logic
-    const saveButton = document.getElementById(`saveButton${index}`);
-    saveButton.onclick = () => {
-      const croppedCanvas = cropperInstance.getCroppedCanvas();
-      const croppedImage = document.getElementById(`croppedImg${index}`);
-      croppedImage.src = croppedCanvas.toDataURL("image/jpeg", 1.0);
+            
 
-      // Hide the cropper container and destroy the Cropper instance
-      cropperContainer.classList.add("hidden");
-      cropperInstance.destroy();
-      cropperInstance = null;
-    };
-  };
+            let saveButton = document.querySelector("#saveButton"+index);
+            saveButton.addEventListener("click",async function(){
+                let croppedCanvas = cropper.getCroppedCanvas();
+                let croppedImage = document.getElementById("croppedImg"+index);
+                croppedImage.src =croppedCanvas.toDataURL("image/jpeg",1.0);
 
-  if (input.files && input.files[0]) {
-    reader.readAsDataURL(input.files[0]);
-  }
-}
+                let timestamp =new Date().getTime();
+                let fileName=`cropped-img-${timestamp}-${index}.png`;
 
+                await croppedCanvas.toBlob((blob)=>{
+                    let input=document.getElementById("input"+index)
+                    const imgFile=new File([blob],fileName,{type:"image/png"});
+                    const fileList=new DataTransfer();
+
+                    fileList.items.add(imgFile)
+                    input.files=fileList.files
+                   
+                    
+
+                });
+                
+                    
+                    cropperContainer.style.display ="none";
+                    cropper.destroy();
+            })
+            
+        };
+        reader.readAsDataURL(input.files[0])
+    }
+
+
+    const selectedImages=[];
+    document.getElementById("input1").addEventListener("change",handleFileSelect);
+
+
+    const MAX_FILE_SIZE=2*1024*1024;
+    const VALID_FILE_TYPES=["image/png","image/jpeg","image/jpg"]
+    
+    function handleFileSelect(event){
+        const addedImagesContainer=document.getElementById("addedImagesContainer");
+        addedImagesContainer.innerHTML = '';
+        const files=event.target.files;
+        for(let i=0;i<files.length;i++){
+            const file=files[i];
+            if(!VALID_FILE_TYPES.includes(file.type)){
+                alert("Invalid file type,Please upload png or jpeg images");
+                continue;
+            }
+            if(file.size>MAX_FILE_SIZE){
+                alert("File size exceeds 2mb.Please upload a smaller file");
+                continue;
+            }
+            selectedImages.push(file);
+            const thumbnail = document.createElement("div");
+            thumbnail.classList.add("thumbnail");
+
+            const img=document.createElement("img");
+            img.src=URL.createObjectURL(file);
+            img.alt = 'thumbnail';
+            img.style.width ="50px";
+            img.style.height= "auto";
+            const removeIcon = document.createElement("span");
+            removeIcon.classList.add("remove-icon");
+            removeIcon.innerHTML = "&times;";
+            removeIcon.addEventListener("click",function(){
+                const index=selectedImages.indexOf(file);
+                if(index!==-1){
+                    selectedImages.splice(index,1);
+                }
+                thumbnail.remove();
+            })
+                thumbnail.appendChild(img);
+                thumbnail.appendChild(removeIcon);
+                addedImagesContainer.appendChild(thumbnail)
+
+            
+        }
+    }
 
     // Form Validation Function
     function validateForm(event) {

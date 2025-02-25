@@ -44,6 +44,7 @@
           <th class="px-6 py-3 text-left">Offer</th>
           <th class="px-6 py-3 text-left">Action</th>
           <th class="px-6 py-3 text-left">Edit</th>
+          <th class="px-6 py-3 text-left">Delete</th>
         </tr>
       </thead>
       <tbody class="text-gray-600">
@@ -81,6 +82,13 @@
           <td class="px-6 py-3">
             <a href="/admin/editProduct?id=<%= data[i]._id %>" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">Edit</a>
           </td>
+
+          <td class="px-6 py-3">
+            <button onclick="confirmDelete('<%= data[i]._id %>')" 
+                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
+                Delete
+            </button>
+        </td>
         </tr>
         <% } %>
       </tbody>
@@ -210,6 +218,51 @@
     });
   }
 
+  function confirmDelete(productId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/deleteProduct?id=${productId}`, {
+                method: "GET"
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire("Deleted!", "Your product has been deleted.", "success")
+                    .then(() => location.reload()); // Refresh the page
+                } else {
+                    Swal.fire("Error!", "Failed to delete the product.", "error");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire("Error!", "Something went wrong.", "error");
+            });
+        }
+    });
+}
 
+function confirmDelete(productId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/deleteProduct?id=${productId}`;
+            }
+        });
+    }
 
 </script>
