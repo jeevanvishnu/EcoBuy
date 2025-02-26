@@ -28,6 +28,12 @@ https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css
         <span id="productName-error" class="error-message"></span>
       </div>
 
+      <div class="mb-4">
+        <label for="product_name" class="block text-gray-700 font-medium">Brand Name</label>
+        <input type="text" name="brand" value="<%=product.brand%>" id="product_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200" />
+        <span id="productName-error" class="error-message"></span>
+      </div>
+
 
       <!-- Description -->
       <div class="mb-4">
@@ -255,6 +261,47 @@ https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css
       thumbnail.appendChild(removeIcon);
       addedImagesContainer.appendChild(thumbnail);
     });
+  }
+
+
+  function validateForm() {
+    let isValid = true;
+
+    // Get input values
+    let regularPrice = document.querySelector('input[name="regularPrice"]');
+    let salePrice = document.querySelector('input[name="salePrice"]');
+    let quantity = document.querySelector('input[name="quantity"]');
+
+    // Get error message elements
+    let regularPriceError = document.getElementById('regularPrice-error');
+    let salePriceError = document.getElementById('salePrice-error');
+    let quantityError = document.getElementById('quantity-error');
+
+    // Reset error messages
+    regularPriceError.innerText = "";
+    salePriceError.innerText = "";
+    quantityError.innerText = "";
+
+    // Check for negative values
+    if (regularPrice.value < 0) {
+      regularPriceError.innerText = "Regular price cannot be negative!";
+      regularPriceError.style.display = "block";
+      isValid = false;
+    }
+
+    if (salePrice.value < 0) {
+      salePriceError.innerText = "Sale price cannot be negative!";
+      salePriceError.style.display = "block";
+      isValid = false;
+    }
+
+    if (quantity.value < 0) {
+      quantityError.innerText = "Quantity cannot be negative!";
+      quantityError.style.display = "block";
+      isValid = false;
+    }
+
+    return isValid;
   }
 
 

@@ -37,6 +37,7 @@
       <thead class="bg-gray-200 text-gray-700">
         <tr>
           <th class="px-6 py-3 text-left">Product Name</th>
+          <th class="px-6 py-3 text-left">Brand</th>
           <th class="px-6 py-3 text-left">Category</th>
           <th class="px-6 py-3 text-left">Sale Price</th>
           <th class="px-6 py-3 text-left">Offer Price</th>
@@ -51,6 +52,7 @@
         <% for (let i = data.length - 1; i >= 0; i--) { %>
         <tr class="border-b border-gray-300">
           <td class="px-6 py-3"><%= data[i].productName %></td>
+          <td class="px-6 py-3"><%= data[i].brand %></td>
           <td class="px-6 py-3"><%= data[i].category ? data[i].category.name : 'No category' %></td>
           <td class="px-6 py-3"><%= data[i].salePrice %></td>
           <td class="px-6 py-3">

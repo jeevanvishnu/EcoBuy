@@ -223,8 +223,8 @@ const login = async (req, res) => {
       return res.render("user/login", { message: "User not found" });
     }
 
-    if (findUser.isBlock) {
-      return res.render("user/login", { message: "user is blocked by admin" });
+    if (findUser.isBlocked) {
+      return res.render("user/login", { message: "Your account has been blocked. Please contact support." });
     }
 
     const passwordMatch = await bcrypt.compare(password, findUser.password);
@@ -277,6 +277,12 @@ const loadShoppingPage = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
+      // Extract unique brands from products
+    const brandNames = [...new Set(products.map((product) => product.brand))];
+
+    // Convert brand names to objects with a name field
+    const brands = brandNames.map((brand) => ({ name: brand }));
+
     const totalProducts = await Product.countDocuments({
       isBlocked: false,
       category: { $in: categoryId },
@@ -291,6 +297,7 @@ const loadShoppingPage = async (req, res) => {
     res.render("user/shop", {
       user: userData,
       products: products,
+      brand:brands,
       category: categoriesWidths,
       totalProducts: totalProducts,
       currentPage: page,
@@ -447,6 +454,22 @@ const searchProducts = async (req, res) => {
   }
 };
 
+const SearchProduct  = async (req,res) =>{
+  try {
+    const searchQuerry = req.query.search
+    console.log(searchQuerry)
+
+    let product = await Product.find({
+      productName:{$regex:searchQuerry , $options:"i"}
+    })
+    res.render('user/shop',{product , search:searchQuerry})
+    
+  } catch (error) {
+    console.log("SearchProduct Error",error.message)
+    res.redirect('/page')
+  }
+}
+
 export default {
   loadHome,
   pageNoteFound,
@@ -461,4 +484,5 @@ export default {
   filterProduct,
   filterByPrice,
   searchProducts,
+
 };

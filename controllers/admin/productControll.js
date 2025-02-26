@@ -3,6 +3,7 @@ import Category from '../../models/categorySchema.js'
 import fs from 'fs'
 import path from 'path'
 import sharp from 'sharp'
+import Brand from "../../models/brandSchema.js"
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 import { fileURLToPath } from 'url';
@@ -14,8 +15,11 @@ const getProductAddPage = async (req, res) => {
     try {
 
         const category = await Category.find({ isListed: true })
+        const brand = await Brand.find({isBlocked:false})
         res.render('admin/product-add', {
-            cat: category
+            cat: category,
+            brand:brand,
+            
         })
 
     } catch (error) {
@@ -52,6 +56,7 @@ const addProducts = async (req, res) => {
                 return res.status(400).json("Invalid Category name");
             }
 
+               
 
             const newProduct = new Product({
                 productName: products.productName,
@@ -65,6 +70,7 @@ const addProducts = async (req, res) => {
                 color: products.color,
                 productImage: images,
                 status: "Available",
+                brand:products.brand
             });
 
             await newProduct.save();
@@ -87,7 +93,7 @@ const getAllProducts = async (req, res) => {
         const productData = await Product.find({
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
-
+                {brand:{$regex:new RegExp('.*'+search+'.*',"i")}}
             ]
 
         }).limit(limit * 1)
@@ -98,23 +104,25 @@ const getAllProducts = async (req, res) => {
         const count = await Product.find({
             $or: [
                 { productName: { $regex: new RegExp(".*" + search + ".*", "i") } },
+                {brand:{$regex:new RegExp('.*'+search+'.*','i')}}
             ]
         }).countDocuments()
 
         const category = await Category.find({ isListed: true })
-
-        if (category) {
+        const brand = await Brand.find({isBlocked:false})
+        if (category && brand) {
             res.render('admin/products', {
                 data: productData,
                 currentPage: page,
                 totalPages: page,
                 totalPages: Math.ceil(count / limit),
                 cat: category,
+                brand:brand
 
 
             })
         } else {
-            res.render('/pageerror')
+            res.render('/admin/pageerror')
         }
 
     } catch (error) {
@@ -138,7 +146,7 @@ const productOffer = async (req, res) => {
             return res.json({ status: false, message: "This product's category already has a higher discount" });
         }
 
-        findProduct.salePrice = Math.floor(findProduct.regularPrice * (percentage / 100));
+        findProduct.salePrice = Math.floor(findProduct.regularPrice - (findProduct.regularPrice * (percentage / 100)));
         findProduct.productOffer = parseInt(percentage);
         await findProduct.save();
 
@@ -207,9 +215,11 @@ const getEditProduct = async (req, res) => {
         const id = req.query.id
         const product = await Product.findOne({ _id: id })
         const category = await Category.find({})
+        const brand =  await Brand.find({})
         res.render("admin/edit-product", {
             cat: category,
             product: product,
+            brand:brand
         })
 
     } catch (error) {
@@ -257,6 +267,7 @@ const editProduct = async (req, res) => {
             size: data.size,
             color: data.color,
             productImage: images, 
+            brand:data.brand
         };
 
         await Product.findByIdAndUpdate(id, updateField, { new: true });
