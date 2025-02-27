@@ -197,6 +197,20 @@
     </style>
 </head>
 <body class="bg-gray-50">
+     <!-- Breadcrumbs (Add Here) -->
+     <nav aria-label="breadcrumb" class="mb-6">
+        <div class="bg-gray-100 p-4 rounded-lg shadow-md w-full max-w-[77rem] mx-auto">
+            <ol class="flex text-gray-700 space-x-2 items-center">
+                <li><a href="/" class="hover:underline font-medium">Home</a></li>
+                <li class="text-gray-500">/</li>
+                <li><a href="/category/<%= product.category %>" class="hover:underline font-medium"><%= category.name %></a></li>
+                <li class="text-gray-500">/</li>
+                <li class="text-gray-900 font-semibold"><%= product.productName %></li>
+            </ol>
+        </div>
+    </nav>
+    
+    
     <main class="container mx-auto px-4 py-12">
         <div class="product-container grid grid-cols-1 md:grid-cols-2 gap-12 p-8">
             <!-- Product Images Section -->
