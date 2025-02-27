@@ -6,7 +6,7 @@ const productDetails = async (req, res) => {
     try {
         console.log('Fetching product details');
 
-        const userId = req.session.User;
+        const userId = req.session.user;
         const userData = await User.findById(userId);
         const productId = req.query.id;
         const product = await Product.findById(productId).populate('category');

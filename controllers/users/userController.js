@@ -262,7 +262,7 @@ const logout = async (req, res) => {
 const loadShoppingPage = async (req, res) => {
   try {
     const user = req.session.user;
-    const userData = await User.findOne({ id: user });
+    const userData = await User.findOne({ _id: user });
     const categories = await Category.find({ isListed: true });
     const categoryId = categories.map((category) => category._id.toString());
     const page = parseInt(req.query.page) || 1;
@@ -312,10 +312,12 @@ const loadShoppingPage = async (req, res) => {
 const filterProduct = async (req, res) => {
   try {
     const user = req.session.user;
+    console.log(user);
     const category = req.query.category;
     const findCategory = category
       ? await Category.findOne({ _id: category })
       : null;
+
     const query = {
       isBlocked: false,
       quantity: { $gt: 0 },
@@ -340,11 +342,17 @@ const filterProduct = async (req, res) => {
     let userData = null;
     if (user) {
       userData = await User.findOne({ _id: user });
+
       if (userData) {
         const searchEntry = {
           category: findCategory ? findCategory._id : null,
           searchedOn: new Date(),
         };
+
+        if (!Array.isArray(userData.searchEntry)) {
+          userData.searchEntry = []; // ✅ Fix: Ensure it's an array
+        }
+
         userData.searchEntry.push(searchEntry);
         await userData.save();
       }
@@ -364,6 +372,7 @@ const filterProduct = async (req, res) => {
     res.redirect("/page");
   }
 };
+
 
 const filterByPrice = async (req, res) => {
   try {

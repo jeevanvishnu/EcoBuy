@@ -5,6 +5,7 @@ import passport from "../../config/passport.js"
 import userMiddleWare  from  "../../middlewares/user/userMiddle.js"
 import productController from "../../controllers/users/productController.js";
 import profileController from "../../controllers/users/profileController.js"
+import userAuth from '../../middlewares/auth.js'
 
 router.get('/',userMiddleWare.checkBlockedUser,userController.loadHome)
 router.get('/signup',userMiddleWare.loginMiddle,userController.loadSignUp)
@@ -28,16 +29,16 @@ router.post('/verify-password',profileController.verifyPassword)
 router.get('/reset-password',profileController.getResetPassPage)
 router.post('/resend-otp',profileController.resendOtp)
 router.post('/reset-passwordOtp',profileController.postNewPassword)
-router.get('/userProfile',userMiddleWare.checkBlockedUser,profileController.userProfile)
+router.get('/userProfile',userAuth.userAuth,profileController.userProfile)
 
 // shoping Router
-router.get('/shop',userMiddleWare.checkBlockedUser,userController.loadShoppingPage)
+router.get('/shop',userController.loadShoppingPage)
 router.get('/filter',userController.filterProduct)
 router.get('/filterPrice',userController.filterByPrice)
 router.get('/search',userController.searchProducts)
 
 // product Managment
-router.get('/productDatails',userMiddleWare.checkBlockedUser, productController.productDetails);
+router.get('/productDatails', productController.productDetails);
 
 
 export default router
