@@ -424,12 +424,13 @@ const searchProducts = async (req, res) => {
     let searchResult = [];
 
     if (req.session.filterProduct && req.session.filterProduct.length > 0) {
-      const filteredProducts = await Product.find({
-        _id: { $in: req.session.filterProduct },
-      });
-      searchResult = filteredProducts.filter((product) =>
-        product.productName.toLowerCase().includes(search.toLowerCase())
-      );
+     
+      const filteredProductIds = req.session.filterProduct.map((product) => product._id);
+      
+      searchResult = await Product.find({
+        _id: { $in: filteredProductIds },
+        productName: { $regex: `.*${search}.*`, $options: "i" },
+      }).lean();
     } else {
       searchResult = await Product.find({
         productName: { $regex: `.*${search}.*`, $options: "i" },
@@ -439,15 +440,17 @@ const searchProducts = async (req, res) => {
       }).lean();
     }
 
-    searchResult.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+    
+    searchResult.sort((a, b) => 
+      new Date(b.createdOn || "2000-01-01") - new Date(a.createdOn || "2000-01-01")
+    );
 
-    // Pagination logic
+    
     let itemsPerPage = 10;
-    let currentPage = parseInt(req.query.page) || 1; // Fixed page number
+    let currentPage = parseInt(req.query.page) || 1;
     let startIndex = (currentPage - 1) * itemsPerPage;
-    let endIndex = startIndex + itemsPerPage;
     let totalPages = Math.ceil(searchResult.length / itemsPerPage);
-    const currentProduct = searchResult.slice(startIndex, endIndex);
+    let currentProduct = searchResult.slice(startIndex, startIndex + itemsPerPage);
 
     res.render("user/shop", {
       user: userData,
@@ -457,27 +460,13 @@ const searchProducts = async (req, res) => {
       currentPage,
       count: searchResult.length,
     });
+
   } catch (error) {
-    console.error(error.message);
+    console.error("Error in searchProducts:", error.message);
     res.redirect("/page");
   }
 };
 
-const SearchProduct  = async (req,res) =>{
-  try {
-    const searchQuerry = req.query.search
-    console.log(searchQuerry)
-
-    let product = await Product.find({
-      productName:{$regex:searchQuerry , $options:"i"}
-    })
-    res.render('user/shop',{product , search:searchQuerry})
-    
-  } catch (error) {
-    console.log("SearchProduct Error",error.message)
-    res.redirect('/page')
-  }
-}
 
 export default {
   loadHome,
