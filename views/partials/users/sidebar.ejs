@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile Sidebar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center h-screen">
+
+    <!-- Sidebar -->
+    <div class="w-64 h-auto max-h-[500px] bg-white shadow-lg rounded-lg p-4 flex flex-col">
+        <div class="text-center">
+            <div class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 flex items-center justify-center bg-blue-500 text-white text-2xl font-bold">
+                <%= user.name.charAt(0).toUpperCase() %>
+            </div>
+            <h2 class="text-lg font-semibold mt-2 text-gray-900"><%=user.name %></h2>
+            <p class="text-gray-500 text-sm"><%= user.email %></p>
+        </div>
+
+        <nav class="mt-4 space-y-2 flex-1">
+            <a href="/userProfile" class=" px-3 py-3 menu-item flex items-center px-4 py-2 text-gray-700 font-semibold rounded-lg transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-500 text-white" data-id="profile">
+                <i class="ph ph-user-circle text-lg mr-3"></i> Profile
+            </a>
+            <a href="#" class=" px-3 py-3  menu-item flex items-center px-4 py-2 text-gray-700 font-semibold rounded-lg transition-all duration-300" data-id="orders">
+                <i class="ph ph-shopping-cart text-lg mr-3"></i> My Orders
+            </a>
+            <a href="#" class=" px-3 py-3  menu-item flex items-center px-4 py-2 text-gray-700 font-semibold rounded-lg transition-all duration-300" data-id="address">
+                <i class="ph ph-map-pin text-lg mr-3"></i> Address
+            </a>
+            <a href="#" class=" px-3 py-3  menu-item flex items-center px-4 py-2 text-gray-700 font-semibold rounded-lg transition-all duration-300" data-id="wallet">
+                <i class="ph ph-wallet text-lg mr-3"></i> Wallet
+            </a>
+            <a href="/logout" id="logout-btn" class="flex items-center px-4 py-2 font-semibold rounded-lg transition-all duration-300 bg-gradient-to-r from-red-500 to-red-700 text-white">
+                <i class="ph ph-sign-out text-lg mr-3"></i> Logout
+            </a>
+        </nav>
+
+        <!-- Logout Button -->
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const menuItems = document.querySelectorAll(".menu-item");
+            const logoutBtn = document.getElementById("logout-btn");
+
+            menuItems.forEach(item => {
+                item.addEventListener("click", function () {
+                    // Remove active class from all menu items
+                    menuItems.forEach(i => i.classList.remove("bg-gradient-to-r", "from-blue-500", "to-purple-500", "text-white"));
+
+                    // Add gradient background to the clicked item
+                    this.classList.add("bg-gradient-to-r", "from-blue-500", "to-purple-500", "text-white");
+                });
+            });
+
+            // Logout Button Click Effect
+            logoutBtn.addEventListener("click", function () {
+                this.classList.add("scale-95");
+                setTimeout(() => {
+                    this.classList.remove("scale-95");
+                    alert("Logged out successfully!");
+                }, 150);
+            });
+        });
+    </script>
+
+</body>
+</html>

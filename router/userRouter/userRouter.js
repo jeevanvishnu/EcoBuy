@@ -28,14 +28,16 @@ router.post('/verify-password',profileController.verifyPassword)
 router.get('/reset-password',profileController.getResetPassPage)
 router.post('/resend-otp',profileController.resendOtp)
 router.post('/reset-passwordOtp',profileController.postNewPassword)
+router.get('/userProfile',userMiddleWare.checkBlockedUser,profileController.userProfile)
+
 // shoping Router
-router.get('/shop',userController.loadShoppingPage)
+router.get('/shop',userMiddleWare.checkBlockedUser,userController.loadShoppingPage)
 router.get('/filter',userController.filterProduct)
 router.get('/filterPrice',userController.filterByPrice)
 router.get('/search',userController.searchProducts)
 
 // product Managment
-router.get('/productDatails', productController.productDetails);
-// router.get('/search',productController)
+router.get('/productDatails',userMiddleWare.checkBlockedUser, productController.productDetails);
+
 
 export default router

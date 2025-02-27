@@ -1,0 +1,147 @@
+<%- include("../partials/users/header.ejs") %>
+<div class="flex" style="column-gap: 216px;">
+<%- include("../partials/users/sidebar.ejs") %>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.js"></script>
+  <style>
+    /* Animations */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes pulse {
+      0% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+      100% { transform: scale(1); }
+    }
+    
+    @keyframes rotate {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
+    .animate-fade-in {
+      opacity: 0;
+      animation: fadeIn 0.7s ease-out forwards;
+    }
+    
+    .delay-1 { animation-delay: 0.2s; }
+    .delay-2 { animation-delay: 0.4s; }
+    .delay-3 { animation-delay: 0.6s; }
+    .delay-4 { animation-delay: 0.8s; }
+    
+    .avatar:hover {
+      animation: pulse 1s infinite;
+    }
+    
+    .gradient-blue {
+      background: linear-gradient(45deg, #3490dc, #6574cd);
+    }
+    
+    .gradient-purple {
+      background: linear-gradient(45deg, #9561e2, #f66d9b);
+    }
+    
+    .btn:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+    }
+    
+    .card {
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .card::after {
+      content: "";
+      position: absolute;
+      top: -50%;
+      left: -50%;
+      width: 200%;
+      height: 200%;
+      background: linear-gradient(
+        to bottom right,
+        rgba(255, 255, 255, 0) 0%,
+        rgba(255, 255, 255, 0.1) 50%,
+        rgba(255, 255, 255, 0) 100%
+      );
+      transform: rotate(30deg);
+      animation: shimmer 4s infinite;
+    }
+    
+    @keyframes shimmer {
+      0% { transform: translateX(-100%) rotate(30deg); }
+      100% { transform: translateX(100%) rotate(30deg); }
+    }
+  </style>
+</head>
+<body class="bg-gray-100 h-screen flex items-center justify-center font-sans">
+  <div class="card w-[600px] bg-white rounded-xl shadow-lg p-8 animate-fade-in items-center">
+    <div class="text-center mb-8">
+      <!-- Avatar with first letter -->
+      <div class="avatar inline-flex items-center justify-center h-24 w-24 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 text-white text-3xl font-bold mx-auto mb-4 shadow-md transition-all duration-300 animate-fade-in">
+        <%= user.name.charAt(0).toUpperCase() %>
+      </div>
+      <h1 class="text-2xl font-bold text-gray-800 animate-fade-in delay-1"><%= user.name %></h1>
+    </div>
+    
+    <!-- Contact Information -->
+    <div class="space-y-6 mb-8">
+      <div class="animate-fade-in delay-1">
+        <label class="text-sm text-gray-500 block mb-1">Name</label>
+        <div class="text-lg font-medium text-gray-800 border-b-2 border-gray-200 pb-2"><%= user.name %></div>
+      </div>
+      
+      <div class="animate-fade-in delay-2">
+        <label class="text-sm text-gray-500 block mb-1">Email</label>
+        <div class="text-lg font-medium text-gray-800 border-b-2 border-gray-200 pb-2"><%= user.email %></div>
+      </div>
+      
+      <div class="animate-fade-in delay-3">
+        <label class="text-sm text-gray-500 block mb-1">Phone Number</label>
+        <div class="text-lg font-medium text-gray-800 border-b-2 border-gray-200 pb-2"><%= user.mobile %></div>
+      </div>
+    </div>
+    
+    <!-- Buttons -->
+    <div class="flex flex-col space-y-3 sm:flex-row sm:space-y-0 sm:space-x-3 animate-fade-in delay-4">
+      <button  class="btn gradient-blue text-white py-3 px-6 rounded-lg font-medium transition-all duration-300 flex-1 text-center">
+        <a href="/">
+            Edit Profile
+        </a>
+      </button>
+      <button class="btn gradient-purple text-white py-3 px-6 rounded-lg font-medium transition-all duration-300 flex-1 text-center">
+        <a href="/">
+            Change Password
+        </a>
+      </button>
+    </div>
+  </div>
+</div>
+  </body>
+
+  <script>
+    // Additional animation for the avatar
+    document.addEventListener('DOMContentLoaded', function() {
+      const avatar = document.querySelector('.avatar');
+      const card = document.querySelector('.card');
+      
+      // Add pulse animation on hover
+      avatar.addEventListener('mouseover', function() {
+        this.style.transform = 'scale(1.1)';
+      });
+      
+      avatar.addEventListener('mouseout', function() {
+        this.style.transform = 'scale(1)';
+      });
+      
+      // Add subtle animations after load
+      setTimeout(function() {
+        avatar.classList.add('transition-all', 'duration-300');
+      }, 1000);
+    });
+  </script>
+
+<%- include("../partials/users/footer.ejs") %>
+

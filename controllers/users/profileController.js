@@ -180,11 +180,29 @@ const postNewPassword = async (req, res) => {
 };
 
 
+const userProfile = async (req,res) =>{
+    try {
+
+        const userId = req.session.user
+        const userData = await User.findById(userId)
+        res.render('user/profile',{
+            user:userData
+        })
+        
+    } catch (error) {
+        console.error("Error of userProfile")
+        res.redirect('/page')
+        
+    }
+}
+
+
 export default {
     getForgotPassPage,
     forgotEmail,
     verifyPassword,
     getResetPassPage,
     resendOtp,
-    postNewPassword
+    postNewPassword,
+    userProfile
 }
