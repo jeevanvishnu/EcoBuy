@@ -62,8 +62,7 @@ const addBanner = async (req, res) => {
 const deleteBanner =  async (req,res) =>{
     try {
         const id = req.query.id
-        await Banner.deleteOne({_id:id}).then((data)=>{
-        })
+        await Banner.deleteOne({_id:id})
         res.redirect('banner')
     } catch (error) {
         res.redirect('/admin/pageerror')
