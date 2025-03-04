@@ -29,7 +29,7 @@ router.post('/verify-password',profileController.verifyPassword)
 router.get('/reset-password',profileController.getResetPassPage)
 router.post('/resend-otp',profileController.resendOtp)
 router.post('/reset-passwordOtp',profileController.postNewPassword)
-router.get('/userProfile',userAuth.userAuth,profileController.userProfile)
+router.get('/userProfile',profileController.userProfile)
 
 // shoping Router
 router.get('/shop',userController.loadShoppingPage)
@@ -38,7 +38,12 @@ router.get('/filterPrice',userController.filterByPrice)
 router.get('/search',userController.searchProducts)
 
 // product Managment
-router.get('/productDatails', productController.productDetails);
-
-
+router.get('/productDatails',userAuth.userAuth, productController.productDetails);
+router.get('/change-email',userAuth.userAuth,profileController.changeEmail)
+router.post('/change-email',userAuth.userAuth,profileController.changeEmailVaild)
+router.post('/verify-email-otp',userAuth.userAuth,profileController.verifyEmailOtp)
+router.post('/update-email',userAuth.userAuth,profileController.updateEmail)
+router.get('/change-password',userAuth.userAuth,profileController.changePassword)
+router.post('/change-password',userAuth.userAuth,profileController.changePasswordValid)
+router.post('/verify-changePassword',userAuth.userAuth,profileController.verifyChangePasswordOtp)
 export default router

@@ -197,6 +197,166 @@ const userProfile = async (req,res) =>{
 }
 
 
+const changeEmail = async (req,res) =>{
+    try {
+        
+        const userId = req.session.user
+        const userData = await User.findById(userId)
+        res.render('user/change-email',{user:userData})
+        
+    } catch (error) {
+        res.redirect('/page')
+        
+    }
+}
+
+
+const changeEmailVaild = async (req,res)=>{
+    try {
+        
+        const {email} = req.body
+        const userExist = await User.findOne({ email });
+        const userId = req.session.user
+        const userEmail =  await User.findById(userId)
+        
+
+        if(userExist && userEmail && userExist._id.toString() === userEmail._id.toString()){
+            const otp = generateOtp()
+            const emailSent = await sendVeficationEmail(email,otp)
+            if(emailSent){
+                req.session.userOtp = otp
+                req.session.userData = req.body
+                req.session.email = email
+               
+                res.render('user/change-otp',{user:userEmail})
+                console.log("Email Send otp",otp)
+            }else{
+                res.json("email error")
+            }
+        }else{
+            res.render("user/change-email",{
+                message:"User with this email not exist"
+            })
+        }
+
+
+    } catch (error) {
+        res.redirect('/page')
+        
+    }
+}
+
+const verifyEmailOtp = async (req,res) =>{
+
+    try {
+
+        const enteredOtp = req.body.otp.join('')
+        const userId = req.session.user
+        const userEmail =  await User.findById(userId)
+        console.log(req.session.userOtp,"This is session otp")
+        if(enteredOtp === req.session.userOtp.toString()){
+            req.session.userData = req.body.userData
+            res.render('user/new-email',{
+                userData:req.session.userData,
+                user:userEmail
+
+            })
+        }else{
+            console.log("Hello...")
+            res.render('user/change-email',{
+                message:"OTP not matching",
+                userData:req.session.userData
+            })
+        }
+        
+    } catch (error) {
+        console.log("Verify email otp ", error.message)
+        res.redirect('/page')
+    }
+}
+
+
+const updateEmail = async (req,res) =>{
+
+    try {
+
+        const newEmail = req.body.email
+        const userId = req.session.user
+        await User.findByIdAndUpdate(userId,{email:newEmail})
+        res.redirect('/userProfile')
+        
+    } catch (error) {
+        console.log("Error is update email",error.message)
+        res.redirect('/page')
+    }
+}
+
+const changePassword = async (req,res)=>{
+    try {
+        const userId = req.session.user
+        const userEmail =  await User.findById(userId)
+        res.render('user/change-password',{user:userEmail})
+        
+    } catch (error) {
+        res.redirect('/page')
+        
+    }
+}
+
+const changePasswordValid = async (req,res)=>{
+    try {
+       
+        const {email} = req.body
+
+        const userExist = await User.findOne({email})
+        const userId = req.session.user
+        const userEmail =  await User.findById(userId)
+        if(userExist){
+            const otp =generateOtp()
+            const emailSend  = await sendVeficationEmail(email,otp)
+            if(emailSend){
+                req.session.userOtp =otp
+                req.session.userData = req.body
+                req.session.email = email
+                res.render('user/forgot-otp',{user:userEmail})
+                console.log("OTP",otp)
+            }else{
+                res.json({
+                    success:false,
+                    message:"Failed to otp send"
+                })
+            }
+        }else{
+            res.render("user/change-password",{
+                message:"User with this email doesnot exist"
+            })
+        }
+
+    } catch (error) {
+        console.log("Error in change password validation",error.message)
+        res.redirect('/page')
+    }
+}
+
+
+const verifyChangePasswordOtp = async(req,res) =>{
+    try {
+
+        const enteredOtp = req.body.otp.join('')
+        console.log(enteredOtp.toString() === req.session.userOtp.toString())
+        console.log(enteredOtp,"Entered otp ..")
+        if(enteredOtp.toString() === req.session.userOtp.toString()){
+            res.json({success:true,redirectUrl:"/reset-passwordOtp"})
+        }else{
+            res.json({success:false,message:"OTP Failed"})
+        }
+        
+    } catch (error) {
+        console.log(error.message,"Error is verifyChangePassword")
+        res.redirect('/page')
+    }
+}
+
 export default {
     getForgotPassPage,
     forgotEmail,
@@ -204,5 +364,12 @@ export default {
     getResetPassPage,
     resendOtp,
     postNewPassword,
-    userProfile
+    userProfile,
+    changeEmail,
+    changeEmailVaild,
+    verifyEmailOtp,
+    updateEmail,
+    changePassword,
+    changePasswordValid,
+    verifyChangePasswordOtp
 }

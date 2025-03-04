@@ -1,0 +1,121 @@
+<%- include("../partials/users/header.ejs") %>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OTP Verification</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gradient-to-r from-blue-200 to-purple-300 flex items-center justify-center min-h-screen w-full">
+
+    <form action="/verify-email-otp" method="post">
+    <div class="bg-white p-8 rounded-xl shadow-lg w-96 text-center mx-auto">
+        <h2 class="text-3xl font-bold text-gray-800 mb-2">Verify Your OTP</h2>
+        <p class="text-gray-600 mb-6">We have sent a code to your registered mobile number</p>
+        
+        <!-- OTP Inputs -->
+        
+        <div class="flex justify-center gap-2 mb-6">
+            <input name="otp" type="text" class="otp-input w-12 h-12 text-center border border-gray-300 rounded-lg text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="1">
+            <input name="otp" type="text" class="otp-input w-12 h-12 text-center border border-gray-300 rounded-lg text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="1">
+            <input name="otp" type="text" class="otp-input w-12 h-12 text-center border border-gray-300 rounded-lg text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="1">
+            <input name="otp" type="text" class="otp-input w-12 h-12 text-center border border-gray-300 rounded-lg text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="1">
+            <input name="otp" type="text" class="otp-input w-12 h-12 text-center border border-gray-300 rounded-lg text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="1">
+            <input name="otp" type="text" class="otp-input w-12 h-12 text-center border border-gray-300 rounded-lg text-xl font-bold focus:outline-none focus:ring-2 focus:ring-blue-500" maxlength="1">
+        </div>
+
+        <!-- Verify Button -->
+        <button id="verify-btn" class="w-full py-3 text-white font-semibold rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all shadow-md">
+            Verify OTP
+        </button>
+
+        <!-- Resend OTP Section -->
+        <p class="mt-4 text-gray-500">
+            Didn't receive the code? 
+            <button id="resend-btn" class="mt-2 px-4 py-2 rounded-lg text-white bg-gray-400 cursor-not-allowed transition-all" disabled>
+                Resend OTP in <span id="timer">60</span>s
+            </button>
+        </p>
+
+        <p id="error-message" class="text-red-500 mt-2 hidden">Please enter a valid 6-digit OTP.</p>
+    </div>
+    </form>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const inputs = document.querySelectorAll(".otp-input");
+            const verifyBtn = document.getElementById("verify-btn");
+            const resendBtn = document.getElementById("resend-btn");
+            const timerElement = document.getElementById("timer");
+            const errorMessage = document.getElementById("error-message");
+            let timeLeft = 60;
+
+            // Auto-focus next input and allow only numbers
+            inputs.forEach((input, index) => {
+                input.addEventListener("input", (e) => {
+                    input.value = e.target.value.replace(/[^0-9]/g, ''); // Allow only numbers
+                    if (e.target.value.length === 1 && index < inputs.length - 1) {
+                        inputs[index + 1].focus();
+                    }
+                });
+
+                // Handle backspace key
+                input.addEventListener("keydown", (e) => {
+                    if (e.key === "Backspace" && input.value === "" && index > 0) {
+                        inputs[index - 1].focus();
+                    }
+                });
+            });
+
+            // OTP Validation
+            verifyBtn.addEventListener("click", function () {
+                let otp = "";
+                inputs.forEach(input => otp += input.value);
+
+                if (otp.length !== 6 || isNaN(otp)) {
+                    errorMessage.classList.remove("hidden");
+                } else {
+                    errorMessage.classList.add("hidden");
+                    alert("OTP Verified: " + otp); // Replace with actual OTP verification logic
+                }
+            });
+
+            // Resend OTP Timer
+            function startTimer() {
+                resendBtn.disabled = true;
+                resendBtn.classList.add("bg-gray-400", "cursor-not-allowed");
+                resendBtn.classList.remove("bg-blue-500", "hover:bg-blue-600");
+                timeLeft = 60;
+                timerElement.textContent = timeLeft;
+
+                const timerInterval = setInterval(() => {
+                    timeLeft--;
+                    timerElement.textContent = timeLeft;
+                    
+                    if (timeLeft === 0) {
+                        clearInterval(timerInterval);
+                        resendBtn.disabled = false;
+                        resendBtn.classList.remove("bg-gray-400", "cursor-not-allowed");
+                        resendBtn.classList.add("bg-blue-500", "hover:bg-blue-600");
+                        resendBtn.textContent = "Resend OTP";
+                    }
+                }, 1000);
+            }
+
+            // Start the timer when page loads
+            startTimer();
+
+            // Resend OTP Click
+            resendBtn.addEventListener("click", function () {
+                timeLeft = 60;
+                timerElement.textContent = timeLeft;
+                resendBtn.textContent = "Resend OTP in 60s";
+                errorMessage.classList.add("hidden");
+                startTimer();
+                alert("New OTP sent!"); // Replace with actual OTP resend logic
+            });
+        });
+    </script>
+</body>
+</html>
