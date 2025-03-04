@@ -38,7 +38,7 @@ router.get('/filterPrice',userController.filterByPrice)
 router.get('/search',userController.searchProducts)
 
 // product Managment
-router.get('/productDatails',userAuth.userAuth, productController.productDetails);
+router.get('/productDatails', productController.productDetails);
 router.get('/change-email',userAuth.userAuth,profileController.changeEmail)
 router.post('/change-email',userAuth.userAuth,profileController.changeEmailVaild)
 router.post('/verify-email-otp',userAuth.userAuth,profileController.verifyEmailOtp)

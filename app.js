@@ -10,6 +10,7 @@ import session from "express-session";
 import passport from "./config/passport.js";
 import adminRouter from './router/adminRouter/adminRouter.js'
 import morgan from "morgan";
+import MongoStore from "connect-mongo";
 
 // ENV config
 dotEnv.config();
@@ -31,6 +32,7 @@ app.use(session({
   secret:process.env.SECRECT_KEY,
   resave:false,
   saveUninitialized:true,
+  store:MongoStore.create({mongoUrl:process.env.MONGODB_URL}),
   cookie:{
     secure:false,
     httpOnly:true,
