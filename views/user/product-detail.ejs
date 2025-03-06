@@ -1,290 +1,309 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <%- include("../partials/users/header.ejs") %>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Poppins', sans-serif;
-            color: #333;
-        }
-        
-        /* Image container and zoom effect */
-        .image-container {
-            position: relative;
-            width: 450px;
-            height: 500px;
-            overflow: hidden;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            margin: 0 auto;
-        }
-        
-        .product-image {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.4s ease-out;
-        }
-        
-        .image-container:hover .product-image {
-            transform: scale(2);
-            transform-origin: var(--x) var(--y);
-            cursor: zoom-in;
-        }
-        
-        /* Thumbnails styling */
-        .thumbnails-container {
-            display: flex;
-            justify-content: center;
-            gap: 12px;
-            margin-top: 20px;
-        }
-        
-        .thumbnail {
-            width: 80px;
-            height: 80px;
-            border-radius: 0.5rem;
-            object-fit: cover;
-            cursor: pointer;
-            border: 2px solid transparent;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-        }
-        
-        .thumbnail:hover {
-            transform: translateY(-5px);
-        }
-        
-        .thumbnail.active {
-            border: 2px solid #3b82f6;
-            transform: scale(1.05);
-        }
-        
-        /* Product details styling */
-        .product-title {
-            font-size: 2.25rem;
-            font-weight: 600;
-            color: #1f2937;
-            line-height: 1.2;
-            margin-bottom: 0.75rem;
-        }
-        
-        .price-container {
-            display: flex;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .sale-price {
-            font-size: 1.75rem;
-            font-weight: 700;
-            color: #ef4444;
-        }
-        
-        .regular-price {
-            font-size: 1.25rem;
-            color: #6b7280;
-            text-decoration: line-through;
-            margin-left: 1rem;
-        }
-        
-        .discount-badge {
-            background-color: #10b981;
-            color: white;
-            padding: 0.25rem 0.75rem;
-            border-radius: 1rem;
-            font-size: 0.875rem;
-            font-weight: 500;
-            margin-left: 1rem;
-        }
-        
-        .product-description {
-            font-size: 1rem;
-            line-height: 1.7;
-            color: #4b5563;
-            margin-bottom: 1.5rem;
-        }
-        
-        .specs-container {
-            background-color: #f9fafb;
-            border-radius: 0.75rem;
-            padding: 1.25rem;
-            margin-bottom: 1.5rem;
-        }
-        
-        .spec-item {
-            display: flex;
-            margin-bottom: 0.5rem;
-        }
-        
-        .spec-label {
-            font-weight: 600;
-            width: 120px;
-        }
-        
-        /* Quantity selector */
-        .quantity-selector {
-            display: flex;
-            align-items: center;
-            background-color: #f3f4f6;
-            border-radius: 0.5rem;
-            max-width: fit-content;
-            margin-bottom: 1.5rem;
-        }
-        
-        .qty-btn {
-            background-color: #e5e7eb;
-            color: #374151;
-            width: 40px;
-            height: 40px;
-            font-size: 1.25rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            user-select: none;
-            transition: all 0.2s;
-        }
-        
-        .qty-btn:hover {
-            background-color: #d1d5db;
-        }
-        
-        .qty-btn:first-child {
-            border-radius: 0.5rem 0 0 0.5rem;
-        }
-        
-        .qty-btn:last-child {
-            border-radius: 0 0.5rem 0.5rem 0;
-        }
-        
-        .qty-value {
-            padding: 0 1.5rem;
-            font-size: 1.125rem;
-            font-weight: 500;
-        }
-        
-        /* Add to cart button */
-        .add-to-cart-btn {
-            background-color: #3b82f6;
-            color: white;
-            font-size: 1.125rem;
-            font-weight: 500;
-            padding: 0.75rem 2.5rem;
-            border-radius: 0.5rem;
-            transition: all 0.3s;
-            border: none;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-        
-        .add-to-cart-btn:hover {
-            background-color: #2563eb;
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-        }
-        
-        /* Main container */
-        .product-container {
-            background-color: white;
-            border-radius: 1.5rem;
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-    </style>
+        <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap"
+            rel="stylesheet">
+        <style>
+            body {
+                font-family: 'Poppins', sans-serif;
+                color: #333;
+            }
+
+            /* Image container and zoom effect */
+            .image-container {
+                position: relative;
+                width: 450px;
+                height: 500px;
+                overflow: hidden;
+                border-radius: 1rem;
+                box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+                margin: 0 auto;
+            }
+
+            .product-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                transition: transform 0.4s ease-out;
+            }
+
+            .image-container:hover .product-image {
+                transform: scale(2);
+                transform-origin: var(--x) var(--y);
+                cursor: zoom-in;
+            }
+
+            /* Thumbnails styling */
+            .thumbnails-container {
+                display: flex;
+                justify-content: center;
+                gap: 12px;
+                margin-top: 20px;
+            }
+
+            .thumbnail {
+                width: 80px;
+                height: 80px;
+                border-radius: 0.5rem;
+                object-fit: cover;
+                cursor: pointer;
+                border: 2px solid transparent;
+                transition: all 0.2s ease;
+                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            }
+
+            .thumbnail:hover {
+                transform: translateY(-5px);
+            }
+
+            .thumbnail.active {
+                border: 2px solid #3b82f6;
+                transform: scale(1.05);
+            }
+
+            /* Product details styling */
+            .product-title {
+                font-size: 2.25rem;
+                font-weight: 600;
+                color: #1f2937;
+                line-height: 1.2;
+                margin-bottom: 0.75rem;
+            }
+
+            .price-container {
+                display: flex;
+                align-items: center;
+                margin-bottom: 1.5rem;
+            }
+
+            .sale-price {
+                font-size: 1.75rem;
+                font-weight: 700;
+                color: #ef4444;
+            }
+
+            .regular-price {
+                font-size: 1.25rem;
+                color: #6b7280;
+                text-decoration: line-through;
+                margin-left: 1rem;
+            }
+
+            .discount-badge {
+                background-color: #10b981;
+                color: white;
+                padding: 0.25rem 0.75rem;
+                border-radius: 1rem;
+                font-size: 0.875rem;
+                font-weight: 500;
+                margin-left: 1rem;
+            }
+
+            .product-description {
+                font-size: 1rem;
+                line-height: 1.7;
+                color: #4b5563;
+                margin-bottom: 1.5rem;
+            }
+
+            .specs-container {
+                background-color: #f9fafb;
+                border-radius: 0.75rem;
+                padding: 1.25rem;
+                margin-bottom: 1.5rem;
+            }
+
+            .spec-item {
+                display: flex;
+                margin-bottom: 0.5rem;
+            }
+
+            .spec-label {
+                font-weight: 600;
+                width: 120px;
+            }
+
+            /* Quantity selector */
+            .quantity-selector {
+                display: flex;
+                align-items: center;
+                background-color: #f3f4f6;
+                border-radius: 0.5rem;
+                max-width: fit-content;
+                margin-bottom: 1.5rem;
+            }
+
+            .qty-btn {
+                background-color: #e5e7eb;
+                color: #374151;
+                width: 40px;
+                height: 40px;
+                font-size: 1.25rem;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                user-select: none;
+                transition: all 0.2s;
+            }
+
+            .qty-btn:hover {
+                background-color: #d1d5db;
+            }
+
+            .qty-btn:first-child {
+                border-radius: 0.5rem 0 0 0.5rem;
+            }
+
+            .qty-btn:last-child {
+                border-radius: 0 0.5rem 0.5rem 0;
+            }
+
+            .qty-value {
+                padding: 0 1.5rem;
+                font-size: 1.125rem;
+                font-weight: 500;
+            }
+
+            /* Add to cart button */
+            .add-to-cart-btn {
+                background-color: #3b82f6;
+                color: white;
+                font-size: 1.125rem;
+                font-weight: 500;
+                padding: 0.75rem 2.5rem;
+                border-radius: 0.5rem;
+                transition: all 0.3s;
+                border: none;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .add-to-cart-btn:hover {
+                background-color: #2563eb;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+            }
+
+            /* Main container */
+            .product-container {
+                background-color: white;
+                border-radius: 1.5rem;
+                box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+                overflow: hidden;
+            }
+        </style>
 </head>
+
 <body class="bg-gray-50">
-     <!-- Breadcrumbs (Add Here) -->
-     <nav aria-label="breadcrumb" class="mb-6">
+    <!-- Breadcrumbs (Add Here) -->
+    <nav aria-label="breadcrumb" class="mb-6">
         <div class="bg-gray-100 p-4 rounded-lg shadow-md w-full max-w-[77rem] mx-auto">
             <ol class="flex text-gray-700 space-x-2 items-center">
                 <li><a href="/" class="hover:underline font-medium">Home</a></li>
                 <li class="text-gray-500">/</li>
-                <li><a href="/category/<%= product.category %>" class="hover:underline font-medium"><%= category.name %></a></li>
+                <li><a href="/category/<%= product.category %>" class="hover:underline font-medium">
+                        <%= category.name %>
+                    </a></li>
                 <li class="text-gray-500">/</li>
-                <li class="text-gray-900 font-semibold"><%= product.productName %></li>
+                <li class="text-gray-900 font-semibold">
+                    <%= product.productName %>
+                </li>
             </ol>
         </div>
     </nav>
-    
-    
+
+
     <main class="container mx-auto px-4 py-12">
         <div class="product-container grid grid-cols-1 md:grid-cols-2 gap-12 p-8">
             <!-- Product Images Section -->
             <div>
                 <div id="imageContainer" class="image-container">
-                    <img id="mainImage" class="product-image" 
-                        src="/uploads/re-image/<%= product.productImage[0] %>" 
+                    <img id="mainImage" class="product-image" src="/uploads/re-image/<%= product.productImage[0] %>"
                         alt="<%= product.productName %>">
                 </div>
                 <div class="thumbnails-container">
-                    <% product.productImage.forEach((image, i) => { %>
-                        <img class="thumbnail <%= i === 0 ? 'active' : '' %>" 
-                            src="/uploads/re-image/<%= image %>"
-                            alt="<%= product.productName %> - view <%= i+1 %>" 
-                            data-src="<%= image %>"
+                    <% product.productImage.forEach((image, i)=> { %>
+                        <img class="thumbnail <%= i === 0 ? 'active' : '' %>" src="/uploads/re-image/<%= image %>"
+                            alt="<%= product.productName %> - view <%= i+1 %>" data-src="<%= image %>"
                             onclick="changeImage(this)">
-                    <% }); %>
+                        <% }); %>
                 </div>
             </div>
-            
+
             <!-- Product Details Section -->
             <div>
-                <h1 class="product-title"><%= product.productName %></h1>
-                
+                <h1 class="product-title">
+                    <%= product.productName %>
+                </h1>
+
                 <div class="price-container">
                     <span class="sale-price">₹<%= product.salePrice.toLocaleString('en-IN') %></span>
                     <span class="regular-price">₹<%= product.regularPrice.toLocaleString('en-IN') %></span>
                     <% if (totalOffer) { %>
-                        <span class="discount-badge"><%= totalOffer %>% Off</span>
-                    <% } %>
+                        <span class="discount-badge">
+                            <%= totalOffer %>% Off
+                        </span>
+                        <% } %>
                 </div>
-                
-                <p class="product-description"><%= product.description %></p>
-                
+
+                <p class="product-description">
+                    <%= product.description %>
+                </p>
+
                 <div class="specs-container">
                     <% if (product.brand) { %>
-                    <div class="spec-item">
-                        <span class="spec-label">Brand:</span>
-                        <span><%= product.brand %></span>
-                    </div>
-                    <% } %>
-                    
-                    <% if (product.color) { %>
-                    <div class="spec-item">
-                        <span class="spec-label">Color:</span>
-                        <span><%= product.color %></span>
-                    </div>
-                    <% } %>
-                    
-                    <div class="spec-item">
-                        <span class="spec-label">Availability:</span>
-                        <span class="<%= product.quantity > 0 ? 'text-green-600 font-medium' : 'text-red-500' %>">
-                            <%= product.quantity > 0 ? `In Stock (${product.quantity})` : 'Out of Stock' %>
-                        </span>
-                    </div>
-                    
-                    <% if (product.category) { %>
-                    <div class="spec-item">
-                        <span class="spec-label">Category:</span>
-                        <span><%= category.name %></span>
-                    </div>
-                    <% } %>
-                    
-                   
+                        <div class="spec-item">
+                            <span class="spec-label">Brand:</span>
+                            <span>
+                                <%= product.brand %>
+                            </span>
+                        </div>
+                        <% } %>
+
+                            <% if (product.color) { %>
+                                <div class="spec-item">
+                                    <span class="spec-label">Color:</span>
+                                    <span>
+                                        <%= product.color %>
+                                    </span>
+                                </div>
+                                <% } %>
+
+                                    <div class="spec-item">
+                                        <span class="spec-label">Availability:</span>
+                                        <span
+                                            class="<%= product.quantity > 0 ? 'text-green-600 font-medium' : 'text-red-500' %>">
+                                            <%= product.quantity> 0 ? `In Stock (${product.quantity})` : 'Out of Stock'
+                                                %>
+                                        </span>
+                                    </div>
+
+                                    <% if (product.category) { %>
+                                        <div class="spec-item">
+                                            <span class="spec-label">Category:</span>
+                                            <span>
+                                                <%= category.name %>
+                                            </span>
+                                        </div>
+                                        <% } %>
+
+
                 </div>
-                
+
                 <div class="quantity-selector">
                     <div id="decreaseQty" class="qty-btn">-</div>
                     <div id="quantity" class="qty-value">1</div>
                     <div id="increaseQty" class="qty-btn">+</div>
                 </div>
-                
+
                 <button id="addToCartBtn" class="add-to-cart-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="9" cy="21" r="1"></circle>
                         <circle cx="20" cy="21" r="1"></circle>
                         <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
@@ -295,64 +314,75 @@
         </div>
     </main>
 
-      <!-- Recommended Products Section -->
-  <section class="mt-12 mb-12">
-    <div class="container mx-auto px-4">
-        <h2 class="text-2xl font-bold mb-6 text-gray-800">Recommended Products</h2>
+    <!-- Recommended Products Section -->
+    <section class="mt-12 mb-12">
+        <div class="container mx-auto px-4">
+            <h2 class="text-2xl font-bold mb-6 text-gray-800">Recommended Products</h2>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <% recommendedProducts.forEach(function(recommendedProduct) { %>
-                <div class="border rounded-lg overflow-hidden shadow-md bg-white transform transition duration-300 hover:scale-105 hover:shadow-lg min-h-[400px] flex flex-col">
-                    <div class="relative overflow-hidden">
-                        <img src="/uploads/re-image/<%= recommendedProduct.productImage[0] %>" 
-                             class="w-full h-64 object-cover transition-transform duration-300 hover:scale-110" 
-                             alt="<%= recommendedProduct.productName %>">
-                    </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                <% recommendedProducts.forEach(function(recommendedProduct) { %>
+                    <div
+                        class="border rounded-lg overflow-hidden shadow-md bg-white transform transition duration-300 hover:scale-105 hover:shadow-lg min-h-[400px] flex flex-col">
+                        <div class="relative overflow-hidden">
+                            <img src="/uploads/re-image/<%= recommendedProduct.productImage[0] %>"
+                                class="w-full h-64 object-cover transition-transform duration-300 hover:scale-110"
+                                alt="<%= recommendedProduct.productName %>">
+                        </div>
 
-                    <div class="p-4 text-center flex-grow flex flex-col justify-between">
-                        <h3 class="text-lg font-semibold text-gray-800"><%= recommendedProduct.productName %></h3>
-                        <p class="text-red-500 font-semibold text-sm mt-2">₹<%= recommendedProduct.salePrice %></p>
-                        
-                        <a href="/productDatails?id=<%= recommendedProduct._id %>" 
-                           class="mt-3 inline-block bg-blue-500 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:bg-blue-600">
-                            View Product
-                        </a>
+                        <div class="p-4 text-center flex-grow flex flex-col justify-between">
+                            <h3 class="text-lg font-semibold text-gray-800">
+                                <%= recommendedProduct.productName %>
+                            </h3>
+                            <p class="text-red-500 font-semibold text-sm mt-2">₹<%= recommendedProduct.salePrice %>
+                            </p>
+
+                            <a href="/productDatails?id=<%= recommendedProduct._id %>"
+                                class="mt-3 inline-block bg-blue-500 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:bg-blue-600">
+                                View Product
+                            </a>
+                            <button
+                                class="mt-3 inline-block bg-blue-500 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:bg-blue-600 addToCartBtn"
+                                data-product-id="<%= recommendedProduct._id %>">
+                                Add to Cart
+                            </button>
+                        </div>
                     </div>
-                </div>
-            <% }); %>
+                    <% }); %>
+            </div>
         </div>
-    </div>
-</section>
-    
+    </section>
+<!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
     <script>
         // Image zoom functionality
         const imageContainer = document.getElementById('imageContainer');
         const mainImage = document.getElementById('mainImage');
-        
+
         imageContainer.addEventListener('mousemove', (e) => {
             const { left, top, width, height } = imageContainer.getBoundingClientRect();
             const x = (e.clientX - left) / width * 100;
             const y = (e.clientY - top) / height * 100;
-            
+
             mainImage.style.setProperty('--x', x + '%');
             mainImage.style.setProperty('--y', y + '%');
         });
-        
+
         // Image change functionality
         function changeImage(thumbnail) {
             const imageSrc = thumbnail.getAttribute('data-src');
-            
+
             // Add loading indicator if needed
             mainImage.style.opacity = '0.7';
-            
+
             // Preload image
             const img = new Image();
             img.src = `/uploads/re-image/${imageSrc}`;
-            
+
             img.onload = () => {
                 mainImage.src = `/uploads/re-image/${imageSrc}`;
                 mainImage.style.opacity = '1';
-                
+
                 // Update active thumbnail
                 document.querySelectorAll('.thumbnail').forEach(thumb => {
                     thumb.classList.remove('active');
@@ -360,23 +390,23 @@
                 thumbnail.classList.add('active');
             };
         }
-        
+
         // Quantity selector
         const quantityElement = document.getElementById('quantity');
         const decreaseBtn = document.getElementById('decreaseQty');
         const increaseBtn = document.getElementById('increaseQty');
-        
+
         decreaseBtn.addEventListener('click', () => {
             let quantity = parseInt(quantityElement.textContent);
             if (quantity > 1) {
                 quantityElement.textContent = quantity - 1;
             }
         });
-        
+
         increaseBtn.addEventListener('click', () => {
             let quantity = parseInt(quantityElement.textContent);
             const maxQuantity = <%= product.quantity %>;
-            
+
             if (quantity < maxQuantity) {
                 quantityElement.textContent = quantity + 1;
             } else {
@@ -384,31 +414,69 @@
                 alert(`Sorry, only ${maxQuantity} items available in stock.`);
             }
         });
-        
-        // Add to cart button
+
+      
         document.getElementById('addToCartBtn').addEventListener('click', () => {
-            const quantity = parseInt(document.getElementById('quantity').textContent);
-            
-            // Here you would add your cart functionality
-            console.log(`Adding ${quantity} of product ID: <%= product._id %> to cart`);
-            
-            // Show success feedback
-            const btn = document.getElementById('addToCartBtn');
-            const originalText = btn.innerHTML;
-            
-            btn.innerHTML = `
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                    <path d="M20 6L9 17l-5-5"></path>
-                </svg>
-                Added to Cart!
-            `;
-            
-            setTimeout(() => {
-                btn.innerHTML = originalText;
-            }, 2000);
+        const quantity = parseInt(document.getElementById('quantity').textContent);
+        const productId = "<%= product._id %>"; // Get the product ID from the page
+         const btn = document.getElementById('addToCartBtn');
+           const originalText = btn.innerHTML;
+        // Send the data to the server
+        fetch('/addToCart', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ productId: productId, quantity: quantity }) // Send both ID and quantity
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === true) {
+                Swal.fire({
+                    title: "Error!",
+                    text: "Something went wrong. Please try again later.",
+                    icon: "error"
+                });
+                btn.innerHTML = `
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M20 6L9 17l-5-5"></path>
+                    </svg>
+                    Added to Cart!
+                `;
+                setTimeout(() => {
+                    btn.innerHTML = originalText;
+                }, 2000);
+            } else {
+
+
+
+                Swal.fire({
+                    title: "Success!",
+                    text: "Product added to cart successfully.",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                });
+
+                
+            }
+        })
+        .catch(error => {
+            console.error("Error:", error);
+            Swal.fire({
+                title: "Error!",
+                text: "Network error or server unavailable.",
+                icon: "error"
+            });
+            btn.innerHTML = originalText;
         });
+    });
+
+       
+
     </script>
-    
+
     <%- include('../partials/users/footer.ejs') %>
 </body>
+
 </html>

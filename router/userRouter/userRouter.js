@@ -6,6 +6,7 @@ import userMiddleWare  from  "../../middlewares/user/userMiddle.js"
 import productController from "../../controllers/users/productController.js";
 import profileController from "../../controllers/users/profileController.js"
 import userAuth from '../../middlewares/auth.js'
+import cartController from "../../controllers/users/cartController.js"
 
 router.get('/',userMiddleWare.checkBlockedUser,userController.loadHome)
 router.get('/signup',userMiddleWare.loginMiddle,userController.loadSignUp)
@@ -54,4 +55,11 @@ router.post('/addAddress',userAuth.userAuth,profileController.postAddAddress)
 router.get('/editAddress',userAuth.userAuth,profileController.editAddress)
 router.post('/editAddress',userAuth.userAuth,profileController.postEditAddress)
 router.get('/deleteAddress',userAuth.userAuth,profileController.deleteAddress)
+
+
+// Cart Managment
+router.get('/cart',userAuth.userAuth,cartController.getCartPage)
+router.post('/addToCart',userAuth.userAuth,cartController.addToCart)
+router.post('/changeQuantity',userAuth.userAuth,cartController.changeQuantity)
+router.get('/deleteItem',userAuth.userAuth,cartController.deleteProduct)
 export default router

@@ -1,0 +1,173 @@
+<%- include("../partials/users/header.ejs") %>
+<link href="https://cdn.jsdelivr.net/npm/remixicon@2.5.0/fonts/remixicon.css" rel="stylesheet">
+
+<main class="main">
+    <div class="bg-gray-100 py-4">
+        <div class="container mx-auto px-4">
+            <div class="text-gray-600 text-sm">
+                <a href="/" class="text-blue-500">Home</a>
+                <span class="mx-2">/</span> Shop
+                <span class="mx-2">/</span> Your Cart
+            </div>
+        </div>
+    </div>
+    <section class="mt-10 mb-10">
+        <div class="container mx-auto px-4">
+            <div class="flex flex-col lg:flex-row gap-6">
+                <!-- Cart Table -->
+                <div class="w-full lg:w-3/4">
+                    <div class="overflow-x-auto bg-white shadow-md rounded-lg p-6">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-gray-200">
+                                <tr>
+                                    <th class="py-2 px-4">Image</th>
+                                    <th class="py-2 px-4">Name</th>
+                                    <th class="py-2 px-4">Price</th>
+                                    <th class="py-2 px-4">Quantity</th>
+                                    <th class="py-2 px-4">Remove</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <% if (data.length > 0) { %>
+                                    <% for (let i = 0; i < data.length; i++) { %>
+                                        <tr class="border-b">
+                                            <td class="py-2 px-4">
+                                                <img class="w-16 h-16 object-cover rounded" 
+                                                     src="/uploads/re-image/<%= data[i].productId.productImage[0] %>" 
+                                                     alt="Product Image" />
+                                            </td>
+                                            <td class="py-2 px-4">
+                                                <h5 class="font-semibold">
+                                                    <a href="cart"><%= data[i].productId.productName %></a>
+                                                </h5>
+                                                <p class="text-gray-500 text-xs">
+                                                    <%= data[i].productId.category %> | <%= data[i].productId.brand %>
+                                                </p>
+                                            </td>
+                                            <td class="py-2 px-4">
+                                                ₹<span id="subTotal<%= data[i].productId._id %>">
+                                                    <%= (data[i].productId.salePrice || data[i].productId.regularPrice) * data[i].quantity %>
+                                                </span>
+                                            </td>
+                                            <td class="py-2 px-4">
+                                                <div class="flex items-center gap-2">
+                                                    <!-- Increase Quantity Button -->
+                                                    <button class="bg-gray-300 text-gray-700 px-2 py-1 rounded" 
+                                                    onclick="changeQuantity('<%= data[i].productId._id %>', Number('<%= data[i].quantity %>'), 1, Number('<%= data[i].productId.salePrice %>'))">
+                                                    +
+                                                </button
+                                                
+                                                    <!-- Quantity Input Field -->
+                                                    <input class="w-10 text-center border rounded" 
+                                                        id="cartProductQuantity<%= data[i].productId._id %>" 
+                                                        value="<%= data[i].quantity %>" readonly>
+                                                
+                                                    <!-- Decrease Quantity Button -->
+                                                    <button class="bg-gray-300 text-gray-700 px-2 py-1 rounded" 
+                                                    onclick="changeQuantity('<%= data[i].productId._id %>', Number('<%= data[i].quantity %>'), -1, Number('<%= data[i].productId.salePrice %>'))">
+                                                    -
+                                                </button>
+                                                </div>
+                                                
+                                            </td>
+                                            <td class="py-2 px-4">
+                                                <button class="text-red-500 hover:text-red-700" 
+                                                    onclick="confirmRemove('<%= data[i].productId._id %>')">
+                                                        <i class="ri-delete-bin-line"></i>
+                                                        </button>
+
+                                            </td>
+                                        </tr>
+                                    <% } %>
+                                <% } else { %>
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-lg">No items found in Cart</td>
+                                    </tr>
+                                <% } %>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Price Details -->
+                <div class="w-full lg:w-1/4">
+                    <div class="bg-white p-6 shadow-md rounded-lg">
+                        <h4 class="text-lg font-semibold mb-4">PRICE DETAILS</h4>
+                        <div class="mb-4">
+                            <div class="flex justify-between py-2 border-b">
+                                <span>Shipping</span>
+                                <span class="text-green-600">Free Shipping</span>
+                            </div>
+                            <div class="flex justify-between py-2">
+                                <span class="font-semibold">Total</span>
+                                <span class="text-lg font-bold text-brand">
+                                    ₹<span id="total"><%= totalAmount %></span>
+                                </span>
+                            </div>
+                        </div>
+                        <a href="/checkout?userId=<%= user._id %>" 
+                           class="block bg-blue-500 text-white text-center py-2 rounded-lg">
+                            Proceed To Checkout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+
+
+
+
+
+async function changeQuantity(productId, currentQuantity, change, price) {
+    try {
+        const response = await fetch("/changeQuantity", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ productId, count: change })
+        });
+
+        const data = await response.json();
+        if (data.status) {
+            document.getElementById(`cartProductQuantity${productId}`).value = data.quantityInput;
+            document.getElementById(`subTotal${productId}`).innerText = data.totalAmount;
+            document.getElementById("total").innerText = data.grandTotal;
+        } else {
+            Swal.fire({
+                title: "Error!",
+                text: data.error,
+                icon: "error"
+            });
+        }
+    } catch (error) {
+        console.error("Error updating quantity:", error);
+        Swal.fire({
+            title: "Error!",
+            text: "Failed to update quantity. Please try again.",
+            icon: "error"
+        });
+    }
+}
+
+function confirmRemove(productId) {
+    Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3085d6',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Yes, remove it!'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = `/deleteItem?id=${productId}`;
+        }
+    });
+}
+</script>

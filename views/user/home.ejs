@@ -24,6 +24,7 @@
 
 
 <section class="py-14">
+  <form action="/addToCart" method="post" enctype="multipart/form-data">
   <div class="max-w-screen-xl mx-auto px-6">
     <h1 class="text-4xl font-bold text-center mb-10 text-gray-900 tracking-wide">Our Latest Products</h1>
     <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
@@ -45,14 +46,19 @@
               <p class="text-base text-gray-500 line-through font-medium">₹<%= product.regularPrice.toLocaleString('en-IN') %></p>
               <p class="text-lg font-bold text-red-600">₹<%= product.salePrice.toLocaleString('en-IN') %></p>
             </div>
-            <button class="mt-4 w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 rounded-full text-md font-bold hover:opacity-90 transition duration-300 shadow-md">
+          
+            
+            <button class="mt-4 w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 rounded-full text-md font-bold hover:opacity-90 transition duration-300 shadow-md addToCartBtn" data-product-id="<%= product._id %>">
               Add to Cart
             </button>
+            
+         
           </div>
         </div>
       <% }); %>
     </div>
   </div>
+  </form>
 </section>
 </body>
 
@@ -60,3 +66,89 @@
 <%- include('../partials/users/footer.ejs') %>
 
 <script src="/script.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+
+<script>
+// document.addEventListener("DOMContentLoaded", function () {
+//     document.querySelectorAll(".addToCartBtn").forEach(button => {
+//         button.addEventListener("click", function (event) {
+//             event.preventDefault(); // Prevent default form submission
+
+//             let productId = this.getAttribute("data-product-id");
+
+//             fetch("/addToCart", {
+//                 method: "POST",
+//                 headers: {
+//                     "Content-Type": "application/json"
+//                 },
+//                 body: JSON.stringify({ productId: productId })
+//             })
+//             .then(response => response.json())
+//             .then(data => {
+//                 if (data.status === true) {  // Fix: Match server response
+//                     alert("Product added to cart!");
+//                 } else {
+//                     alert(data.status || "Failed to add product to cart.");
+//                 }
+//             })
+//             .catch(error => console.error("Error:", error));
+//         });
+//     });
+// });
+
+
+document.addEventListener("DOMContentLoaded", function () {
+    document.querySelectorAll(".addToCartBtn").forEach(button => {
+        button.addEventListener("click", function (event) {
+            event.preventDefault(); // Prevent default form submission
+
+            let productId = this.getAttribute("data-product-id");
+
+            fetch("/addToCart", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({ productId: productId })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if  (data.status === true) { 
+                
+                Swal.fire({
+                    title: "Error!",
+                    text: data.message || "Failed to add product to cart.",
+                    icon: "error"
+                });
+                } else {
+
+                 
+                  
+                    Swal.fire({
+                        title: "Success!",
+                        text: "Product added to cart successfully.",
+                        icon: "success",
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire({
+                    title: "Error!",
+                    text: "Something went wrong. Please try again later.",
+                    icon: "error"
+                });
+            });
+        });
+    });
+});
+
+
+
+</script>
+
+
+
