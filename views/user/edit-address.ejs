@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Address</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e0e7ff 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+        
+        .card {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+        
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            outline: none;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+        
+        .input-label {
+            position: absolute;
+            top: 0.8rem;
+            left: 1rem;
+            font-size: 0.95rem;
+            color: #64748b;
+            pointer-events: none;
+            transition: 0.3s ease all;
+        }
+        
+        .form-input:focus ~ .input-label,
+        .form-input:not(:placeholder-shown) ~ .input-label {
+            top: -0.75rem;
+            left: 0.75rem;
+            padding: 0 0.25rem;
+            font-size: 0.75rem;
+            color: #6366f1;
+            background-color: #fff;
+        }
+        
+        .btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        .btn:hover::after {
+            left: 100%;
+        }
+        
+        .error-message {
+            display: none;
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            margin-left: 0.25rem;
+        }
+
+        .section-title {
+            position: relative;
+            display: inline-block;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, transparent);
+            bottom: -5px;
+            left: 25%;
+            border-radius: 2px;
+        }
+        
+        /* Page transition animation */
+        @keyframes pageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .page-transition {
+            animation: pageEnter 0.8s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-center items-center p-4">
+    <%- include("../partials/users/header.ejs") %>
+    
+    <div id="formContainer" class="w-full max-w-xl bg-white rounded-xl p-8 card page-transition">
+        <h2 class="text-center text-3xl font-bold text-gray-800 mb-8 section-title">Edit Your Address</h2>
+        
+        <form id="editAddressForm" action="/editAddress?id=<%= address._id %>" method="POST">
+            <input type="hidden" name="id" value="<%= address._id %>">
+            
+            <div class="input-group">
+                <input type="text" id="name" name="name" value="<%= address.name %>" class="form-input" placeholder=" " required>
+                <label for="name" class="input-label">Full Name</label>
+                <span id="nameError" class="error-message">Name is required</span>
+            </div>
+            
+            <div class="input-group">
+                <textarea id="address" name="addressType" rows="3" class="form-input" placeholder=" " required><%= address.addressType %></textarea>
+                <label for="address" class="input-label">Complete Address</label>
+                <span id="addressError" class="error-message">Address is required</span>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <input type="text" id="state" name="state" value="<%= address.state %>" class="form-input" placeholder=" " required>
+                    <label for="state" class="input-label">State</label>
+                    <span id="stateError" class="error-message">State is required</span>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" id="city" name="city" value="<%= address.city %>" class="form-input" placeholder=" " required>
+                    <label for="city" class="input-label">City</label>
+                    <span id="cityError" class="error-message">City is required</span>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <input type="text" id="pincode" name="pincode" value="<%= address.pincode %>" class="form-input" placeholder=" " required pattern="\d{6}">
+                    <label for="pincode" class="input-label">PIN Code</label>
+                    <span id="pincodeError" class="error-message">Enter a valid 6-digit PIN code</span>
+                </div>
+                
+                <div class="input-group">
+                    <input type="tel" id="phone" name="phone" value="<%= address.phone %>" class="form-input" placeholder=" " required pattern="\d{10}">
+                    <label for="phone" class="input-label">Phone Number</label>
+                    <span id="phoneError" class="error-message">Enter a valid 10-digit phone number</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" id="landmark" name="landMark" value="<%= address.landMark %>" class="form-input" placeholder=" ">
+                <label for="landmark" class="input-label">Landmark (Optional)</label>
+            </div>
+            
+            <div id="buttons" class="flex flex-col sm:flex-row justify-end gap-3 mt-8">
+                <a href="/userProfile" class="btn text-center bg-gray-100 text-gray-700 border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-200 transition-all duration-300">Cancel</a>
+                <button type="submit" class="btn bg-indigo-600 text-white px-6 py-3 rounded-lg hover:bg-indigo-700 transition-all duration-300">Update Address</button>
+            </div>
+        </form>
+    </div>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            // 3D tilt effect on card
+            const card = document.querySelector('.card');
+            
+            card.addEventListener('mousemove', function(e) {
+                const xVal = e.layerX;
+                const yVal = e.layerY;
+                const xRotation = 20 * ((yVal - card.clientHeight / 2) / card.clientHeight);
+                const yRotation = -20 * ((xVal - card.clientWidth / 2) / card.clientWidth);
+                
+                const string = `perspective(500px) scale(1.02) rotateX(${xRotation}deg) rotateY(${yRotation}deg)`;
+                card.style.transform = string;
+            });
+            
+            card.addEventListener('mouseout', function() {
+                card.style.transform = `perspective(500px) scale(1) rotateX(0) rotateY(0)`;
+            });
+            
+            // Form validation
+            document.getElementById("editAddressForm").addEventListener("submit", function(event) {
+                let isValid = true;
+                
+                const name = document.getElementById("name");
+                const address = document.getElementById("address");
+                const state = document.getElementById("state");
+                const city = document.getElementById("city");
+                const pincode = document.getElementById("pincode");
+                const phone = document.getElementById("phone");
+                
+                // Reset errors
+                document.querySelectorAll(".error-message").forEach(el => {
+                    el.style.display = "none";
+                });
+                
+                // Reset borders
+                document.querySelectorAll(".form-input").forEach(el => {
+                    el.style.borderColor = "#e2e8f0";
+                });
+                
+                if (name.value.trim() === "") {
+                    document.getElementById("nameError").style.display = "block";
+                    name.style.borderColor = "#ef4444";
+                    isValid = false;
+                }
+                
+                if (address.value.trim() === "") {
+                    document.getElementById("addressError").style.display = "block";
+                    address.style.borderColor = "#ef4444";
+                    isValid = false;
+                }
+                
+                if (state.value.trim() === "") {
+                    document.getElementById("stateError").style.display = "block";
+                    state.style.borderColor = "#ef4444";
+                    isValid = false;
+                }
+                
+                if (city.value.trim() === "") {
+                    document.getElementById("cityError").style.display = "block";
+                    city.style.borderColor = "#ef4444";
+                    isValid = false;
+                }
+                
+                if (!/^\d{6}$/.test(pincode.value)) {
+                    document.getElementById("pincodeError").style.display = "block";
+                    pincode.style.borderColor = "#ef4444";
+                    isValid = false;
+                }
+                
+                if (!/^\d{10}$/.test(phone.value)) {
+                    document.getElementById("phoneError").style.display = "block";
+                    phone.style.borderColor = "#ef4444";
+                    isValid = false;
+                }
+                
+                if (!isValid) {
+                    event.preventDefault();
+                    
+                    // Shake animation for invalid form
+                    gsap.to("#formContainer", {
+                        x: [-10, 10, -10, 10, 0],
+                        duration: 0.5,
+                        ease: "power2.out"
+                    });
+                } else {
+                    // Success animation
+                    gsap.to("#formContainer", {
+                        y: -20,
+                        opacity: 0,
+                        duration: 0.5,
+                        ease: "power2.in"
+                    });
+                }
+            });
+            
+            // Add focus animations for inputs
+            document.querySelectorAll('.form-input').forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.style.borderColor = "#6366f1";
+                });
+                
+                input.addEventListener('blur', function() {
+                    if (this.value.trim() === '' && !this.validity.valid) {
+                        this.style.borderColor = "#ef4444";
+                    } else if (this.value.trim() === '') {
+                        this.style.borderColor = "#e2e8f0";
+                    } else if (!this.validity.valid) {
+                        this.style.borderColor = "#ef4444";
+                    } else {
+                        this.style.borderColor = "#10b981";
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>

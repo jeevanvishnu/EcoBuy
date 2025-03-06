@@ -46,4 +46,12 @@ router.post('/update-email',userAuth.userAuth,profileController.updateEmail)
 router.get('/change-password',userAuth.userAuth,profileController.changePassword)
 router.post('/change-password',userAuth.userAuth,profileController.changePasswordValid)
 router.post('/verify-changePassword',userAuth.userAuth,profileController.verifyChangePasswordOtp)
+
+// Address Managment
+router.get('/address',userAuth.userAuth,profileController.address)
+router.get('/addAddress',userAuth.userAuth,profileController.addAddress)
+router.post('/addAddress',userAuth.userAuth,profileController.postAddAddress)
+router.get('/editAddress',userAuth.userAuth,profileController.editAddress)
+router.post('/editAddress',userAuth.userAuth,profileController.postEditAddress)
+router.get('/deleteAddress',userAuth.userAuth,profileController.deleteAddress)
 export default router

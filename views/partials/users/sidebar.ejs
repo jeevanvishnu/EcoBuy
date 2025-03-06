@@ -6,65 +6,107 @@
     <title>User Profile Sidebar</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .gradient-animation {
+            background-size: 200% 200%;
+            animation: gradientShift 5s ease infinite;
+        }
+        .sidebar-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), 
+                        0 10px 20px -5px rgba(0, 0, 0, 0.05);
+        }
+    </style>
 </head>
-<body class="bg-gray-100 flex items-center justify-center h-screen">
-
-    <!-- Sidebar -->
-    <div class="w-64 h-auto max-h-[500px] bg-white shadow-lg rounded-lg p-4 flex flex-col">
-        <div class="text-center">
-            <div class="w-20 h-20 rounded-full mx-auto border-4 border-blue-500 flex items-center justify-center bg-blue-500 text-white text-2xl font-bold">
-                <%= user.name.charAt(0).toUpperCase() %>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-72 bg-white sidebar-shadow rounded-3xl overflow-hidden transform transition-all duration-300 hover:scale-[1.02]">
+        <!-- Profile Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 relative">
+            <div class="absolute top-4 right-4">
+                <i class="ph ph-gear text-xl opacity-70 hover:opacity-100 transition"></i>
             </div>
-            <h2 class="text-lg font-semibold mt-2 text-gray-900"><%=user.name %></h2>
-            <p class="text-gray-500 text-sm"><%= user.email %></p>
+            <div class="flex flex-col items-center">
+                <div class="w-24 h-24 rounded-full border-4 border-white/30 mb-4 flex items-center justify-center 
+                    bg-white/20 text-3xl font-bold shadow-lg">
+                    <%= user.name.charAt(0).toUpperCase() %>
+                </div>
+                <h2 class="text-xl font-bold tracking-wide"><%= user.name %></h2>
+                <p class="text-sm opacity-80 mt-1"><%= user.email %></p>
+            </div>
         </div>
 
-        <nav class="mt-4 space-y-2 flex-1">
-            <a href="/userProfile" class=" px-3 py-3 menu-item flex items-center px-4 py-2 text-gray-700 font-semibold rounded-lg transition-all duration-300 bg-gradient-to-r from-blue-500 to-purple-500 text-white" data-id="profile">
-                <i class="ph ph-user-circle text-lg mr-3"></i> Profile
+        <!-- Navigation Menu -->
+        <nav class="p-4 space-y-2">
+            <a href="/userProfile" class="menu-item group flex items-center px-4 py-3 rounded-xl transition-all duration-300 
+                hover:bg-blue-50 hover:text-blue-600" data-id="profile">
+                <div class="bg-blue-100 text-blue-600 rounded-lg p-2 mr-4 group-hover:bg-blue-200 transition">
+                    <i class="ph ph-user-circle text-xl"></i>
+                </div>
+                <span class="font-semibold">Profile</span>
+                <i class="ph ph-caret-right ml-auto opacity-0 group-hover:opacity-100 transition"></i>
             </a>
-            <a href="#" class=" px-3 py-3  menu-item flex items-center px-4 py-2 text-gray-700 font-semibold rounded-lg transition-all duration-300" data-id="orders">
-                <i class="ph ph-shopping-cart text-lg mr-3"></i> My Orders
+
+            <a href="#" class="menu-item group flex items-center px-4 py-3 rounded-xl transition-all duration-300 
+                hover:bg-purple-50 hover:text-purple-600" data-id="orders">
+                <div class="bg-purple-100 text-purple-600 rounded-lg p-2 mr-4 group-hover:bg-purple-200 transition">
+                    <i class="ph ph-shopping-cart text-xl"></i>
+                </div>
+                <span class="font-semibold">My Orders</span>
+                <i class="ph ph-caret-right ml-auto opacity-0 group-hover:opacity-100 transition"></i>
             </a>
-            <a href="#" class=" px-3 py-3  menu-item flex items-center px-4 py-2 text-gray-700 font-semibold rounded-lg transition-all duration-300" data-id="address">
-                <i class="ph ph-map-pin text-lg mr-3"></i> Address
+
+            <a href="/address" class="menu-item group flex items-center px-4 py-3 rounded-xl transition-all duration-300 
+                hover:bg-green-50 hover:text-green-600" data-id="address">
+                <div class="bg-green-100 text-green-600 rounded-lg p-2 mr-4 group-hover:bg-green-200 transition">
+                    <i class="ph ph-map-pin text-xl"></i>
+                </div>
+                <span class="font-semibold">Add Address</span>
+                <i class="ph ph-caret-right ml-auto opacity-0 group-hover:opacity-100 transition"></i>
             </a>
-            <a href="#" class=" px-3 py-3  menu-item flex items-center px-4 py-2 text-gray-700 font-semibold rounded-lg transition-all duration-300" data-id="wallet">
-                <i class="ph ph-wallet text-lg mr-3"></i> Wallet
-            </a>
-            <a href="/logout" id="logout-btn" class="flex items-center px-4 py-2 font-semibold rounded-lg transition-all duration-300 bg-gradient-to-r from-red-500 to-red-700 text-white">
-                <i class="ph ph-sign-out text-lg mr-3"></i> Logout
+
+            <a href="#" class="menu-item group flex items-center px-4 py-3 rounded-xl transition-all duration-300 
+                hover:bg-yellow-50 hover:text-yellow-600" data-id="wallet">
+                <div class="bg-yellow-100 text-yellow-600 rounded-lg p-2 mr-4 group-hover:bg-yellow-200 transition">
+                    <i class="ph ph-wallet text-xl"></i>
+                </div>
+                <span class="font-semibold">Wallet</span>
+                <i class="ph ph-caret-right ml-auto opacity-0 group-hover:opacity-100 transition"></i>
             </a>
         </nav>
 
         <!-- Logout Button -->
+        <div class="p-4 border-t border-gray-100">
+            <a href="/logout" id="logout-btn" class="flex items-center justify-center px-4 py-3 
+                bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl 
+                hover:from-red-600 hover:to-pink-700 transition-all duration-300 
+                gradient-animation">
+                <i class="ph ph-sign-out text-xl mr-3"></i>
+                Logout
+            </a>
+        </div>
     </div>
 
     <script>
         document.addEventListener("DOMContentLoaded", function () {
             const menuItems = document.querySelectorAll(".menu-item");
-            const logoutBtn = document.getElementById("logout-btn");
+            const currentPath = window.location.pathname;
 
             menuItems.forEach(item => {
-                item.addEventListener("click", function () {
-                    // Remove active class from all menu items
-                    menuItems.forEach(i => i.classList.remove("bg-gradient-to-r", "from-blue-500", "to-purple-500", "text-white"));
-
-                    // Add gradient background to the clicked item
-                    this.classList.add("bg-gradient-to-r", "from-blue-500", "to-purple-500", "text-white");
-                });
-            });
-
-            // Logout Button Click Effect
-            logoutBtn.addEventListener("click", function () {
-                this.classList.add("scale-95");
-                setTimeout(() => {
-                    this.classList.remove("scale-95");
-                    alert("Logged out successfully!");
-                }, 150);
+                const itemPath = item.getAttribute("href");
+                
+                if (currentPath === itemPath) {
+                    item.classList.add("bg-blue-50", "text-blue-600");
+                    item.querySelector('div').classList.add("bg-blue-200");
+                } else {
+                    item.classList.remove("bg-blue-50", "text-blue-600");
+                    item.querySelector('div').classList.remove("bg-blue-200");
+                }
             });
         });
     </script>
-
 </body>
 </html>

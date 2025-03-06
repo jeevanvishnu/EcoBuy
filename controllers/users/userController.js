@@ -350,7 +350,7 @@ const filterProduct = async (req, res) => {
         };
 
         if (!Array.isArray(userData.searchEntry)) {
-          userData.searchEntry = []; // ✅ Fix: Ensure it's an array
+          userData.searchEntry = []; 
         }
 
         userData.searchEntry.push(searchEntry);

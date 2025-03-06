@@ -4,8 +4,8 @@ import bcrypt from 'bcrypt'
 import dotEnv from 'dotenv'
 dotEnv.config()
 import session from "express-session"
-
-
+import Address  from "../../models/addressSchema.js"
+import mongoose from "mongoose"
 
 const getForgotPassPage = async (req,res)=>{
     try {
@@ -185,7 +185,10 @@ const userProfile = async (req,res) =>{
 
         const userId = req.session.user
         const userData = await User.findById(userId)
+        const addressData = await Address.findOne({userId:userId})
+
         res.render('user/profile',{
+            userAddress:addressData,
             user:userData
         })
         
@@ -357,6 +360,182 @@ const verifyChangePasswordOtp = async(req,res) =>{
     }
 }
 
+
+const address = async (req,res) =>{
+
+    try {
+
+        const userId = req.session.user
+        const userEmail =  await User.findById(userId)
+        const userAddress = await Address.findOne({userId:userId})
+       
+        res.render('user/address',{user:userEmail , address :userAddress ? userAddress.address  : null})
+        
+    } catch (error) {
+        res.redirect('/page')
+    }
+}
+
+const addAddress = async (req,res) =>{
+    try {
+
+        const userId = req.session.user
+        const userEmail =  await User.findById(userId)
+
+        res.render('user/add-address',{user:userEmail})
+
+        
+    } catch (error) {
+        console.log("Error of add address field")
+        res.redirect('/page')
+        
+    }
+}
+
+const postAddAddress = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const userData = await User.findOne({ _id: userId });
+
+        const { name, addressType, city, state, pincode, landMark, phone } = req.body;
+
+        let userAddress = await Address.findOne({ userId: userData._id });
+
+        if (!userAddress) {
+            userAddress = new Address({
+                userId: userData._id,
+                address: [{
+                    name,
+                    addressType,
+                    city,
+                    state,
+                    pincode,
+                    landMark,
+                    phone
+                }]
+            });
+        } else {
+            
+            userAddress.address.push({
+                name,
+                addressType,
+                city,
+                state,
+                pincode,
+                landMark,
+                phone
+            });
+        }
+
+        
+        await userAddress.save();
+
+        res.redirect('/userProfile');
+    } catch (error) {
+        console.error("Add Address Error", error);
+        res.status(500).redirect('/page');
+    }
+};
+
+
+const editAddress = async (req,res) =>{
+    try {
+        const addressId = req.query.id
+        const user = req.session.user
+        const currentAddress = await Address.findOne({
+            "address._id": addressId
+         })
+         
+
+        if(!currentAddress){
+            return res.redirect('/page')
+        }
+
+        const addressData = currentAddress.address.find((item)=>{
+            return item._id.toString() === addressId.toString()
+        })
+
+        if(!addressData){
+            return res.redirect('/page')
+        }
+        res.render('user/edit-address',{address:addressData ,user : user})
+
+    } catch (error) {
+        console.error("Error of edit Address", error.message)
+        res.redirect('/page')
+        
+    }
+}
+
+const postEditAddress = async (req,res) =>{
+    try {
+
+        const data = req.body
+        const addressId = req.query.id
+        const user = req.session.user
+        const findAddress = await Address.findOne({"address._id":addressId})
+        console.log(findAddress)
+        if(!findAddress){
+            res.redirect('/page')
+        }
+        await Address.updateOne(
+            {"address._id":addressId},
+            {$set: {
+                "address.$": {
+                    _id: addressId,
+                    addressType: data.addressType,
+                    name: data.name,  
+                    city: data.city,
+                    landMark: data.landMark,
+                    state: data.state,
+                    pincode: data.pincode,
+                    phone: data.phone
+                }
+            }}),
+
+
+     
+        res.redirect('/userProfile')
+        
+    } catch (error) {
+        console.error("Error in edit Address")
+        res.redirect('/page')
+    }
+}
+
+const deleteAddress = async (req,res) =>{
+    try {
+        
+        const addressId = req.query.id
+        const findAddress = await Address.findOne({"address._id":addressId});
+        if(!findAddress){
+            return res.status(404).send("Address not Found")
+        }
+
+        await Address.updateOne(
+            {
+                "address._id":addressId
+            },
+            {
+                $pull:{
+                    address :{
+                        _id : addressId
+                    }
+                }
+            }
+        )
+
+        res.redirect('/userProfile')
+
+    } catch (error) {
+        console.log("Error in delete Address",error.message)
+        res.redirect('/page')
+    }
+}
+
+
+
+
 export default {
     getForgotPassPage,
     forgotEmail,
@@ -371,5 +550,11 @@ export default {
     updateEmail,
     changePassword,
     changePasswordValid,
-    verifyChangePasswordOtp
+    verifyChangePasswordOtp,
+    address,
+    addAddress,
+    postAddAddress,
+    editAddress,
+    postEditAddress,
+    deleteAddress
 }
