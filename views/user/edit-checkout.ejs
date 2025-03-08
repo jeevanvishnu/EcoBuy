@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit Address</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.11.4/gsap.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap');
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background-color: #f8fafc;
+            background-image: radial-gradient(#e0e7ff 1px, transparent 1px);
+            background-size: 20px 20px;
+        }
+
+        .card {
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            transform-style: preserve-3d;
+            transition: transform 0.5s ease;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            background: transparent;
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            outline: none;
+            font-size: 0.95rem;
+            transition: all 0.3s;
+        }
+
+        .form-input:focus {
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+        }
+
+        .input-label {
+            position: absolute;
+            top: 0.8rem;
+            left: 1rem;
+            font-size: 0.95rem;
+            color: #64748b;
+            pointer-events: none;
+            transition: 0.3s ease all;
+        }
+
+        .form-input:focus ~ .input-label,
+        .form-input:not(:placeholder-shown) ~ .input-label {
+            top: -0.75rem;
+            left: 0.75rem;
+            padding: 0 0.25rem;
+            font-size: 0.75rem;
+            color: #6366f1;
+            background-color: #fff;
+        }
+
+        .btn {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .btn::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: -100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+
+        .btn:hover::after {
+            left: 100%;
+        }
+
+        .error-message {
+            display: none;
+            color: #ef4444;
+            font-size: 0.875rem;
+            margin-top: 0.25rem;
+            margin-left: 0.25rem;
+        }
+
+        .section-title {
+            position: relative;
+            display: inline-block;
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            width: 50%;
+            height: 3px;
+            background: linear-gradient(90deg, #6366f1, transparent);
+            bottom: -5px;
+            left: 25%;
+            border-radius: 2px;
+        }
+
+        /* Page transition animation */
+        @keyframes pageEnter {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .page-transition {
+            animation: pageEnter 0.8s ease-out forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-center items-center p-4">
+    <%- include("../partials/users/header.ejs") %>
+    
+    <div id="formContainer" class="w-full max-w-xl bg-white rounded-xl p-8 card page-transition">
+        <h2 class="text-center text-3xl font-bold text-gray-800 mb-8 section-title">Edit Your Address</h2>
+        
+        <form id="editAddressForm" action="/editAddressCheckout?id=<%= address._id %>" method="POST">
+            <input type="hidden" name="id" value="<%= address._id %>">
+            
+            <div class="input-group">
+                <input type="text" id="name" name="name" value="<%= address.name %>" class="form-input" placeholder=" " required>
+                <label for="name" class="input-label">Full Name</label>
+            </div>
+            
+            <div class="input-group">
+                <textarea id="address" name="addressType" rows="3" class="form-input" placeholder=" " required><%= address.addressType %></textarea>
+                <label for="address" class="input-label">Complete Address</label>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <input type="text" id="state" name="state" value="<%= address.state %>" class="form-input" placeholder=" " required>
+                    <label for="state" class="input-label">State</label>
+                </div>
+                
+                <div class="input-group">
+                    <input type="text" id="city" name="city" value="<%= address.city %>" class="form-input" placeholder=" " required>
+                    <label for="city" class="input-label">City</label>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="input-group">
+                    <input type="text" id="pincode" name="pincode" value="<%= address.pincode %>" class="form-input" placeholder=" " required pattern="\d{6}">
+                    <label for="pincode" class="input-label">PIN Code</label>
+                </div>
+                
+                <div class="input-group">
+                    <input type="tel" id="phone" name="phone" value="<%= address.phone %>" class="form-input" placeholder=" " required pattern="\d{10}">
+                    <label for="phone" class="input-label">Phone Number</label>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <input type="text" id="landmark" name="landMark" value="<%= address.landMark %>" class="form-input" placeholder=" ">
+                <label for="landmark" class="input-label">Landmark (Optional)</label>
+            </div>
+            
+            <div id="buttons" class="flex flex-col sm:flex-row justify-end gap-3 mt-8">
+                <a href="/checkout" class="btn text-center bg-gray-100 text-gray-700 border border-gray-300 px-6 py-3 rounded-lg hover:bg-gray-200 transition-all duration-300">Cancel</a>
+                <button type="submit" class="btn bg-green-500 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition-all duration-300">Update Address</button>
+            </div>
+        </form>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const card = document.querySelector('.card');
+            
+            card.addEventListener('mousemove', function(e) {
+                const xVal = e.layerX;
+                const yVal = e.layerY;
+                const xRotation = 20 * ((yVal - card.clientHeight / 2) / card.clientHeight);
+                const yRotation = -20 * ((xVal - card.clientWidth / 2) / card.clientWidth);
+                
+                const string = `perspective(500px) scale(1.02) rotateX(${xRotation}deg) rotateY(${yRotation}deg)`;
+                card.style.transform = string;
+            });
+            
+            card.addEventListener('mouseout', function() {
+                card.style.transform = `perspective(500px) scale(1) rotateX(0) rotateY(0)`;
+            });
+            
+            document.getElementById("editAddressForm").addEventListener("submit", function(event) {
+                event.preventDefault(); // Prevent default submission
+                
+                const name = document.getElementById("name").value.trim();
+                const address = document.getElementById("address").value.trim();
+                const state = document.getElementById("state").value.trim();
+                const city = document.getElementById("city").value.trim();
+                const pincode = document.getElementById("pincode").value.trim();
+                const phone = document.getElementById("phone").value.trim();
+                
+                // Validation checks with SweetAlert
+                if (name === "") {
+                    Swal.fire('Error', 'Name is required', 'error');
+                    return;
+                }
+                
+                if (address === "") {
+                    Swal.fire('Error', 'Address is required', 'error');
+                    return;
+                }
+                
+                if (state === "") {
+                    Swal.fire('Error', 'State is required', 'error');
+                    return;
+                }
+                
+                if (city === "") {
+                    Swal.fire('Error', 'City is required', 'error');
+                    return;
+                }
+                
+                if (!/^\d{6}$/.test(pincode)) {
+                    Swal.fire('Error', 'Enter a valid 6-digit PIN code', 'error');
+                    return;
+                }
+                
+                if (!/^\d{10}$/.test(phone)) {
+                    Swal.fire('Error', 'Enter a valid 10-digit phone number', 'error');
+                    return;
+                }
+                
+                // If all validations pass, submit the form
+                Swal.fire({
+                    title: 'Are you sure?',
+                    text: 'Do you want to update this address?',
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Yes, Update!',
+                    cancelButtonText: 'No, Cancel',
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        // Proceed with form submission if confirmed
+                        document.getElementById("editAddressForm").submit();
+                    }
+                });
+            });
+            
+            // Add focus animations for inputs
+            document.querySelectorAll('.form-input').forEach(input => {
+                input.addEventListener('focus', function() {
+                    this.style.borderColor = "#6366f1";
+                });
+                
+                input.addEventListener('blur', function() {
+                    this.style.borderColor = "#e2e8f0";
+                });
+            });
+        });
+    </script>
+</body>
+</html>

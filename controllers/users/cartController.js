@@ -49,63 +49,6 @@ const getCartPage = async (req, res) => {
 
 
 
-  
-
-
-
-
-// const addToCart = async (req, res) => {
-//     try {
-//         const { productId } = req.body;
-//         const userId = req.session.user; 
-
-//         if (!userId) {
-//             return res.status(401).json({ success: false, message: "Unauthorized" });
-//         }
-
-//         const user = await User.findById(userId);
-//         if (!user) {
-//             return res.status(404).json({ success: false, message: "User not found" });
-//         }
-
-//         const product = await Product.findById(productId);
-//         if (!product) {
-//             return res.status(404).json({ success: false, message: "Product not found" });
-//         }
-
-//         let cart = await Cart.findOne({ userId });
-
-//         if (!cart) {
-//             cart = new Cart({ userId, items: [] });
-//         }
-
-        
-//         if (!cart.items) {
-//             cart.items = [];
-//         }
-
-//         const existingItem = cart.items.find(item => item.productId.toString() === new mongoose.Types.ObjectId(productId).toString());
-
-//         if (existingItem) {
-//             existingItem.quantity += 1;
-//             existingItem.totalPrice = existingItem.quantity * (product.salePrice || product.regularPrice || 0);
-//         } else {
-//             cart.items.push({
-//                 productId,
-//                 quantity: 1,
-//                 totalPrice: product.salePrice || product.regularPrice || 0
-//             });
-//         }
-
-//         await cart.save();
-//         res.json({ success: true, message: "Product added to cart" });
-
-//     } catch (error) {
-//         console.error("Add to cart error:", error.message);
-//         res.status(500).json({ success: false, message: "Internal Server Error" });
-//     }
-// };
-
 
 const addToCart = async (req, res) => {
     try {

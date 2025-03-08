@@ -1,0 +1,296 @@
+<%- include("../partials/users/header.ejs") %>
+
+<!-- Banner Area -->
+<section class="bg-gray-100 py-8">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap items-center justify-end">
+            <div class="w-full">
+                <h1 class="text-3xl font-bold mb-2">Checkout</h1>
+                <nav class="flex items-center text-sm">
+                    <a href="/" class="text-gray-700 hover:text-gray-900">Home</a>
+                    <span class="mx-2">›</span>
+                    <a href="/cart" class="text-gray-700 hover:text-gray-900">Cart</a>
+                    <span class="mx-2">›</span>
+                    <a href="/checkout" class="text-indigo-600 font-medium">Checkout</a>
+                </nav>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="bg-gray-50 py-10">
+    <div class="container mx-auto px-4">
+        <div class="flex flex-wrap -mx-4">
+
+            <!-- Shipping Address Section -->
+            <div class="w-full lg:w-2/3 px-4">
+                <div class="bg-white rounded-lg shadow-sm p-6 mb-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-xl font-semibold">Shipping Address</h2>
+                        <a href="/addCheckoutAddress" class="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add New Address
+                        </a>
+                    </div>
+
+                    <% if (addresses && addresses.length > 0) { %>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <% addresses.forEach((addressDoc) => { %>
+                                <% addressDoc.address.forEach((addr, addrIndex) => { %>
+                                    <label for="address<%= addr._id %>" class="address-item-container">
+                                    <div class="border border-gray-200 rounded-lg p-4 hover:border-indigo-300 transition-colors relative group">
+                                        <input type="radio" name="selectedAddress" id="address<%= addr._id %>" value="<%= addr._id %>" class="address-radio" <%= addrIndex === 0 ? 'checked' : '' %>>
+                    
+                                        <div class="flex items-start mb-2">
+                                            <span class="inline-block px-2 py-1 text-xs font-medium <%= addr.isDefault ? 'bg-indigo-100 text-indigo-800' : 'bg-gray-100 text-gray-600' %> rounded-md mb-1">
+                                                <%= addr.addressType %>
+                                            </span>
+                                            <% if (addr.isDefault) { %>
+                                                <span class="ml-2 inline-block px-2 py-1 text-xs font-medium bg-green-100 text-green-800 rounded-md">Default</span>
+                                            <% } %>
+                                        </div>
+                    
+                                        <h3 class="font-medium text-gray-900 mb-1"><%= addr.name %></h3>
+                                        <p class="text-sm text-gray-700 mb-1">
+                                            <%= addr.streetAddress %>, <%= addr.landMark %><br>
+                                            <%= addr.city %>, <%= addr.state %> - <%= addr.pincode %>
+                                        </p>
+                                        <p class="text-sm text-gray-700">
+                                            <span class="font-medium">Phone:</span> <%= addr.phone %>
+                                        </p>
+                                       
+                                        <!-- Action Buttons -->
+                                        <div class="mt-4 flex space-x-2 border-t border-gray-100 pt-3">
+                                            <a href="/editAddressCheckout?id=<%= addr._id %>" class="text-indigo-600 hover:text-indigo-800 text-sm font-medium flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                                Edit
+                                            </a>
+                                            <a href="" onclick=" confirmDelete(event ,'<%= addr._id %>')">
+                                            <button type="button" class="text-red-600 hover:text-red-800 text-sm font-medium flex items-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                </svg>
+                                                Delete
+                                            </button>
+                                            </a>
+                                            <% if (!addr.isDefault) { %>
+                                                <button type="button" onclick="setDefaultAddress('<%= addr._id %>')" class="text-green-600 hover:text-green-800 text-sm font-medium flex items-center">
+                                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                                    </svg>
+                                                    Set as Default
+                                                </button>
+                                            <% } %>
+                                        </div>
+                                    </div>
+                                    </label>
+                                <% }); %>
+                            <% }); %>
+                        </div>
+                    <% } else { %>
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-md p-4 text-center">
+                            <p class="text-yellow-700">You don't have any saved addresses.</p>
+                            <p class="text-sm text-yellow-600 mt-1">Please add an address to continue with checkout.</p>
+                        </div>
+                    <% } %>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="w-full lg:w-1/3 px-4">
+                <div class="bg-white rounded-lg shadow-sm p-6">
+                    <h2 class="text-xl font-semibold mb-4">Your Order</h2>
+
+                    <!-- Products List -->
+                    <div class="border-b border-gray-200 pb-4 mb-4">
+                        <div class="flex justify-between mb-3">
+                            <span class="font-semibold text-gray-800">Products</span>
+                            <span class="font-semibold text-gray-800">Subtotal</span>
+                        </div>
+
+                        <% if (products && products.length > 0) { %>
+                            <% let subtotal = 0; %>
+                            <% products.forEach(function(item) { %>
+                                <% subtotal += item.totalPrice; %>
+                                <div class="flex justify-between items-start mb-4">
+                                    <div class="flex items-start">
+                                        <a href="/productDetails?id=<%= item.productId._id %>" class="flex items-start hover:opacity-80">
+                                            <img src="/uploads/re-image/<%= item.productId.productImage[0] %>" alt="<%= item.productId.productName %>" class="w-12 h-12 object-cover rounded-md">
+                                            <div class="ml-3">
+                                                <p class="text-sm font-medium text-gray-800"><%= item.productId.productName.split('|')[0].trim() %> (x<%= item.quantity %>)</p>
+                                                <p class="text-xs text-gray-500"><%= item.productId.category ? item.productId.category.name : 'N/A' %></p>
+                                            </div>
+                                        </a>
+                                    </div>
+                                    <span class="text-sm font-bold text-indigo-600">₹ <%= item.totalPrice.toFixed(2) %></span>
+                                </div>
+                            <% }); %>
+                        <% } else { %>
+                            <div class="text-center py-4">
+                                <p class="text-gray-600">No items found in cart</p>
+                            </div>
+                        <% } %>
+                    </div>
+
+                    <!-- Price Summary -->
+                    <div class="border-b border-gray-200 pb-4 mb-6">
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-600">Subtotal</span>
+                            <span class="text-gray-800">₹ <%= subtotal.toFixed(2) %></span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-600">Coupon Discount</span>
+                            <span class="text-gray-800">(-) ₹ <%= discount.toFixed(2) %></span>
+                        </div>
+                        <div class="flex justify-between mb-2">
+                            <span class="text-gray-600">Shipping</span>
+                            <span class="text-gray-800">₹ 0.00</span>
+                        </div>
+                        <div class="text-right mb-3">
+                            <button onclick="showShippingCharge()" class="text-indigo-600 text-sm hover:text-indigo-800">View shipping charge</button>
+                        </div>
+                        <div class="flex justify-between font-semibold mt-3">
+                            <span class="text-gray-800">Total</span>
+                            <span class="text-lg text-indigo-600">₹ <%= totalAmount.toFixed(2) %></span>
+                        </div>
+                    </div>
+
+                    <!-- Payment Method -->
+                    <div class="mb-6">
+                        <h3 class="text-lg font-semibold mb-4">Payment Method</h3>
+
+                        <!-- Coupon Code -->
+                        <div class="mb-4">
+                            <div class="flex mb-2">
+                                <input type="text" placeholder="Enter coupon code here..." class="flex-grow border border-gray-300 rounded-l-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                                <button class="bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-2 px-4 rounded-r-md transition duration-150 ease-in-out">Apply</button>
+                            </div>
+                        </div>
+
+                        <!-- Payment Options -->
+                        <div class="space-y-3">
+                            <label class="flex items-center p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="payment" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                <span class="ml-2 flex items-center">
+                                    <img src="/assets/images.jpg" alt="Razorpay" class="h-8"> RozoRupee
+                                </span>
+                            </label>
+
+                            <label class="flex items-center p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="payment" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                <span class="ml-2 text-gray-700">Other Methods</span>
+                            </label>
+
+                            <label class="flex items-center p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+                                <input type="radio" name="payment" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                                <span class="ml-2 text-gray-700">Cash on delivery</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Place Order Button -->
+                    <button id="placeOrderBtn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-md transition duration-150 ease-in-out">
+                        Place Order
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    function showShippingCharge() {
+        Swal.fire({
+            title: 'Free Shipping',
+            text: 'Shipping charge is free at the current moment!',
+            icon: 'info',
+            confirmButtonText: 'OK'
+        });
+    }
+
+    function placeOrder() {
+        const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
+        if (!selectedAddress) {
+            Swal.fire('Error', 'Please select a shipping address', 'error');
+            return;
+        }
+
+        const paymentMethod = document.querySelector('input[name="payment"]:checked');
+
+        if (!paymentMethod) {
+            Swal.fire('Error', 'Please select a payment method', 'error');
+            return;
+        }
+
+        //  Check for Cash on Delivery
+        let method = paymentMethod.nextElementSibling.textContent.trim()
+        if (method !== 'Cash on delivery') {
+            Swal.fire('Error', 'Only Cash on Delivery is available at the moment', 'error');
+            return;
+        }
+
+        const orderData = {
+            addressId: selectedAddress.value,
+            paymentMethod : method
+        };
+
+        fetch('/placeOrder', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(orderData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                Swal.fire({
+                    title: 'Order Placed Successfully!',
+                    text: `Order ID: ${data.orderId}`,
+                    icon: 'success',
+                    confirmButtonText: 'View Orders'
+                }).then((result) => {
+                    if (result.isConfirmed) {
+                        window.location.href = '/orders';
+                    }
+                });
+            } else {
+                Swal.fire('Error', data.message || 'An error occurred while placing the order', 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            Swal.fire('Error', 'An error occurred while placing the order', 'error');
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+        const placeOrderBtn = document.getElementById('placeOrderBtn');
+        if (placeOrderBtn) {
+            placeOrderBtn.addEventListener('click', placeOrder);
+        }
+    });
+
+    function confirmDelete(event, addressId) {
+    event.preventDefault();
+    Swal.fire({
+        title: "Are you sure?",
+        text: "This address will be deleted permanently!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            window.location.href = "/checkoutDelete?id=" + addressId;
+        }
+    });
+}
+</script>

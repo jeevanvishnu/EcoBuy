@@ -410,7 +410,7 @@
             if (quantity < maxQuantity) {
                 quantityElement.textContent = quantity + 1;
             } else {
-                // Optional: Show max quantity alert
+               
                 alert(`Sorry, only ${maxQuantity} items available in stock.`);
             }
         });
@@ -421,13 +421,13 @@
         const productId = "<%= product._id %>"; // Get the product ID from the page
          const btn = document.getElementById('addToCartBtn');
            const originalText = btn.innerHTML;
-        // Send the data to the server
+        
         fetch('/addToCart', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ productId: productId, quantity: quantity }) // Send both ID and quantity
+            body: JSON.stringify({ productId: productId, quantity: quantity }) 
         })
         .then(response => response.json())
         .then(data => {
@@ -472,7 +472,9 @@
         });
     });
 
-       
+       // Quantity selector
+
+
 
     </script>
 

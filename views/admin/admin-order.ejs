@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
+</head>
+<%- include('../partials/admin/header.ejs') %>
+<body class="bg-gray-100 overflow-scroll">
+
+    <header class="flex justify-between items-center p-4 bg-gray-800 text-white fixed w-full top-0 z-50">
+        <div class="text-2xl font-bold">Admin Dashboard</div>
+        <a href="/admin/logout" class="px-4 py-2 bg-red-600 text-white rounded-lg font-semibold text-lg hover:bg-red-500 transition">Logout</a>
+    </header>
+
+    <div class="max-w-4xl ml-[220px] mt-16 p-8">
+        <% order.forEach(order => { %>
+        <div class="bg-white rounded-lg shadow-lg overflow-hidden">
+            <div class="bg-gradient-to-r from-gray-50 to-gray-200 p-6 flex justify-between items-center border-b border-gray-200">
+                <h1 class="text-xl font-semibold text-gray-900">Order #<%= order._id %></h1>
+                <a href="/admin/orderManagement" class="px-4 py-2 bg-indigo-600 text-white rounded-lg text-sm hover:bg-indigo-700 transition">Back</a>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-8">
+                <div class="bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-700 uppercase mb-3">Delivery Address</h3>
+                    <p class="text-lg text-gray-900">
+                       <%= order.address ? `${order.address}` : 'Address not available' %>
+                    </p>
+                </div>
+
+                <div class="bg-gradient-to-br from-gray-50 to-white p-6 rounded-xl shadow-md border border-gray-200">
+                    <h3 class="text-sm font-semibold text-gray-700 uppercase mb-3">Payment Method</h3>
+                    <p class="text-lg text-gray-900"><%= order.paymentMethod ? order.paymentMethod : 'Not specified' %></p>
+                </div>
+            </div>
+
+            <div class="p-8">
+                <h2 class="text-xl text-gray-900 mb-6">Products</h2>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <% order.orderedItem.forEach(item => { %>
+                        <div class="bg-white border border-gray-200 rounded-xl p-6 hover:shadow-lg transform hover:translate-y-[-2px] transition-all">
+                            <div class="flex mb-4">
+                                <img class="w-24 h-24 object-cover rounded-lg shadow-md" 
+                                     src="<%= item.product && item.product.productImage && item.product.productImage[0] ? 
+                                           `/uploads/re-image/${item.product.productImage[0]}` : 
+                                           '/images/placeholder.png' %>" 
+                                     alt="<%= item.product ? item.product.productName : 'Product' %>">
+                                <div class="ml-4">
+                                    <h4 class="text-lg font-medium text-gray-900"><%= item.product ? item.product.productName : 'Unknown Product' %></h4>
+                                    <div class="text-sm text-gray-700 mt-2">
+                                        <p>Quantity: <%= item.quantity || 0 %></p>
+                                        <p>Price: ₹<%= item.price ? item.price.toFixed(2) : '0.00' %></p>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-center justify-between mt-2 mb-4">
+                                <span class="inline-flex items-center px-3 py-1 text-xs font-medium rounded-full
+                                    <%= item.productStatus === 'pending' ? 'bg-yellow-200 text-yellow-800' : 
+                                       item.productStatus === 'processing' ? 'bg-blue-200 text-blue-800' : 
+                                       item.productStatus === 'shipped' ? 'bg-indigo-200 text-indigo-800' : 
+                                       item.productStatus === 'delivered' ? 'bg-green-200 text-green-800' : 
+                                       item.productStatus === 'cancelled' ? 'bg-red-200 text-red-800' : 
+                                       item.productStatus === 'Return Requested' ? 'bg-purple-200 text-purple-800' :
+                                       item.productStatus === 'returned' ? 'bg-orange-200 text-orange-800' :
+                                       'bg-gray-200 text-gray-800' %>">
+                                    <%= item.productStatus || 'Unknown' %>
+                                </span>
+                            </div>
+
+                            <form class="flex flex-col gap-3" action="/admin/updateProductStatus" method="POST">
+                                <input type="hidden" name="orderId" value="<%= order._id %>">
+                                <input type="hidden" name="productId" value="<%= item.product ? item.product._id : '' %>">
+
+                                <select name="status" class="px-4 py-2 border rounded-lg text-gray-900 w-full" <%= item.productStatus === 'cancelled' ? 'disabled' : '' %>>
+                                    <% if (item.productStatus !== 'cancelled') { %>
+                                        <option value="pending" <%= item.productStatus === 'pending' ? 'selected' : '' %>>Pending</option>
+                                        <option value="processing" <%= item.productStatus === 'processing' ? 'selected' : '' %>>Processing</option>
+                                        <option value="shipped" <%= item.productStatus === 'shipped' ? 'selected' : '' %>>Shipped</option>
+                                        <option value="delivered" <%= item.productStatus === 'delivered' ? 'selected' : '' %>>Delivered</option>
+                                        <option value="returned" <%= item.productStatus === 'returned' ? 'selected' : '' %>>Returned</option>
+                                    <% } else { %>
+                                        <option value="cancelled" selected>Cancelled</option>
+                                    <% } %>
+                                </select>
+
+                                <button type="submit" class="px-6 py-2 bg-indigo-600 text-white rounded-lg text-sm font-medium hover:bg-indigo-700 transition w-full" <%= item.productStatus === 'cancelled' ? 'disabled' : '' %>>
+                                    <%= item.productStatus === 'cancelled' ? 'Cancelled' : 'Update' %>
+                                </button>
+                            </form>
+
+                            <% if (item.productStatus === 'Return Requested') { %>
+                                <div class="mt-4 p-4 bg-yellow-100 border border-yellow-400 rounded-lg">
+                                    <p><strong>Return Reason:</strong> <%= order.returnReason ? order.returnReason : "No reason provided" %></p>
+                                    <div class="mt-4 flex gap-4">
+                                        <form action="/admin/approve-return/<%= order._id %>/<%= item.product ? item.product._id : '' %>" method="POST">
+                                            <button type="submit" class="px-4 py-2 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition">Accept Return</button>
+                                        </form>
+                                        <form action="/admin/decline-return/<%= order._id %>/<%= item.product ? item.product._id : '' %>" method="POST">
+                                            <button type="submit" class="px-4 py-2 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 transition">Decline Return</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            <% } %>
+
+                            <% if (item.productStatus === 'cancelled') { %>
+                                <div class="mt-4 p-4 bg-red-50 border border-red-200 rounded-lg">
+                                    <h5 class="font-semibold text-gray-800">Cancellation Reason:</h5>
+                                    <p><%= item.cancellationReason || 'No reason provided' %></p>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% }); %>
+                </div>
+            </div>
+        </div>
+        <% }); %>
+    </div>
+</body>
+</html>

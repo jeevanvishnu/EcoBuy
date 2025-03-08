@@ -1,0 +1,143 @@
+<%- include("../partials/users/header.ejs") %>
+<style>
+    .input-field {
+        width: 100%;
+        border-bottom: 2px solid gray;
+        padding: 10px 5px;
+        outline: none;
+        font-size: 1rem;
+        transition: 0.3s;
+    }
+    .input-field:focus {
+        border-color: indigo;
+    }
+    .label {
+        position: absolute;
+        left: 10px;
+        top: 10px;
+        color: gray;
+        transition: 0.3s;
+    }
+    .input-field:focus + .label, .input-field:not(:placeholder-shown) + .label {
+        top: -15px;
+        font-size: 0.85rem;
+        color: indigo;
+    }
+    .submit-button {
+        width: 100%;
+        background: linear-gradient(to right, indigo, purple);
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        font-size: 1.2rem;
+        transition: 0.3s;
+    }
+    .submit-button:hover {
+        background: linear-gradient(to right, indigo, darkpurple);
+        transform: scale(1.05);
+    }
+</style>
+
+
+    <body class="bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-4xl px-8 py-3 ml-[110px]">
+            <div class="bg-white shadow-2xl rounded-2xl overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6">
+                    <h2 class="text-3xl font-bold tracking-wide">Add New Address</h2>
+                    <p class="text-indigo-100 mt-2">Please provide your complete address details</p>
+                </div>
+
+                <form action="/checkoutAddAddress" method="post" id="addressForm" class="p-10 space-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="relative">
+                            <input name="name" type="text" id="name" required class="input-field">
+                            <label for="name" class="label">Full Name</label>
+                        </div>
+                        <div class="relative">
+                            <input name="addressType" type="text" id="addressType" required class="input-field">
+                            <label for="addressType" class="label">Street Address</label>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                        <div class="relative">
+                            <input name="city" type="text" id="city" required class="input-field">
+                            <label for="city" class="label">City</label>
+                        </div>
+                        <div class="relative">
+                            <input name="state" type="text" id="state" required class="input-field">
+                            <label for="state" class="label">State</label>
+                        </div>
+                        <div class="relative">
+                            <input name="pincode" type="text" id="pincode" required class="input-field">
+                            <label for="pincode" class="label">Postal Code</label>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="relative">
+                            <input name="landMark" type="text" id="landMark" required class="input-field">
+                            <label for="landMark" class="label">Landmark</label>
+                        </div>
+                        <div class="relative">
+                            <input name="phone" type="tel" id="phone" required class="input-field">
+                            <label for="phone" class="label">Phone Number</label>
+                        </div>
+                    </div>
+                    <div class="mt-10">
+                        <button type="submit" class="submit-button">Save Address</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+    document.getElementById('addressForm').addEventListener('submit', function(event) {
+        event.preventDefault();
+        const fields = ['name', 'addressType', 'city', 'state', 'pincode', 'landMark', 'phone'];
+        for (let field of fields) {
+            const input = document.getElementById(field);
+            if (input.value.trim() === '') {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: `${input.previousElementSibling.innerText} is required!`
+                });
+                return;
+            }
+        }
+        this.submit();
+    });
+
+
+    document.getElementById("addressForm").addEventListener("submit", function (event) {
+    event.preventDefault(); // Prevent form submission
+
+    // Get form inputs
+    const name = document.getElementById("name").value.trim();
+    const addressType = document.getElementById("addressType").value.trim();
+    const city = document.getElementById("city").value.trim();
+    const state = document.getElementById("state").value.trim();
+    const pincode = document.getElementById("pincode").value.trim();
+    const landMark = document.getElementById("landMark").value.trim();
+    const phone = document.getElementById("phone").value.trim();
+
+    // Check for empty fields
+    if (!name || !addressType || !city || !state || !pincode || !landMark || !phone) {
+        Swal.fire({
+            icon: "warning",
+            title: "Missing Fields!",
+            text: "Please fill out all fields before submitting.",
+            confirmButtonColor: "#6B46C1"
+        });
+        return; // Stop further execution
+    }
+
+    // If all fields are filled, submit the form
+    this.submit();
+});  
+
+
+</script>
+

@@ -7,6 +7,7 @@ import productController from "../../controllers/users/productController.js";
 import profileController from "../../controllers/users/profileController.js"
 import userAuth from '../../middlewares/auth.js'
 import cartController from "../../controllers/users/cartController.js"
+import checkoutController from "../../controllers/users/checkoutController.js"
 
 router.get('/',userMiddleWare.checkBlockedUser,userController.loadHome)
 router.get('/signup',userMiddleWare.loginMiddle,userController.loadSignUp)
@@ -62,4 +63,14 @@ router.get('/cart',userAuth.userAuth,cartController.getCartPage)
 router.post('/addToCart',userAuth.userAuth,cartController.addToCart)
 router.post('/changeQuantity',userAuth.userAuth,cartController.changeQuantity)
 router.get('/deleteItem',userAuth.userAuth,cartController.deleteProduct)
+
+// checkout Managment
+router.get('/checkout',userAuth.userAuth,checkoutController.getCheckout)
+router.get('/addCheckoutAddress',userAuth.userAuth,checkoutController.addCheckoutAddress)
+router.post('/checkoutAddAddress',userAuth.userAuth,checkoutController.checkoutAddAddress)
+router.get('/editAddressCheckout',userAuth.userAuth,checkoutController.getCheckoutEdit)
+router.post('/editAddressCheckout',userAuth.userAuth,checkoutController.editCheckoutAddress)
+router.get('/checkoutDelete',userAuth.userAuth,checkoutController.checkoutDeleteAddress)
+router.post('/placeOrder',userAuth.userAuth,checkoutController.placeOrder)
+router.get('/orders',userAuth.userAuth,checkoutController.orderSucess)
 export default router

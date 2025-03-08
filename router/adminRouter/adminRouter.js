@@ -8,6 +8,7 @@ import categoryController from "../../controllers/admin/categoryControll.js";
 import productController from "../../controllers/admin/productControll.js";
 // import upload from "../../public/upload.js";
 import bannerController from "../../controllers/admin/bannerController.js"
+import orderController from "../../controllers/admin/orderController.js";
 import multer from "multer";
 import storage from "../../helpers/upload.js";
 import uploads from '../../helpers/bannerUpload.js'
@@ -71,4 +72,8 @@ router.get('/banner',adminAuth,bannerController.getBannerPage)
 router.get('/addBanner',adminAuth,bannerController.addgetBannerPage)
 router.post('/addBanner',adminAuth,uploads.single('images'),bannerController.addBanner)
 router.get('/deleteBanner',adminAuth,bannerController.deleteBanner)
+
+// Order Managment
+router.get('/orderManagment',adminAuth,orderController.loadOrderManagment)
+
 export default router;
