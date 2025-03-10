@@ -9,7 +9,8 @@ const checkBlockedUser = async (req, res, next) => {
             
             if (user && user.isBlocked) {
                 delete req.session.user;
-                return res.redirect('/login'); 
+                // return res.redirect('/login'); 
+                return res.render('user/login',{message:"Your account has been blocked."})
             }
         }
 

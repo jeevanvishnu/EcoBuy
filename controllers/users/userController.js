@@ -277,10 +277,10 @@ const loadShoppingPage = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-      // Extract unique brands from products
+      
     const brandNames = [...new Set(products.map((product) => product.brand))];
 
-    // Convert brand names to objects with a name field
+    
     const brands = brandNames.map((brand) => ({ name: brand }));
 
     const totalProducts = await Product.countDocuments({
