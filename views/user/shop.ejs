@@ -1,124 +1,266 @@
-<%- include("../partials/users/header.ejs") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shop with Enhanced Filters</title>
+    <!-- Styles would be included in header.ejs -->
+</head>
+<body>
+    <%- include("../partials/users/header.ejs") %>
 
-<div class="max-w-6xl mx-auto p-4">
-    <section class="container mx-auto">
-        <!-- Search Bar -->
-        <div class="flex justify-between items-center mb-6">
-            <form action="/search" method="GET" class="flex items-center bg-gray-100 rounded-lg shadow-sm overflow-hidden w-full max-w-md">
-                <input type="text" name="search" placeholder="Search items..." class="flex-1 p-3 text-sm bg-transparent outline-none" />
-                <button type="submit" class="px-4 py-3 bg-blue-600 text-white transition hover:bg-blue-700">
-                    Search
-                </button>
-            </form>
-        </div>
-
-        <div class="flex flex-col md:flex-row gap-6">
-            <!-- Sidebar -->
-            <aside class="w-full md:w-1/4 bg-white p-5 rounded-lg shadow-sm border border-gray-200 h-fit">
-                <!-- Categories -->
-                <div class="mb-6">
-                    <h3 class="font-bold text-gray-800 mb-3 text-lg">Categories</h3>
-                    <ul class="text-gray-600 space-y-2">
-                        <% if(locals.category && category.length > 0) { %>
-                            <% for(let i=0; i < category.length; i++) { %>
-                                <li><a href="/filter?category=<%= category[i]._id %>" class="block p-2 hover:bg-gray-100 rounded-md hover:text-blue-600 transition"><%= category[i].name %></a></li>
-                            <% } %>
-                        <% } else { %>
-                            <li class="text-gray-500">No categories available</li>
-                        <% } %>
-                    </ul>
-                </div>
+    <div class="max-w-6xl mx-auto p-4">
+        <section class="container mx-auto">
+            <!-- Search Bar and Sort Options -->
+            <div class="flex flex-col md:flex-row justify-between items-center mb-6 gap-4">
+                <form action="/search" method="GET" class="flex items-center bg-gray-100 rounded-lg shadow-sm overflow-hidden w-full max-w-md">
+                    <input type="text" name="search" placeholder="Search items..." class="flex-1 p-3 text-sm bg-transparent outline-none" />
+                    <button type="submit" class="px-4 py-3 bg-blue-600 text-white transition hover:bg-blue-700">
+                        Search
+                    </button>
+                </form>
                 
-                <!-- Price Filters -->
-                <div>
-                    <h3 class="font-bold text-gray-800 mb-3 text-lg">Filter by Price</h3>
-                    <div class="space-y-2">
-                        <a href="/filter?minPrice=0&maxPrice=500" class="block p-2 bg-gray-100 rounded-lg text-center hover:bg-blue-500 hover:text-white transition">Under ₹500</a>
-                        <a href="/filter?minPrice=500&maxPrice=1000" class="block p-2 bg-gray-100 rounded-lg text-center hover:bg-blue-500 hover:text-white transition">₹500 - ₹1000</a>
-                        <a href="/filter?minPrice=1000&maxPrice=1500" class="block p-2 bg-gray-100 rounded-lg text-center hover:bg-blue-500 hover:text-white transition">₹1000 - ₹1500</a>
-                        <a href="/filter?minPrice=1500&maxPrice=100000" class="block p-2 bg-gray-100 rounded-lg text-center hover:bg-blue-500 hover:text-white transition">Above ₹1500</a>
+                <!-- Sort Options Dropdown -->
+                <div class="relative w-full md:w-auto">
+                    <select id="sortOptions" onchange="window.location = this.value;" class="appearance-none w-full md:w-auto bg-white border border-gray-200 rounded-lg px-4 py-3 pr-8 cursor-pointer focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-700">
+                        <option value="" disabled selected>Sort Products</option>
+                        <option value="/shop?sort=newest">Newest First</option>
+                        <option value="/shop?sort=price_asc">Price: Low to High</option>
+                        <option value="/shop?sort=price_desc">Price: High to Low</option>
+                        <option value="/shop?sort=name_asc">Name: A to Z</option>
+                        <option value="/shop?sort=name_desc">Name: Z to A</option>
+                    </select>
+                    <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-3 text-gray-600">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                        </svg>
                     </div>
                 </div>
-            </aside>
-            
-            <!-- Product Grid -->
-            <main class="flex-1">
-                <% if(locals.products && products.length > 0) { %>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <% for(let i = 0; i < products.length; i++) { %>
-                            <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition group">
-                                <div class="relative overflow-hidden rounded-md mb-3">
-                                    <a href="/productDatails?id=<%= products[i]._id %>" class="block">
-                                        <img 
-                                            src="/uploads/re-image/<%= products[i].productImage[0] %>" 
-                                            alt="<%= products[i].productName %>" 
-                                            class="w-full h-48 object-cover rounded-md group-hover:scale-105 transition duration-300" 
-                                        />
-                                    </a>
-                                    <button class="absolute top-2 right-2 bg-white p-2 rounded-full shadow-sm hover:text-red-500 transition">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                <div class="text-center">
-                                    <h4 class="font-medium text-gray-800 mb-1 text-lg"><%= products[i].productName %></h4>
-                                    <p class="text-gray-600 text-sm mb-2 line-clamp-2"><%= products[i].description %></p>
-                                    <div class="flex justify-center items-center gap-2 mb-3">
-                                        <span class="text-gray-500 line-through">₹<%= products[i].regularPrice.toLocaleString('en-IN') %></span>
-                                        <span class="text-blue-600 font-bold text-lg">₹<%= products[i].salePrice.toLocaleString('en-IN') %></span>
-                                        <% const discount = Math.round((products[i].regularPrice - products[i].salePrice) / products[i].regularPrice * 100); %>
-                                        <span class="text-green-600 text-xs bg-green-100 px-2 py-1 rounded">-<%= discount %>%</span>
-                                    </div>
-                                    <a href="/productDatails?id=<%= products[i]._id %>">
-                                    <button class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2">
-                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
-                                        </svg>
-                                        Add to Cart
-                                    </button>
-                                </a>
-                                </div>
-                            </div>
-                        <% } %>
-                    </div>
-                <% } else { %>
-                    <div class="flex flex-col items-center justify-center py-12">
-                        <div class="text-gray-400 mb-4">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                            </svg>
+            </div>
+
+            <div class="flex flex-col md:flex-row gap-6">
+                <!-- Sidebar -->
+                <aside class="w-full md:w-1/4 bg-white p-5 rounded-lg shadow-sm border border-gray-200 h-fit">
+                    <!-- Active Filters Display -->
+                    <div class="mb-6">
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">Active Filters</h3>
+                        <div id="activeFilters" class="flex flex-wrap gap-2">
+                            <!-- Example active filter (would be dynamically generated) -->
+                           
+                                    
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                    </svg>
+                                </button>
+                            </span>
                         </div>
-                        <h3 class="text-xl font-medium text-gray-700">No products found</h3>
-                        <p class="text-gray-500 mt-2">Try adjusting your filters or search criteria</p>
                     </div>
-                <% } %>
+
+                    <!-- Categories -->
+                    <div class="mb-6">
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">Categories</h3>
+                        <ul class="text-gray-600 space-y-2">
+                            <% if(locals.category && category.length > 0) { %>
+                                <% for(let i=0; i < category.length; i++) { %>
+                                    <li><a href="/filter?category=<%= encodeURIComponent(category[i]._id) %>" class="block p-2 hover:bg-gray-100 rounded-md hover:text-blue-600 transition"><%= category[i].name %></a></li>
+                                <% } %>
+                            <% } else { %>
+                                <li class="text-gray-500">No categories available</li>
+                            <% } %>
+                        </ul>
+                    </div>
+                    
+                    <!-- Price Filters -->
+                    <div class="mb-6">
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">Filter by Price</h3>
+                        <div class="space-y-2">
+                            <a href="/filterPrice?minPrice=0&maxPrice=500" class="block p-2 bg-gray-100 rounded-lg text-center hover:bg-blue-500 hover:text-white transition">Under ₹500</a>
+                            <a href="/filterPrice?minPrice=500&maxPrice=1000" class="block p-2 bg-gray-100 rounded-lg text-center hover:bg-blue-500 hover:text-white transition">₹500 - ₹1000</a>
+                            <a href="/filterPrice?minPrice=1000&maxPrice=1500" class="block p-2 bg-gray-100 rounded-lg text-center hover:bg-blue-500 hover:text-white transition">₹1000 - ₹1500</a>
+                            <a href="/filterPrice?minPrice=1500&maxPrice=100000" class="block p-2 bg-gray-100 rounded-lg text-center hover:bg-blue-500 hover:text-white transition">Above ₹1500</a>
+                        </div>
+                    </div>
+
+                    <!-- Custom Price Range -->
+                    <div class="mb-6">
+                        <h3 class="font-bold text-gray-800 mb-3 text-lg">Custom Price Range</h3>
+                        <form action="/filterPrice" method="GET" class="space-y-3">
+                            <div class="flex items-center gap-2">
+                                <input type="number" name="minPrice" placeholder="Min ₹" class="w-full p-2 border border-gray-300 rounded-md" min="0">
+                                <span class="text-gray-500">-</span>
+                                <input type="number" name="maxPrice" placeholder="Max ₹" class="w-full p-2 border border-gray-300 rounded-md" min="0">
+                            </div>
+                            <button type="submit" class="w-full p-2 bg-gray-200 hover:bg-gray-300 rounded-md transition">Apply</button>
+                        </form>
+                    </div>
+
+                    <!-- Clear All Filters -->
+                    <a href="/shop" class="block w-full p-2 bg-red-100 text-red-700 rounded-lg text-center hover:bg-red-200 transition mt-4">
+                        Clear All Filters
+                    </a>
+                </aside>
                 
-                <!-- Pagination -->
-                <% if (locals.totalPages && totalPages > 1) { %>
-                    <div class="flex justify-center gap-2 mt-8">
-                        <% if (currentPage > 1) { %>
-                            <a href="/shop?page=<%= currentPage - 1 %>" class="px-4 py-2 bg-gray-100 rounded-md text-gray-700 hover:bg-blue-500 hover:text-white transition">
-                                Previous
-                            </a>
-                        <% } %>
-
-                        <% for (let i = 1; i <= totalPages; i++) { %>
-                            <a href="/shop?page=<%= i %>" class="px-4 py-2 rounded-md <%= currentPage === i ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-blue-500 hover:text-white' %> transition">
-                                <%= i %>
-                            </a>
-                        <% } %>
-                        
-                        <% if (currentPage < totalPages) { %>
-                            <a href="/shop?page=<%= currentPage + 1 %>" class="px-4 py-2 bg-gray-100 rounded-md text-gray-700 hover:bg-blue-500 hover:text-white transition">
-                                Next
-                            </a>
-                        <% } %>
+                <!-- Product Grid -->
+                <main class="flex-1">
+                    <!-- Applied Sort/Filter Info -->
+                    <div class="mb-4 text-sm text-gray-600 flex justify-between items-center">
+                        <span>Showing <strong><%= products ? products.length : 0 %></strong> products</span>
+                        <span id="currentSort">Sort: <strong>Newest First</strong></span>
                     </div>
-                <% } %>
-            </main>
-        </div>
-    </section>
-</div>
 
-<%- include('../partials/users/footer.ejs') %>
+                    <% if(locals.products && products.length > 0) { %>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            <% for(let i = 0; i < products.length; i++) { %>
+                                <div class="bg-white border border-gray-200 p-4 rounded-lg shadow-sm hover:shadow-md transition group">
+                                    <div class="relative overflow-hidden rounded-md mb-3">
+                                        <a href="/productDatails?id=<%= products[i]._id %>" class="block">
+                                            <img 
+                                                src="/uploads/re-image/<%= products[i].productImage[0] %>" 
+                                                alt="<%= products[i].productName %>" 
+                                                class="w-full h-48 object-cover rounded-md group-hover:scale-105 transition duration-300" 
+                                            />
+                                        </a>
+                                        <button class="absolute top-2 right-2 bg-white p-2 rounded-full shadow-sm hover:text-red-500 transition">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                    <div class="text-center">
+                                        <h4 class="font-medium text-gray-800 mb-1 text-lg"><%= products[i].productName %></h4>
+                                        <p class="text-gray-600 text-sm mb-2 line-clamp-2"><%= products[i].description %></p>
+                                        <div class="flex justify-center items-center gap-2 mb-3">
+                                            <span class="text-gray-500 line-through">₹<%= products[i].regularPrice.toLocaleString('en-IN') %></span>
+                                            <span class="text-blue-600 font-bold text-lg">₹<%= products[i].salePrice.toLocaleString('en-IN') %></span>
+                                            <% const discount = Math.round((products[i].regularPrice - products[i].salePrice) / products[i].regularPrice * 100); %>
+                                            <span class="text-green-600 text-xs bg-green-100 px-2 py-1 rounded">-<%= discount %>%</span>
+                                        </div>
+                                        <a href="/productDatails?id=<%= products[i]._id %>">
+                                            <button class="w-full py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition flex items-center justify-center gap-2">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                                                </svg>
+                                                Add to Cart
+                                            </button>
+                                        </a>
+                                    </div>
+                                </div>
+                            <% } %>
+                        </div>
+                    <% } else { %>
+                        <div class="flex flex-col items-center justify-center py-12">
+                            <div class="text-gray-400 mb-4">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                                </svg>
+                            </div>
+                            <h3 class="text-xl font-medium text-gray-700">No products found</h3>
+                            <p class="text-gray-500 mt-2">Try adjusting your filters or search criteria</p>
+                        </div>
+                    <% } %>
+                    
+                    <!-- Pagination -->
+                    <% if (locals.totalPages && totalPages > 1) { %>
+                        <div class="flex justify-center gap-2 mt-8">
+                            <% if (currentPage > 1) { %>
+                                <a href="<%= locals.paginationBaseUrl || '/shop' %>?page=<%= currentPage - 1 %><%= locals.sortParam ? '&' + locals.sortParam : '' %>" class="px-4 py-2 bg-gray-100 rounded-md text-gray-700 hover:bg-blue-500 hover:text-white transition">
+                                    Previous
+                                </a>
+                            <% } %>
+
+                            <% for (let i = 1; i <= totalPages; i++) { %>
+                                <a href="<%= locals.paginationBaseUrl || '/shop' %>?page=<%= i %><%= locals.sortParam ? '&' + locals.sortParam : '' %>" class="px-4 py-2 rounded-md <%= currentPage === i ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-700 hover:bg-blue-500 hover:text-white' %> transition">
+                                    <%= i %>
+                                </a>
+                            <% } %>
+                            
+                            <% if (currentPage < totalPages) { %>
+                                <a href="<%= locals.paginationBaseUrl || '/shop' %>?page=<%= currentPage + 1 %><%= locals.sortParam ? '&' + locals.sortParam : '' %>" class="px-4 py-2 bg-gray-100 rounded-md text-gray-700 hover:bg-blue-500 hover:text-white transition">
+                                    Next
+                                </a>
+                            <% } %>
+                        </div>
+                    <% } %>
+                </main>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        // Update the currently selected sort option based on URL parameters
+        document.addEventListener('DOMContentLoaded', function() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const sortValue = urlParams.get('sort');
+            const sortSelect = document.getElementById('sortOptions');
+            const currentSortText = document.getElementById('currentSort');
+            
+            if (sortValue) {
+                // Set the dropdown to match current sort
+                for (let i = 0; i < sortSelect.options.length; i++) {
+                    if (sortSelect.options[i].value.includes('sort=' + sortValue)) {
+                        sortSelect.selectedIndex = i;
+                        currentSortText.innerHTML = 'Sort: <strong>' + sortSelect.options[i].text + '</strong>';
+                        break;
+                    }
+                }
+            }
+            
+            // Update active filters display
+            const activeFiltersDiv = document.getElementById('activeFilters');
+            if (urlParams.has('minPrice') && urlParams.has('maxPrice')) {
+                const min = urlParams.get('minPrice');
+                const max = urlParams.get('maxPrice');
+                
+                let filterText;
+                if (min == 0 && max == 500) filterText = 'Under ₹500';
+                else if (min == 500 && max == 1000) filterText = '₹500 - ₹1000';
+                else if (min == 1000 && max == 1500) filterText = '₹1000 - ₹1500';
+                else if (min == 1500) filterText = 'Above ₹1500';
+                else filterText = `₹${min} - ₹${max}`;
+                
+                // Add filter tag if not already present
+                if (!document.querySelector(`#activeFilters span[data-filter="price"]`)) {
+                    activeFiltersDiv.innerHTML += `
+                        <span data-filter="price" class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded flex items-center">
+                            ${filterText}
+                            <a href="/shop" class="ml-1 text-blue-600 hover:text-blue-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </a>
+                        </span>
+                    `;
+                }
+            }
+            
+            if (urlParams.has('category')) {
+                // Would need server-side help to get category name from ID
+                const categoryId = urlParams.get('category');
+                // This would be replaced with actual category name in production
+                const categoryName = "Selected Category"; 
+                
+                if (!document.querySelector(`#activeFilters span[data-filter="category"]`)) {
+                    activeFiltersDiv.innerHTML += `
+                        <span data-filter="category" class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-1 rounded flex items-center">
+                            ${categoryName}
+                            <a href="/shop" class="ml-1 text-blue-600 hover:text-blue-800">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </a>
+                        </span>
+                    `;
+                }
+            }
+            
+            // Show or hide the active filters section
+            if (activeFiltersDiv.children.length === 0) {
+                activeFiltersDiv.parentElement.style.display = 'none';
+            } else {
+                activeFiltersDiv.parentElement.style.display = 'block';
+            }
+        });
+    </script>
+
+    <%- include('../partials/users/footer.ejs') %>
+</body>
+</html>

@@ -342,10 +342,11 @@ const checkoutDeleteAddress = async (req, res) => {
 
 const orderSucess = async (req,res) =>{
     try {
-
+        const user = req.session.user
+        const userData = await User.findById(user)
         const order = Order.find()
 
-        res.render('user/order-sucess',{order})
+        res.render('user/order-sucess',{order,user:userData})
         
     } catch (error) {
         console.error("Error has been orderSuceess",error.message)

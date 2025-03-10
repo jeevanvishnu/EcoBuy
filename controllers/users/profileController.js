@@ -534,6 +534,56 @@ const deleteAddress = async (req,res) =>{
 }
 
 
+const editProfile = async (req,res)=>{
+    try {
+
+      const userId = req.session.user
+      const userData = await User.findById(userId)
+
+      res.render('user/edit-profile',{user:userData})
+        
+    } catch (error) {
+        console.log("error of edit profile",error.message)
+        res.redirect('/page')
+    }
+}
+
+
+const postEditProfile = async (req, res) => {
+    try {
+        const { mobile, name } = req.body;  
+        const id = req.query.id;
+        console.log("req.body:", req.body);
+        console.log("User ID from query:", id);
+        
+        if (!id) {
+            return res.status(400).send("User ID is missing.");
+        }
+        
+       
+        const updateFields = {};
+        if (name) updateFields.name = name;
+        if (mobile) updateFields.mobile = mobile;  
+        
+        const updatedUser = await User.findByIdAndUpdate(id, updateFields, {
+            new: true,
+            runValidators: true
+        });
+        
+        if (!updatedUser) {
+            return res.status(404).send("User not found.");
+        }
+        
+        console.log("User updated successfully:", updatedUser);
+        res.redirect('userProfile');
+    } catch (error) {
+        console.error("Error updating profile:", error);
+       res.redirect('/page')
+    }
+};
+
+
+
 
 
 export default {
@@ -556,5 +606,7 @@ export default {
     postAddAddress,
     editAddress,
     postEditAddress,
-    deleteAddress
+    deleteAddress,
+    editProfile,
+    postEditProfile
 }

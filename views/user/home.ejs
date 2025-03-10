@@ -70,32 +70,6 @@
 
 
 <script>
-// document.addEventListener("DOMContentLoaded", function () {
-//     document.querySelectorAll(".addToCartBtn").forEach(button => {
-//         button.addEventListener("click", function (event) {
-//             event.preventDefault(); // Prevent default form submission
-
-//             let productId = this.getAttribute("data-product-id");
-
-//             fetch("/addToCart", {
-//                 method: "POST",
-//                 headers: {
-//                     "Content-Type": "application/json"
-//                 },
-//                 body: JSON.stringify({ productId: productId })
-//             })
-//             .then(response => response.json())
-//             .then(data => {
-//                 if (data.status === true) {  // Fix: Match server response
-//                     alert("Product added to cart!");
-//                 } else {
-//                     alert(data.status || "Failed to add product to cart.");
-//                 }
-//             })
-//             .catch(error => console.error("Error:", error));
-//         });
-//     });
-// });
 
 
 document.addEventListener("DOMContentLoaded", function () {

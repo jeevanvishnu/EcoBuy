@@ -29,9 +29,9 @@ const loadHome = async (req, res) => {
   try {
     const today = new Date().toISOString();
     const findBanner = await Banner.find({
-      startDate:{$lt:new Date(today)},
-      endDate:{$gt:new Date(today)}
-    })
+      startDate: { $lt: new Date(today) },
+      endDate: { $gt: new Date(today) },
+    });
     const user = req.session.user;
     const categories = await Category.find({ isListed: true });
     let productData = await Product.find({
@@ -48,19 +48,22 @@ const loadHome = async (req, res) => {
       const userData = await User.findOne({ _id: user });
 
       console.log(userData);
-      return res.render("user/home", { user: userData, products: productData ,banner:findBanner || []});
+      return res.render("user/home", {
+        user: userData,
+        products: productData,
+        banner: findBanner || [],
+      });
     } else {
-      return res.render("user/home", { products: productData ,banner:findBanner || [] });
+      return res.render("user/home", {
+        products: productData,
+        banner: findBanner || [],
+      });
     }
   } catch (error) {
     console.log(`Home page rendering error ${error.message}`);
     res.status(500).send("Internal Server Error");
   }
 };
-
-
-
-
 
 // create a function on generate otp
 const generateOtp = () => {
@@ -224,7 +227,9 @@ const login = async (req, res) => {
     }
 
     if (findUser.isBlocked) {
-      return res.render("user/login", { message: "Your account has been blocked. Please contact support." });
+      return res.render("user/login", {
+        message: "Your account has been blocked. Please contact support.",
+      });
     }
 
     const passwordMatch = await bcrypt.compare(password, findUser.password);
@@ -277,10 +282,8 @@ const loadShoppingPage = async (req, res) => {
       .skip(skip)
       .limit(limit);
 
-      
     const brandNames = [...new Set(products.map((product) => product.brand))];
 
-    
     const brands = brandNames.map((brand) => ({ name: brand }));
 
     const totalProducts = await Product.countDocuments({
@@ -297,7 +300,7 @@ const loadShoppingPage = async (req, res) => {
     res.render("user/shop", {
       user: userData,
       products: products,
-      brand:brands,
+      brand: brands,
       category: categoriesWidths,
       totalProducts: totalProducts,
       currentPage: page,
@@ -350,7 +353,7 @@ const filterProduct = async (req, res) => {
         };
 
         if (!Array.isArray(userData.searchEntry)) {
-          userData.searchEntry = []; 
+          userData.searchEntry = [];
         }
 
         userData.searchEntry.push(searchEntry);
@@ -373,23 +376,41 @@ const filterProduct = async (req, res) => {
   }
 };
 
-
 const filterByPrice = async (req, res) => {
   try {
     const user = req.session.user;
     const userData = await User.findOne({ _id: user });
     const categories = await Category.find({ isListed: true }).lean();
 
-    let minPrice = Number(req.query.gt) || 0;
-    let maxPrice = Number(req.query.lt) || 100000;
+    let minPrice = Number(req.query.minPrice) || 0;
+    let maxPrice = Number(req.query.maxPrice) || 100000;
+
+    let sort = req.query.sort || "newest";
 
     let findProducts = await Product.find({
-      salePrice: { $gt: minPrice, $lt: maxPrice },
+      salePrice: { $gte: minPrice, $lte: maxPrice },
       isBlocked: false,
       quantity: { $gt: 0 },
     }).lean();
 
-    findProducts.sort((a, b) => new Date(b.createdOn) - new Date(a.createdOn));
+    switch (sort) {
+      case "price_asc":
+        findProducts.sort((a, b) => a.salePrice - b.salePrice);
+        break;
+      case "price_desc":
+        findProducts.sort((a, b) => b.salePrice - a.salePrice);
+        break;
+      case "name_asc":
+        findProducts.sort((a, b) => a.productName.localeCompare(b.productName));
+        break;
+      case "name_desc":
+        findProducts.sort((a, b) => b.productName.localeCompare(a.productName));
+        break;
+      default:
+        findProducts.sort(
+          (a, b) => new Date(b.createdOn) - new Date(a.createdOn)
+        );
+    }
 
     let itemsPerPage = 10;
     let currentPage = parseInt(req.query.page) || 1;
@@ -399,12 +420,75 @@ const filterByPrice = async (req, res) => {
     const currentProduct = findProducts.slice(startIndex, endIndex);
     req.session.filterProduct = findProducts;
 
+    let paginationBaseUrl = "/filterPrice";
+    let sortParam = `sort=${sort}`;
+
     res.render("user/shop", {
       user: userData,
       products: currentProduct,
       category: categories,
       totalPages,
       currentPage,
+      paginationBaseUrl,
+      sortParam,
+      minPrice,
+      maxPrice,
+    });
+  } catch (error) {
+    console.log(error.message);
+    res.redirect("/page");
+  }
+};
+
+const shopController = async (req, res) => {
+  try {
+    const user = req.session.user;
+    const userData = await User.findOne({ _id: user });
+    const categories = await Category.find({ isListed: true }).lean();
+
+    let sort = req.query.sort || "newest";
+
+    let findProducts = await Product.find({
+      isBlocked: false,
+      quantity: { $gt: 0 },
+    }).lean();
+
+    switch (sort) {
+      case "price_asc":
+        findProducts.sort((a, b) => a.salePrice - b.salePrice);
+        break;
+      case "price_desc":
+        findProducts.sort((a, b) => b.salePrice - a.salePrice);
+        break;
+      case "name_asc":
+        findProducts.sort((a, b) => a.productName.localeCompare(b.productName));
+        break;
+      case "name_desc":
+        findProducts.sort((a, b) => b.productName.localeCompare(a.productName));
+        break;
+      default:
+        findProducts.sort(
+          (a, b) => new Date(b.createdOn) - new Date(a.createdOn)
+        );
+    }
+
+    // Pagination
+    let itemsPerPage = 10;
+    let currentPage = parseInt(req.query.page) || 1;
+    let startIndex = (currentPage - 1) * itemsPerPage;
+    let endIndex = startIndex + itemsPerPage;
+    let totalPages = Math.ceil(findProducts.length / itemsPerPage);
+    const currentProduct = findProducts.slice(startIndex, endIndex);
+
+    let sortParam = sort !== "newest" ? `sort=${sort}` : "";
+
+    res.render("user/shop", {
+      user: userData,
+      products: currentProduct,
+      category: categories,
+      totalPages,
+      currentPage,
+      sortParam,
     });
   } catch (error) {
     console.log(error.message);
@@ -424,9 +508,10 @@ const searchProducts = async (req, res) => {
     let searchResult = [];
 
     if (req.session.filterProduct && req.session.filterProduct.length > 0) {
-     
-      const filteredProductIds = req.session.filterProduct.map((product) => product._id);
-      
+      const filteredProductIds = req.session.filterProduct.map(
+        (product) => product._id
+      );
+
       searchResult = await Product.find({
         _id: { $in: filteredProductIds },
         productName: { $regex: `.*${search}.*`, $options: "i" },
@@ -440,17 +525,20 @@ const searchProducts = async (req, res) => {
       }).lean();
     }
 
-    
-    searchResult.sort((a, b) => 
-      new Date(b.createdOn || "2000-01-01") - new Date(a.createdOn || "2000-01-01")
+    searchResult.sort(
+      (a, b) =>
+        new Date(b.createdOn || "2000-01-01") -
+        new Date(a.createdOn || "2000-01-01")
     );
 
-    
     let itemsPerPage = 10;
     let currentPage = parseInt(req.query.page) || 1;
     let startIndex = (currentPage - 1) * itemsPerPage;
     let totalPages = Math.ceil(searchResult.length / itemsPerPage);
-    let currentProduct = searchResult.slice(startIndex, startIndex + itemsPerPage);
+    let currentProduct = searchResult.slice(
+      startIndex,
+      startIndex + itemsPerPage
+    );
 
     res.render("user/shop", {
       user: userData,
@@ -460,13 +548,11 @@ const searchProducts = async (req, res) => {
       currentPage,
       count: searchResult.length,
     });
-
   } catch (error) {
     console.error("Error in searchProducts:", error.message);
     res.redirect("/page");
   }
 };
-
 
 export default {
   loadHome,
@@ -482,5 +568,6 @@ export default {
   filterProduct,
   filterByPrice,
   searchProducts,
-
+  filterByPrice,
+  shopController,
 };

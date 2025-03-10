@@ -32,12 +32,16 @@ router.get('/reset-password',profileController.getResetPassPage)
 router.post('/resend-otp',profileController.resendOtp)
 router.post('/reset-passwordOtp',profileController.postNewPassword)
 router.get('/userProfile',profileController.userProfile)
+router.get('/editProfile',profileController.editProfile)
+router.post('/editProfile',profileController.postEditProfile)
+
 
 // shoping Router
-router.get('/shop',userController.loadShoppingPage)
+router.get('/shop',userController.shopController)
 router.get('/filter',userController.filterProduct)
 router.get('/filterPrice',userController.filterByPrice)
 router.get('/search',userController.searchProducts)
+
 
 // product Managment
 router.get('/productDatails', productController.productDetails);

@@ -35,10 +35,20 @@ const userSchema = new Schema ({
         type:Boolean,
         default:false
     },
-    cart:{
-        type:Schema.Types.ObjectId,
-        ref:"Cart",
-    },
+    // cart:{
+    //     type:Schema.Types.ObjectId,
+    //     ref:"Cart",
+    // },
+
+
+    cart: [
+        {
+            productId: { type: Schema.Types.ObjectId, ref: "Product" },
+            quantity: { type: Number, default: 1 }
+        }
+    ],
+    
+
     wallet:{
         type:Number,
         default:0
