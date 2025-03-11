@@ -36,7 +36,7 @@ const productDetails = async (req, res) => {
 
     } catch (error) {
         console.error("Error fetching product details:", error.message);
-        res.redirect('/page'); // Redirect if error occurs
+        res.redirect('/page'); 
     }
 };
 

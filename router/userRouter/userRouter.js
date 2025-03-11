@@ -75,6 +75,7 @@ router.post('/checkoutAddAddress',userAuth.userAuth,checkoutController.checkoutA
 router.get('/editAddressCheckout',userAuth.userAuth,checkoutController.getCheckoutEdit)
 router.post('/editAddressCheckout',userAuth.userAuth,checkoutController.editCheckoutAddress)
 router.get('/checkoutDelete',userAuth.userAuth,checkoutController.checkoutDeleteAddress)
+router.get('/getCartTotal',userAuth.userAuth,checkoutController.getCartTotal)
 router.post('/placeOrder',userAuth.userAuth,checkoutController.placeOrder)
 router.get('/orders',userAuth.userAuth,checkoutController.orderSucess)
 export default router

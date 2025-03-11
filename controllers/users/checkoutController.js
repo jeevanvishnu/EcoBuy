@@ -220,10 +220,38 @@ const checkoutDeleteAddress = async (req, res) => {
   };
 
 
+
+   //Updated Route and Controller
+const getCartTotal = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.status(401).json({ success: false, message: 'User not authenticated' });
+        }
+
+        const cart = await Cart.findOne({ userId }).populate('items.productId');
+
+        if (!cart || !cart.items || cart.items.length === 0) {
+            return res.status(400).json({ success: false, message: 'Cart is empty or invalid' });
+        }
+       let total = 0;
+     //New  CartTotal calculation
+        for (const item of cart.items) {
+            total += item.productId.salePrice * item.quantity;
+
+        }
+        //Add  CartTotal return
+
+        res.status(200).json({ success: true, total });
+    } catch (error) {
+        console.error('Error fetching cart total:', error);
+        res.status(500).json({ success: false, message: 'Failed to fetch cart total' });
+    }
+};
+
   const placeOrder = async (req, res) => {
     try {
-        const { addressId } = req.body;
-        const paymentMethod = "cod";
+        const { addressId, paymentMethod } = req.body;
         console.log("Place order req.body", req.body);
 
         const userId = req.session.user;
@@ -363,6 +391,7 @@ export default {
   editCheckoutAddress,
   checkoutDeleteAddress,
   placeOrder,
-  orderSucess
+  orderSucess,
+  getCartTotal
 
 };

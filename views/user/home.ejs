@@ -1,132 +1,140 @@
 <%- include("../partials/users/header.ejs") %>
-<body class="bg-[rgb(244,246,247)]">
-<!-- Swiper Slider -->
-<div class="swiper mySwiper w-full max-w-screen-xl mx-auto relative overflow-hidden ">
-  <div class="swiper-wrapper pt-16">
-    <% for(let i = 0; i < banner.length; i++) { %>
-      <div class="swiper-slide">
-        <img class="w-full h-72 sm:h-96 md:h-[28rem] object-cover rounded-lg shadow-lg" src="/banners/<%= banner[i].image %>" alt="Slide <%= i + 1 %>" />
-      </div>
-    <% } %>
-  </div>
-  <div class="swiper-pagination"></div>
-</div>
 
-<!-- Products Section -->
-
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    body  {
-      font-family: 'Poppins', sans-serif;
-
-    }
-  </style>
-
-
-<section class="py-14">
-  <form action="/addToCart" method="post" enctype="multipart/form-data">
-  <div class="max-w-screen-xl mx-auto px-6">
-    <h1 class="text-4xl font-bold text-center mb-10 text-gray-900 tracking-wide">Our Latest Products</h1>
-    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
-      <% products.forEach(product => { %>
-        <div class="bg-white shadow-md rounded-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
-          <div class="relative group">
-            <a href="/productDatails?id=<%= product._id %>">
-              <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>"
-                   class="w-full h-64 object-cover rounded-t-lg transition-all duration-300 group-hover:opacity-90"/>
-            </a>
-            <button class="absolute top-3 right-3 bg-white p-2 rounded-full text-gray-500 hover:bg-red-500 hover:text-white transition duration-300 shadow-md">
-              <i class="fas fa-heart text-md"></i>
-            </button>
+  <body class="bg-[rgb(244,246,247)]">
+    <!-- Swiper Slider -->
+    <div class="swiper mySwiper w-full max-w-screen-xl mx-auto relative overflow-hidden ">
+      <div class="swiper-wrapper pt-16">
+        <% for(let i=0; i < banner.length; i++) { %>
+          <div class="swiper-slide">
+            <img class="w-full h-72 sm:h-96 md:h-[28rem] object-cover rounded-lg shadow-lg"
+              src="/banners/<%= banner[i].image %>" alt="Slide <%= i + 1 %>" />
           </div>
-          <div class="p-5 flex flex-col items-center text-center">
-            <h2 class="text-lg font-semibold text-gray-800"><%= product.productName %></h2>
-            <p class="text-sm font-medium text-gray-600 mt-1">Color: <%= product.color %></p>
-            <div class="flex items-center gap-2 mt-2">
-              <p class="text-base text-gray-500 line-through font-medium">₹<%= product.regularPrice.toLocaleString('en-IN') %></p>
-              <p class="text-lg font-bold text-red-600">₹<%= product.salePrice.toLocaleString('en-IN') %></p>
-            </div>
+          <% } %>
+      </div>
+      <div class="swiper-pagination"></div>
+    </div>
 
-            <% if (product.isInCart) { %>
-              <a href="/cart" class="mt-4 w-full bg-green-500 text-white py-2 rounded-full text-md font-bold hover:opacity-90 transition duration-300 shadow-md">
-                Go to Cart
-              </a>
-            <% } else { %>
-              <button class="mt-4 w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 rounded-full text-md font-bold hover:opacity-90 transition duration-300 shadow-md addToCartBtn" data-product-id="<%= product._id %>">
-                Add to Cart
-              </button>
-            <% } %>
-         
+    <!-- Products Section -->
+
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+      body {
+        font-family: 'Poppins', sans-serif;
+
+      }
+    </style>
+
+
+    <section class="py-14">
+      <form action="/addToCart" method="post" enctype="multipart/form-data">
+        <div class="max-w-screen-xl mx-auto px-6">
+          <h1 class="text-4xl font-bold text-center mb-10 text-gray-900 tracking-wide">Our Latest Products</h1>
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-8">
+            <% products.forEach(product=> { %>
+              <div
+                class="bg-white shadow-md rounded-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
+                <div class="relative group">
+                  <a href="/productDatails?id=<%= product._id %>">
+                    <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>"
+                      class="w-full h-64 object-cover rounded-t-lg transition-all duration-300 group-hover:opacity-90" />
+                  </a>
+                  <button
+                    class="absolute top-3 right-3 bg-white p-2 rounded-full text-gray-500 hover:bg-red-500 hover:text-white transition duration-300 shadow-md">
+                    <i class="fas fa-heart text-md"></i>
+                  </button>
+                </div>
+                <div class="p-5 flex flex-col items-center text-center">
+                  <h2 class="text-lg font-semibold text-gray-800">
+                    <%= product.productName %>
+                  </h2>
+                  <p class="text-sm font-medium text-gray-600 mt-1">Color: <%= product.color %>
+                  </p>
+                  <div class="flex items-center gap-2 mt-2">
+                    <p class="text-base text-gray-500 line-through font-medium">₹<%=
+                        product.regularPrice.toLocaleString('en-IN') %>
+                    </p>
+                    <p class="text-lg font-bold text-red-600">₹<%= product.salePrice.toLocaleString('en-IN') %>
+                    </p>
+                  </div>
+
+                  <% if (product.isInCart) { %>
+                    <a href="/cart"
+                      class="mt-4 w-full bg-green-500 text-white py-2 rounded-full text-md font-bold hover:opacity-90 transition duration-300 shadow-md">
+                      Go to Cart
+                    </a>
+                    <% } else { %>
+                      <button
+                        class="mt-4 w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 rounded-full text-md font-bold hover:opacity-90 transition duration-300 shadow-md addToCartBtn"
+                        data-product-id="<%= product._id %>">
+                        Add to Cart
+                      </button>
+                      <% } %>
+
+                </div>
+              </div>
+              <% }); %>
           </div>
         </div>
-      <% }); %>
-    </div>
-  </div>
-  </form>
-</section>
-</body>
+      </form>
+    </section>
+  </body>
 
 
-<%- include('../partials/users/footer.ejs') %>
+  <%- include('../partials/users/footer.ejs') %>
 
-<script src="/script.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-
-<script>
+    <script src="/script.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 
-document.addEventListener("DOMContentLoaded", function () {
-    document.querySelectorAll(".addToCartBtn").forEach(button => {
-        button.addEventListener("click", function (event) {
+    <script>
+
+
+      document.addEventListener("DOMContentLoaded", function () {
+        document.querySelectorAll(".addToCartBtn").forEach(button => {
+          button.addEventListener("click", function (event) {
             event.preventDefault(); // Prevent default form submission
 
             let productId = this.getAttribute("data-product-id");
 
             fetch("/addToCart", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({ productId: productId })
+              method: "POST",
+              headers: {
+                "Content-Type": "application/json"
+              },
+              body: JSON.stringify({ productId: productId })
             })
-            .then(response => response.json())
-            .then(data => {
-                if  (data.status === true) { 
-                
-                Swal.fire({
+              .then(response => response.json())
+              .then(data => {
+                if (data.success === true) {
+
+                  Swal.fire({
+                    title: "Success!",
+                    text: "Product added to cart successfully.",
+                    icon: "success",
+                    timer: 1500,
+                    showConfirmButton: false
+                  });
+                } else {
+
+                  Swal.fire({
                     title: "Error!",
                     text: data.message || "Failed to add product to cart.",
                     icon: "error"
-                });
-                } else {
-
-                 
-                  
-                    Swal.fire({
-                        title: "Success!",
-                        text: "Product added to cart successfully.",
-                        icon: "success",
-                        timer: 1500,
-                        showConfirmButton: false
-                    });
+                  });
                 }
-            })
-            .catch(error => {
+              })
+              .catch(error => {
                 console.error("Error:", error);
                 Swal.fire({
-                    title: "Error!",
-                    text: "Please Login Add item to the Cart",
-                    icon: "error"
+                  title: "Error!",
+                  text: "Please Login Add item to the Cart",
+                  icon: "error"
                 });
-            });
+              });
+          });
         });
-    });
-});
+      });
 
 
 
-</script>
-
-
-
+    </script>

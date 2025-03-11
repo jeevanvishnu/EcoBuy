@@ -496,7 +496,7 @@ const postEditAddress = async (req,res) =>{
 
 
      
-        res.redirect('/userProfile')
+        res.redirect('/address')
         
     } catch (error) {
         console.error("Error in edit Address")
@@ -526,7 +526,7 @@ const deleteAddress = async (req,res) =>{
             }
         )
 
-        res.redirect('/userProfile')
+        res.redirect('/address')
 
     } catch (error) {
         console.log("Error in delete Address",error.message)

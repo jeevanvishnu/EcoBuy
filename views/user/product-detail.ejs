@@ -340,19 +340,15 @@
                                 class="mt-3 inline-block bg-blue-500 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:bg-blue-600">
                                 View Product
                             </a>
-                            <button
-                                class="mt-3 inline-block bg-blue-500 text-white px-6 py-2 rounded-md text-sm font-medium transition-colors duration-300 hover:bg-blue-600 addToCartBtn"
-                                data-product-id="<%= recommendedProduct._id %>">
-                                Add to Cart
-                            </button>
+                           
                         </div>
                     </div>
                     <% }); %>
             </div>
         </div>
     </section>
-<!-- SweetAlert2 CDN -->
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <!-- SweetAlert2 CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
     <script>
         // Image zoom functionality
@@ -383,7 +379,7 @@
                 mainImage.src = `/uploads/re-image/${imageSrc}`;
                 mainImage.style.opacity = '1';
 
-                // Update active thumbnail
+
                 document.querySelectorAll('.thumbnail').forEach(thumb => {
                     thumb.classList.remove('active');
                 });
@@ -404,52 +400,35 @@
         });
 
         increaseBtn.addEventListener('click', () => {
-            let quantity = parseInt(quantityElement.textContent);
+             quantity = parseInt(quantityElement.textContent);
             const maxQuantity = <%= product.quantity %>;
 
             if (quantity < maxQuantity) {
                 quantityElement.textContent = quantity + 1;
             } else {
-               
+
                 alert(`Sorry, only ${maxQuantity} items available in stock.`);
             }
         });
 
-      
+
         document.getElementById('addToCartBtn').addEventListener('click', () => {
-        const quantity = parseInt(document.getElementById('quantity').textContent);
-        const productId = "<%= product._id %>"; // Get the product ID from the page
-         const btn = document.getElementById('addToCartBtn');
-           const originalText = btn.innerHTML;
-        
-        fetch('/addToCart', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ productId: productId, quantity: quantity }) 
-        })
+            const quantity = parseInt(document.getElementById('quantity').textContent);
+            const productId = "<%= product._id %>"; 
+            const btn = document.getElementById('addToCartBtn');
+            const originalText = btn.innerHTML;
+
+            fetch('/addToCart', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ productId: productId, quantity: quantity }) 
+    })
         .then(response => response.json())
         .then(data => {
-            if (data.status === true) {
-                Swal.fire({
-                    title: "Error!",
-                    text: "Something went wrong. Please try again later.",
-                    icon: "error"
-                });
-                btn.innerHTML = `
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M20 6L9 17l-5-5"></path>
-                    </svg>
-                    Added to Cart!
-                `;
-                setTimeout(() => {
-                    btn.innerHTML = originalText;
-                }, 2000);
-            } else {
-
-
-
+            if (data.success) {
+              
                 Swal.fire({
                     title: "Success!",
                     text: "Product added to cart successfully.",
@@ -458,7 +437,12 @@
                     showConfirmButton: false
                 });
 
-                
+            } else {
+                Swal.fire({
+                    title: "Error!",
+                    text: data.message || "Something went wrong. Please try again later.",
+                    icon: "error"
+                });
             }
         })
         .catch(error => {
@@ -468,13 +452,11 @@
                 text: "Please Login Add To Cart",
                 icon: "error"
             });
-            btn.innerHTML = originalText;
         });
-    });
 
-       // Quantity selector
+        });
 
-
+        
 
     </script>
 

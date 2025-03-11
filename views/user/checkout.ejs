@@ -204,6 +204,8 @@
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
+
+
 <script>
     function showShippingCharge() {
         Swal.fire({
@@ -235,11 +237,37 @@
             return;
         }
 
+        // Add Check for COD limit
+      const codLimit = 1000;
+     // Call  checkTotalBeforePlaceOrder  function
+       checkTotalBeforePlaceOrder (method, codLimit );
+
+
+    }
+  //New checkTotalBeforePlaceOrder  function
+  async function checkTotalBeforePlaceOrder (method, codLimit ) {
+       //Add Get Cart total  API
+        const response = await fetch('/getCartTotal');
+        const data = await response.json();
+
+         //Check  If cod Limit
+        if (data.total > codLimit ) {
+            Swal.fire('Error', `COD is only available for orders under ₹${codLimit.toLocaleString('en-IN')}. Please choose another payment method.`, 'error');
+            return;
+        }
+
+        const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
         const orderData = {
             addressId: selectedAddress.value,
-            paymentMethod : method
+            paymentMethod: method
         };
 
+        //Call  New PlaceOrder API
+       sendOrderToPlace(orderData);
+
+
+    }
+     function  sendOrderToPlace ( orderData ){
         fetch('/placeOrder', {
             method: 'POST',
             headers: {
@@ -268,6 +296,7 @@
             console.error('Error:', error);
             Swal.fire('Error', 'An error occurred while placing the order', 'error');
         });
+
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -278,19 +307,19 @@
     });
 
     function confirmDelete(event, addressId) {
-    event.preventDefault();
-    Swal.fire({
-        title: "Are you sure?",
-        text: "This address will be deleted permanently!",
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#d33",
-        cancelButtonColor: "#3085d6",
-        confirmButtonText: "Yes, delete it!"
-    }).then((result) => {
-        if (result.isConfirmed) {
-            window.location.href = "/checkoutDelete?id=" + addressId;
-        }
-    });
-}
+        event.preventDefault();
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This address will be deleted permanently!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = "/checkoutDelete?id=" + addressId;
+            }
+        });
+    }
 </script>
