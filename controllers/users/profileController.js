@@ -442,6 +442,7 @@ const editAddress = async (req,res) =>{
     try {
         const addressId = req.query.id
         const user = req.session.user
+        const userData = await User.findById(user)
         const currentAddress = await Address.findOne({
             "address._id": addressId
          })
@@ -458,7 +459,7 @@ const editAddress = async (req,res) =>{
         if(!addressData){
             return res.redirect('/page')
         }
-        res.render('user/edit-address',{address:addressData ,user : user})
+        res.render('user/edit-address',{address:addressData ,user : userData})
 
     } catch (error) {
         console.error("Error of edit Address", error.message)

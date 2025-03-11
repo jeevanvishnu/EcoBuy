@@ -19,7 +19,7 @@
 
       <!-- Form Content -->
       <div class="px-6 py-6 bg-white">
-        <form action="/editProfile?id=<%=user._id %>" method="POST" class="space-y-6">
+        <form action="/editProfile?id=<%=user._id %>" method="POST" class="space-y-6" id="editProfileForm">
           <!-- Profile Picture Upload -->
           <div class="flex flex-col items-center pb-6 border-b border-gray-200">
             <div class="relative">
@@ -28,7 +28,7 @@
               </div>
               <button type="button" class="absolute bottom-0 right-0 bg-indigo-600 text-white p-1.5 rounded-full shadow-md hover:bg-indigo-700 transition-colors" title="Change profile picture">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
                   <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" />
                 </svg>
               </button>
@@ -47,6 +47,7 @@
               </div>
               <input type="text" name="name" id="name" value="<%= user.name %>" class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 block w-full py-3 sm:text-sm border-gray-300 rounded-md" placeholder="Your full name">
             </div>
+             <span id="nameError" class="text-red-500 text-sm hidden"></span>
           </div>
 
           <!-- Phone Number Field -->
@@ -60,12 +61,13 @@
               </div>
               <input type="tel" name="mobile" id="phone" value="<%= user.mobile || '' %>" class="pl-10 focus:ring-indigo-500 focus:border-indigo-500 block w-full py-3 sm:text-sm border-gray-300 rounded-md" placeholder="Your phone number">
             </div>
+             <span id="phoneError" class="text-red-500 text-sm hidden"></span>
           </div>
 
           <!-- Submit and Cancel Buttons -->
            
           <div class="flex space-x-4 pt-4">
-            <button  type="submit" class="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 border border-transparent rounded-lg py-3 px-6 flex items-center justify-center text-base font-medium text-white hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-md transition-all transform hover:-translate-y-0.5">
+            <button  type="button" id="saveChangesBtn" class="flex-1 bg-gradient-to-r from-indigo-500 to-purple-600 border border-transparent rounded-lg py-3 px-6 flex items-center justify-center text-base font-medium text-white hover:from-indigo-600 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 shadow-md transition-all transform hover:-translate-y-0.5">
               Save Changes
             </button>
         
@@ -79,12 +81,84 @@
   </div>
 </div>
 <script src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-<script>
-  document.addEventListener('', function() {
-  
-  });
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
- 
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const saveChangesBtn = document.getElementById('saveChangesBtn');
+    const form = document.getElementById('editProfileForm'); // Corrected line
+    const nameInput = document.getElementById('name');
+    const phoneInput = document.getElementById('phone');
+    const nameError = document.getElementById('nameError');
+    const phoneError = document.getElementById('phoneError');
+
+    saveChangesBtn.addEventListener('click', function(event) {
+      event.preventDefault(); 
+
+     
+      nameError.classList.add('hidden');
+      phoneError.classList.add('hidden');
+
+      
+      let isValid = true;
+
+      if (nameInput.value.trim() === '') {
+        nameError.textContent = 'Name is required.';
+        nameError.classList.remove('hidden');
+        isValid = false;
+      }
+
+      if (phoneInput.value.trim() === '') {
+        phoneError.textContent = 'Phone number is required.';
+        phoneError.classList.remove('hidden');
+        isValid = false;
+      } else if (!/^\d{10}$/.test(phoneInput.value.trim())) {
+        phoneError.textContent = 'Phone number must be 10 digits.';
+        phoneError.classList.remove('hidden');
+        isValid = false;
+      }
+
+
+      var toastMixin = Swal.mixin({
+    toast: true,
+    icon: 'success',
+    title: 'General Title',
+    animation: false,
+    position: 'top-right',
+    showConfirmButton: false,
+    timer: 2000,
+    timerProgressBar: true,
+    didOpen: (toast) => {
+      toast.addEventListener('mouseenter', Swal.stopTimer)
+      toast.addEventListener('mouseleave', Swal.resumeTimer)
+    }
+  });
+      
+
+      if (isValid) {
+        saveChangesBtn.addEventListener('click',()=>{
+          toastMixin.fire({
+            animation:true,
+            title:"Profile Edit SucessFully"
+          }).then(()=>{
+            
+              form.submit()
+           
+          })
+        })
+      } else {
+          Toastify({
+          text: "Please correct the errors in the form.",
+          duration: 3000, 
+          close: true,
+          gravity: "top",
+          position: "right",
+          backgroundColor: "#dc3545", 
+          stopOnFocus: true,
+        }).showToast();
+      }
+    });
+  });
 </script>
 
 <%- include("../partials/users/footer.ejs") %>
