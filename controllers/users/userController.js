@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import Category from "../../models/categorySchema.js";
 import Product from "../../models/productSchema.js";
 import Banner from "../../models/bannerSchema.js";
+import Cart from "../../models/cartSchema.js";
 // Setup Signup page
 const loadSignUp = (req, res) => {
   try {
@@ -25,9 +26,12 @@ const pageNoteFound = (req, res) => {
   }
 };
 
+
+
 const loadHome = async (req, res) => {
   try {
     const today = new Date().toISOString();
+    let cartItem = [];
     const findBanner = await Banner.find({
       startDate: { $lt: new Date(today) },
       endDate: { $gt: new Date(today) },
@@ -45,12 +49,25 @@ const loadHome = async (req, res) => {
     productData = productData.slice(0, 12);
 
     if (user) {
-      const userData = await User.findOne({ _id: user });
+      const cart = await Cart.findOne({ user: user._id }).populate('items.productId'); 
+      let cartItems = [];
+
+      if (cart) {
+        cartItems = cart.items.map(item => item.productId._id.toString()); 
+      }
+
+      const userData = await User.findOne({_id:user});
+
+      const products = productData.map(product => ({ 
+        ...product.toObject(),
+        isInCart: cartItems.includes(product._id.toString())
+      }));
+      console.log(products,"Home data")
 
       console.log(userData);
       return res.render("user/home", {
         user: userData,
-        products: productData,
+        products: products, 
         banner: findBanner || [],
       });
     } else {
@@ -64,6 +81,10 @@ const loadHome = async (req, res) => {
     res.status(500).send("Internal Server Error");
   }
 };
+
+
+    
+
 
 // create a function on generate otp
 const generateOtp = () => {

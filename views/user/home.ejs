@@ -31,7 +31,7 @@
       <% products.forEach(product => { %>
         <div class="bg-white shadow-md rounded-lg overflow-hidden transform transition-all duration-300 hover:scale-105 hover:shadow-xl">
           <div class="relative group">
-            <a href="/">
+            <a href="/productDatails?id=<%= product._id %>">
               <img src="/uploads/re-image/<%= product.productImage[0] %>" alt="<%= product.productName %>"
                    class="w-full h-64 object-cover rounded-t-lg transition-all duration-300 group-hover:opacity-90"/>
             </a>
@@ -46,12 +46,16 @@
               <p class="text-base text-gray-500 line-through font-medium">₹<%= product.regularPrice.toLocaleString('en-IN') %></p>
               <p class="text-lg font-bold text-red-600">₹<%= product.salePrice.toLocaleString('en-IN') %></p>
             </div>
-          
-            
-            <button class="mt-4 w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 rounded-full text-md font-bold hover:opacity-90 transition duration-300 shadow-md addToCartBtn" data-product-id="<%= product._id %>">
-              Add to Cart
-            </button>
-            
+
+            <% if (product.isInCart) { %>
+              <a href="/cart" class="mt-4 w-full bg-green-500 text-white py-2 rounded-full text-md font-bold hover:opacity-90 transition duration-300 shadow-md">
+                Go to Cart
+              </a>
+            <% } else { %>
+              <button class="mt-4 w-full bg-gradient-to-r from-blue-500 to-indigo-600 text-white py-2 rounded-full text-md font-bold hover:opacity-90 transition duration-300 shadow-md addToCartBtn" data-product-id="<%= product._id %>">
+                Add to Cart
+              </button>
+            <% } %>
          
           </div>
         </div>
