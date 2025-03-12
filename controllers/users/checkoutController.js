@@ -41,13 +41,13 @@ const getCheckout = async (req, res) => {
         subtotal += item.totalPrice;
       });
   
-      const discount = 0; 
+      const discount = 0; // Calculate dynamic discount if needed
       const totalAmount = subtotal - discount;
   
-    
+      // Get user addresses
       const addresses = await Address.find({ userId: userId });
       console.log(addresses,"get Address")
-      
+      // Render checkout page with all necessary data
       res.render("user/checkout", {
         addresses: addresses || [],
         cart: cart,
@@ -328,8 +328,10 @@ const getCartTotal = async (req, res) => {
             totalPrice: cartTotal,
             discount: discountAmount,
             finalAmount: finalAmount,
-            address: userId, 
+            deliveryAddress : addressFound, 
+            paymentMethod:paymentMethod,
             status: 'Pending', 
+
         });
 
         await order.save();

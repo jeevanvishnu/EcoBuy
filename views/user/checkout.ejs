@@ -172,25 +172,22 @@
                         </div>
 
                         <!-- Payment Options -->
-                        <div class="space-y-3">
-                            <label class="flex items-center p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="payment" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
-                                <span class="ml-2 flex items-center">
-                                    <img src="/assets/images.jpg" alt="Razorpay" class="h-8"> RozoRupee
-                                </span>
-                            </label>
-
-                            <label class="flex items-center p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="payment" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
-                                <span class="ml-2 text-gray-700">Other Methods</span>
-                            </label>
-
-                            <label class="flex items-center p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
-                                <input type="radio" name="payment" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
-                                <span class="ml-2 text-gray-700">Cash on delivery</span>
-                            </label>
-                        </div>
-                    </div>
+                        <label class="flex items-center p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment" value="Credit Card" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                            <span class="ml-2 flex items-center">
+                              <img src="/assets/images.jpg" alt="Razorpay" class="h-8"> RozoRupee
+                            </span>
+                          </label>
+                          
+                          <label class="flex items-center p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment" value="Other Methods" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-gray-700">Other Methods</span>
+                          </label>
+                          
+                          <label class="flex items-center p-3 border border-gray-200 rounded-md cursor-pointer hover:bg-gray-50">
+                            <input type="radio" name="payment" value="Cash on Delivery" class="h-4 w-4 text-indigo-600 border-gray-300 focus:ring-indigo-500">
+                            <span class="ml-2 text-gray-700">Cash on delivery</span>
+                          </label>
 
                     <!-- Place Order Button -->
                     <button id="placeOrderBtn" class="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-3 px-4 rounded-md transition duration-150 ease-in-out">
@@ -217,33 +214,34 @@
     }
 
     function placeOrder() {
+    
         const selectedAddress = document.querySelector('input[name="selectedAddress"]:checked');
         if (!selectedAddress) {
             Swal.fire('Error', 'Please select a shipping address', 'error');
             return;
         }
 
-        const paymentMethod = document.querySelector('input[name="payment"]:checked');
 
-        if (!paymentMethod) {
-            Swal.fire('Error', 'Please select a payment method', 'error');
-            return;
-        }
-
-        //  Check for Cash on Delivery
-        let method = paymentMethod.nextElementSibling.textContent.trim()
-        if (method !== 'Cash on delivery') {
-            Swal.fire('Error', 'Only Cash on Delivery is available at the moment', 'error');
-            return;
-        }
-
-        // Add Check for COD limit
-      const codLimit = 1000;
-     // Call  checkTotalBeforePlaceOrder  function
-       checkTotalBeforePlaceOrder (method, codLimit );
-
-
+    const paymentMethod = document.querySelector('input[name="payment"]:checked');
+    if (!paymentMethod) {
+        Swal.fire('Error', 'Please select a payment method', 'error');
+        return;
     }
+
+    let method = paymentMethod.value;
+    let displayMethod = paymentMethod.nextElementSibling.textContent.trim();
+    
+    // Check for Cash on Delivery
+    if (displayMethod !== 'Cash on delivery') {
+        Swal.fire('Error', 'Only Cash on Delivery is available at the moment', 'error');
+        return;
+    }
+
+    // Add Check for COD limit
+    const codLimit = 1000;
+    // Call checkTotalBeforePlaceOrder function
+    checkTotalBeforePlaceOrder(method, codLimit);
+}
   //New checkTotalBeforePlaceOrder  function
   async function checkTotalBeforePlaceOrder (method, codLimit ) {
        //Add Get Cart total  API

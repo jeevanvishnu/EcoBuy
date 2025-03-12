@@ -38,18 +38,29 @@ const orderSchema = new Schema({
         required:true,
 
     },
-    address:{
-        type:Schema.Types.ObjectId,
-        ref:"User",
-        required:true
+    // address:{
+    //     type:Schema.Types.ObjectId,
+    //     ref:"User",
+    //     required:true
+    // },
+
+    deliveryAddress: {
+        type: Array,
+        required: true
     },
+
     invoiceDate:{
         type:Date
+    },
+    paymentMethod: {
+        type: String,
+        required: true,
+        enum: ['Credit Card', 'PayPal', 'Cash on Delivery', 'Bank Transfer', 'Wallet']
     },
     status:{
         type:String,
         required:true,
-        enum:['Pending','Processing','Shipped','Cancellec','Return','Request','Returned']
+        enum:['Pending','Processing','Shipped','Cancelled','Return','Request','Returned']
     },
     createdon:{
         type:Date,
