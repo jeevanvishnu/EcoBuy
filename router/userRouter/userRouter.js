@@ -8,6 +8,7 @@ import profileController from "../../controllers/users/profileController.js"
 import userAuth from '../../middlewares/auth.js'
 import cartController from "../../controllers/users/cartController.js"
 import checkoutController from "../../controllers/users/checkoutController.js"
+import orderController from "../../controllers/users/orderController.js"
 
 router.get('/',userMiddleWare.checkBlockedUser,userController.loadHome)
 router.get('/signup',userMiddleWare.loginMiddle,userController.loadSignUp)
@@ -80,7 +81,8 @@ router.post('/placeOrder',userAuth.userAuth,checkoutController.placeOrder)
 router.get('/orders',userAuth.userAuth,checkoutController.orderSucess)
 
 // order Managment
-router.get('/order')
+router.get('/order',userAuth.userAuth,orderController.orderDetails)
+router.get('/orderStatus/:id',userAuth.userAuth,orderController.loadorderStatus)
 
 
 export default router

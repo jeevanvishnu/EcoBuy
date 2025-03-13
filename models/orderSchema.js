@@ -9,6 +9,15 @@ const orderSchema = new Schema({
         default:()=>uuidv4(),
         unique:true
     },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    cartId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Cart'
+    },
     orderedItem:[{
         product:{
             type:Schema.Types.ObjectId,
@@ -38,12 +47,7 @@ const orderSchema = new Schema({
         required:true,
 
     },
-    // address:{
-    //     type:Schema.Types.ObjectId,
-    //     ref:"User",
-    //     required:true
-    // },
-
+    
     deliveryAddress: {
         type: Array,
         required: true
@@ -71,7 +75,13 @@ const orderSchema = new Schema({
     couponApplied:{
         type:Boolean,
         default:false
+    },
+    date: {
+        type: Date,
+        default: Date.now,
+        required: true
     }
+
 })
 
 const order = mongoose.model("Order",orderSchema)

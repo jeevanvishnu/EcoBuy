@@ -136,6 +136,7 @@ const getCheckoutEdit = async (req, res) => {
     try {
         const addressId = req.query.id
         const user = req.session.user
+        const userData = await User.findOne({_id:user});
         const currentAddress = await Address.findOne({
             "address._id": addressId
          })
@@ -152,7 +153,7 @@ const getCheckoutEdit = async (req, res) => {
         if(!addressData){
             return res.redirect('/page')
         }
-        res.render('user/edit-checkout',{address:addressData ,user : user})
+        res.render('user/edit-checkout',{address:addressData ,user : userData})
 
     } catch (error) {
         console.error("Error of edit Address", error.message)
@@ -325,6 +326,8 @@ const getCartTotal = async (req, res) => {
        
         const order = new Order({
             orderedItem: orderedItems,
+            cartId:cart._id,
+            userId,
             totalPrice: cartTotal,
             discount: discountAmount,
             finalAmount: finalAmount,

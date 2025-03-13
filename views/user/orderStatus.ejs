@@ -1,0 +1,268 @@
+<%- include("../partials/users/header.ejs") %>
+<div class="font-sans bg-gray-100 min-h-screen flex flex-col">
+  <div class="container max-w-6xl mx-auto my-5 py-8 px-8 bg-white shadow-xl rounded-2xl animate-fade-in">
+    <!-- Order Info -->
+    <div class="flex justify-between items-center pb-5 mb-7 border-b-2 border-gray-200">
+      <h1 class="text-2xl sm:text-3xl font-semibold text-gray-800">Order #<%= order._id %></h1>
+    </div>
+
+    <!-- Tracking Container -->
+    <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 relative overflow-hidden shadow-md">
+      <div class="flex justify-between items-center relative z-10 px-10">
+        <%
+          let progressWidth = 0;
+          const status = order.status;
+          if (status === 'Pending') progressWidth = 25;
+          else if (status === 'Processing') progressWidth = 50;
+          else if (status === 'Shipped') progressWidth = 75;
+          else if (status === 'Delivered') progressWidth = 100;
+        %>
+        <div class="absolute top-1/2 left-0 h-1 bg-indigo-500 transform -translate-y-1/2 transition-width duration-1000 ease-in-out z-0" style="width: <%= progressWidth %>%"></div>
+
+        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= status === 'Pending' ? 'active' : (status === 'Processing' || status === 'Shipped' || status === 'Delivered') ? 'completed' : '' %>">
+          <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-2 relative transition-all duration-300 shadow-md">
+            <i class="fas fa-box text-xl text-gray-500 transition-all duration-300"></i>
+          </div>
+          <div class="font-semibold text-gray-600 mt-2 text-center text-sm">Order Placed</div>
+          <div class="text-xs text-gray-500 mt-1"><%= new Date(order.date).toDateString() %></div>
+        </div>
+
+        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= status === 'Processing' ? 'active' : (status === 'Shipped' || status === 'Delivered') ? 'completed' : '' %>">
+          <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-2 relative transition-all duration-300 shadow-md">
+            <i class="fas fa-box-open text-xl text-gray-500 transition-all duration-300"></i>
+          </div>
+          <div class="font-semibold text-gray-600 mt-2 text-center text-sm">Processing</div>
+          <div class="text-xs text-gray-500 mt-1">Preparing Order</div>
+        </div>
+
+        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= status === 'Shipped' ? 'active' : status === 'Delivered' ? 'completed' : '' %>">
+          <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-2 relative transition-all duration-300 shadow-md">
+            <i class="fas fa-truck-fast text-xl text-gray-500 transition-all duration-300"></i>
+          </div>
+          <div class="font-semibold text-gray-600 mt-2 text-center text-sm">On The Way</div>
+          <div class="text-xs text-gray-500 mt-1">In Transit</div>
+        </div>
+
+        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= status === 'Delivered' ? 'active' : '' %>">
+          <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-2 relative transition-all duration-300 shadow-md">
+            <i class="fas fa-house-circle-check text-xl text-gray-500 transition-all duration-300"></i>
+          </div>
+          <div class="font-semibold text-gray-600 mt-2 text-center text-sm">Delivered</div>
+          <div class="text-xs text-gray-500 mt-1">Package Arrived</div>
+        </div>
+      </div>
+
+      <% if (status === 'Shipped') { %>
+        <div class="absolute bottom-5 left-0 w-full h-10 pointer-events-none">
+          <div class="absolute bottom-2 left-0 text-2xl text-indigo-500 animate-moveTruck">
+            <i class="fas fa-truck"></i>
+          </div>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Order Details -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
+      <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">Shipping Address</h3>
+        <% if (order && order.deliveryAddress && order.deliveryAddress.length > 0) { %>
+          <% const address = order.deliveryAddress[0] %>
+          <p class="text-gray-600"><%= address.name || 'N/A' %></p>
+          <p class="text-gray-600"><%= address.addressType || 'N/A' %></p>
+          <p class="text-gray-600"><%= address.landMark || 'N/A' %></p>
+          <p class="text-gray-600"><%= address.city || 'N/A' %>, <%= address.state || 'N/A' %></p>
+          <p class="text-gray-600"><%= address.pincode || 'N/A' %></p>
+          <p class="text-gray-600">Phone: <%= address.phone || 'N/A' %></p>
+        <% } else { %>
+          <p class="text-gray-500">Address not available</p>
+        <% } %>
+      </div>
+      <div class="p-4 bg-gray-50 rounded-xl shadow-md">
+        <h3 class="text-lg font-semibold text-gray-800 mb-3">Payment Details</h3>
+        <p class="text-gray-600">Method: <%= order.paymentMethod || 'N/A' %></p>
+        <p class="text-gray-600">Total Amount: ₹<%= order.finalAmount ? order.finalAmount.toFixed(2) : '0.00' %></p>
+        <% if (order.discount > 0) { %>
+          <p class="text-gray-600">Discount: ₹<%= order.discount.toFixed(2) %></p>
+        <% } %>
+      </div>
+    </div>
+
+    <!-- Product Table -->
+    <div class="overflow-x-auto mt-8">
+      <table class="min-w-full bg-white rounded-xl shadow-md">
+        <thead>
+          <tr class="bg-gray-100">
+            <th class="py-3 px-4 text-center font-medium text-gray-700">Image</th>
+            <th class="py-3 px-4 text-center font-medium text-gray-700">Product ID</th>
+            <th class="py-3 px-4 text-center font-medium text-gray-700">Quantity</th>
+            <th class="py-3 px-4 text-center font-medium text-gray-700">Price</th>
+            <th class="py-3 px-4 text-center font-medium text-gray-700">Total</th>
+            <th class="py-3 px-4 text-center font-medium text-gray-700">Status</th>
+            <th class="py-3 px-4 text-center font-medium text-gray-700">Action</th>
+          </tr>
+        </thead>
+        <tbody>
+            <% order.orderedItem.forEach(item => { %>
+              <tr>
+                <td>
+                    <% if (item.product && item.product.productImage && item.product.productImage.length > 0) { %>
+                      <img class="product-image" src="/uploads/re-image/<%= item.product.productImage[0] %>" alt="<%= item.product.productName %>">
+                    <% } else { %>
+                      <span>No Image</span>  
+                    <% } %>
+                  </td>
+                <td class="py-3 px-4 text-center text-gray-600"><%= item.product.productName%></td>
+                <td class="py-3 px-4 text-center text-gray-600"><%= item.quantity %></td>
+                <td class="py-3 px-4 text-center text-gray-600">₹<%= item.price.toFixed(2) %></td>
+                <td class="py-3 px-4 text-center text-gray-600">₹<%= (item.price * item.quantity).toFixed(2) %></td>
+                <td class="py-3 px-4 text-center text-gray-600"><%= order.status %></td>
+                <td class="py-3 px-4 text-center">
+                  <% if (order.status === 'Pending' || order.status === 'Shipped') { %>
+                    <form action="/cancelorder/<%= order._id %>/<%= item.product %>" method="POST" class="inline">
+                      <button type="submit" class="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded-md text-sm">Cancel</button>
+                    </form>
+                  <% } else if (order.status === 'Delivered') { %>
+                    <button type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white py-2 px-4 rounded-md text-sm" onclick="openReturnModal('<%= order._id %>', '<%= item.product %>')">
+                      Return
+                    </button>
+                  <% } %>
+                </td>
+              </tr>
+            <% }); %>
+          </tbody>
+      </table>
+    </div>
+
+    <!-- Total Section -->
+    <div class="text-right mt-8 p-4 bg-gray-50 rounded-xl">
+      <p class="text-xl font-semibold text-gray-800">Total Amount: ₹<%= order.finalAmount.toFixed(2) %></p>
+    </div>
+
+    <!-- Retry Payment -->
+    <% if (order.status === 'Payment Pending') { %>
+      <div class="text-center mt-5">
+        <p class="text-red-500 font-bold">Your payment failed. Please try again.</p>
+        <button onclick="retryPayment('<%= order._id %>')" class="bg-indigo-500 hover:bg-indigo-700 text-white py-2 px-6 rounded-md text-lg">Retry Payment</button>
+      </div>
+    <% } %>
+  </div>
+
+  <!-- Modal for Return Reason -->
+  <div id="returnModal" class="fixed z-50 top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center hidden">
+    <div class="bg-white rounded-xl shadow-lg p-6 w-3/4 md:w-1/2">
+      <span class="close absolute top-2 right-2 text-gray-500 hover:text-gray-800 cursor-pointer text-2xl" onclick="closeReturnModal()">×</span>
+      <h2 class="text-xl font-semibold text-gray-800 mb-4">Return Reason</h2>
+      <form id="returnReasonForm">
+        <div class="mb-4">
+          <textarea id="returnReason" placeholder="Please provide a reason for the return..." required class="w-full h-32 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
+        </div>
+        <button type="submit" class="bg-indigo-500 hover:bg-indigo-700 text-white py-2 px-6 rounded-md">Submit</button>
+      </form>
+    </div>
+  </div>
+
+  <%- include('../partials/users/footer.ejs') %>
+
+  <script>
+   document.addEventListener('DOMContentLoaded', function() {
+      // Animate progress bar on load
+      setTimeout(() => {
+        const progress = document.querySelector('.absolute');
+        if (progress) {
+          progress.style.transition = 'width 1.5s ease-in-out';
+        }
+      }, 100);
+
+      // Add hover effects for stage icons
+      const stageIcons = document.querySelectorAll('.w-14');
+      stageIcons.forEach(icon => {
+        icon.addEventListener('mouseenter', () => {
+          if (!icon.closest('.flex').classList.contains('active')) {
+            icon.style.transform = 'translateY(-8px)';
+          }
+        });
+
+        icon.addEventListener('mouseleave', () => {
+          if (!icon.closest('.flex').classList.contains('active')) {
+            icon.style.transform = 'translateY(0)';
+          }
+        });
+      });
+    });
+
+    // Your existing message handling code
+    <% if (message) { %>
+      Swal.fire({
+        text: '<%= message %>',
+        icon: 'error',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+        timerProgressBar: true
+      });
+    <% } %>
+
+    function openReturnModal(orderId, productId) {
+      document.getElementById('returnModal').classList.remove('hidden');
+      document.getElementById('returnReasonForm').onsubmit = function(event) {
+        event.preventDefault(); // Prevent the default form submission
+        const reason = document.getElementById('returnReason').value;
+        // Submit the reason to the server
+        fetch(`/returnorder/${orderId}/${productId}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({ reason }),
+        })
+        .then(response => {
+          if (response.ok) {
+            // Handle success (e.g., refresh the page or show a success message)
+            location.reload();
+          } else {
+            // Handle error
+            alert('Failed to submit return reason.');
+          }
+        });
+        closeReturnModal();
+      };
+    }
+
+    function closeReturnModal() {
+      document.getElementById('returnModal').classList.add('hidden');
+      document.getElementById('returnReason').value = ''; // Clear the textarea
+    }
+  </script>
+  <style>
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-fade-in {
+      animation: fadeIn 0.8s ease-out forwards;
+    }
+
+    @keyframes moveTruck {
+      0% {
+        transform: translateX(-100px);
+      }
+
+      100% {
+        transform: translateX(calc(100% + 100px));
+      }
+    }
+
+    .animate-moveTruck {
+      animation: moveTruck 8s linear infinite;
+    }
+  </style>
+</div>
