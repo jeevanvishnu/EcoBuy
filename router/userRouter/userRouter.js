@@ -78,4 +78,9 @@ router.get('/checkoutDelete',userAuth.userAuth,checkoutController.checkoutDelete
 router.get('/getCartTotal',userAuth.userAuth,checkoutController.getCartTotal)
 router.post('/placeOrder',userAuth.userAuth,checkoutController.placeOrder)
 router.get('/orders',userAuth.userAuth,checkoutController.orderSucess)
+
+// order Managment
+router.get('/order')
+
+
 export default router

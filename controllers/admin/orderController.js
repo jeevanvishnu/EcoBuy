@@ -1,6 +1,4 @@
 import Order from "../../models/orderSchema.js"
-import Address from "../../models/addressSchema.js";
-import User from "../../models/userSchema.js";
 
 // In loadOrderManagment
 const loadOrderManagment = async (req, res) => {
