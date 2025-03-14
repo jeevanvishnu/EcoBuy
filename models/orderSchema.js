@@ -31,7 +31,8 @@ const orderSchema = new Schema({
         price:{
             type:Number,
             default:0
-        }
+        },
+        
 
     }],
     totalPrice:{
@@ -51,6 +52,10 @@ const orderSchema = new Schema({
     deliveryAddress: {
         type: Array,
         required: true
+    },
+    cancelReason:{
+        type:String,
+        default:null
     },
 
     invoiceDate:{

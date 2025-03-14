@@ -83,6 +83,6 @@ router.get('/orders',userAuth.userAuth,checkoutController.orderSucess)
 // order Managment
 router.get('/order',userAuth.userAuth,orderController.orderDetails)
 router.get('/orderStatus/:id',userAuth.userAuth,orderController.loadorderStatus)
-
+router.post('/cancelOrder/:orderId/:productId',userAuth.userAuth,orderController.postCancelOrder)
 
 export default router

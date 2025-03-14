@@ -134,6 +134,9 @@
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                  <% if(order.cancelReason) {%>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cancel Reason</th>
+                    <% } %>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
@@ -195,16 +198,17 @@
                       <input type="hidden" name="orderId" value="<%= order._id %>">
                       <input type="hidden" name="productId" value="<%= item.product ? item.product._id : '' %>">
                       
+                      
                       <div class="flex space-x-2">
                         <select name="status" <%= order.status === 'Cancelled' ? 'disabled' : '' %>>
                          
-                          <%console.log(item,"this is item");%>
+                          
                           
                         <% if (order.status !== 'Cancelled') { %>
                             <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
                             <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
                             <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                            <option value="Shipped" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                            <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
                             <option value="Return" <%= order.status === 'Return' ? 'selected' : '' %>>Return</option>
                         <% } else { %>
                             <option value="Cancelled" selected>Cancelled</option>
@@ -214,7 +218,16 @@
                       <%= (order.status && order.status === 'Cancelled') ? 'Cancelled' : 'Update' %>
                   </button>
                       </div>
+                      
+                     
                     </form>
+                  </td>
+                  <td class="px-6 py-4 whitespace-nowrap text-sm text-black font-bold">
+                    <% if(order.cancelReason) {%>
+                    <%= order.cancelReason  %>
+                      
+                        
+                        <% } %>
                   </td>
                 </tr>
                 <% }); %>
@@ -226,5 +239,3 @@
     </div>
   </div>
 </body>
-
-

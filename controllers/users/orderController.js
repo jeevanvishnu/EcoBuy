@@ -35,6 +35,7 @@ const loadorderStatus = async (req, res) => {
     try {
         const orderId = req.params.id;
         const userId = req.session.user;
+        const userData = await User.findOne({ _id:userId});
         console.log(userId)
         console.log('Attempting to find order with ID:', orderId);
         
@@ -65,7 +66,7 @@ const loadorderStatus = async (req, res) => {
         }
 
         res.render('user/orderStatus', {
-            user: userId,
+            user: userData,
             order: populatedOrder,
             message: req.query.error || null
         });
@@ -88,8 +89,37 @@ const loadorderStatus = async (req, res) => {
     }
 };
 
+const postCancelOrder = async (req,res) =>{
+    const { orderId } = req.params;
+    const { reason } = req.body;
+    console.log(reason,"this is  reson")
+    try {
+        const order = await Order.findById(orderId);
+
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        if (order.status !== 'Pending' && order.status !== 'Processing') {
+            return res.status(400).json({ message: 'Order cannot be cancelled at this stage' });
+        }
+
+        order.status = 'Cancelled';
+        order.cancelReason = reason;
+        await order.save();
+
+        res.status(200).json({ message: 'Order cancelled successfully' });
+
+    } catch (error) {
+        console.error(error.message);
+        res.status(500).json({ message: 'Failed to cancel order' });
+    }
+}
+
+ 
 
 export default {
     orderDetails,
-    loadorderStatus
+    loadorderStatus,
+   postCancelOrder
 }
