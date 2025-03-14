@@ -75,5 +75,7 @@ router.get('/deleteBanner',adminAuth,bannerController.deleteBanner)
 
 // Order Managment
 router.get('/orderManagment',adminAuth,orderController.loadOrderManagment)
-
+router.post('/updateOrderStatus',adminAuth,orderController.updateOrderStatus)
+router.get('/orderDetails/:id',adminAuth,orderController.loadOrderDetails)
+router.post('/updateProductStatus',adminAuth,orderController.updateProductStatus)
 export default router;

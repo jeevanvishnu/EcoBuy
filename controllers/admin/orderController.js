@@ -36,8 +36,90 @@ const loadOrderManagment = async (req, res) => {
     }
 };
 
+// post a order Status
+const loadOrderDetails = async (req, res) => {
+    const orderId = req.params.id;
+    console.log(orderId,"this is loadOrderDetails orderid")
+
+    try {
+        const order = await Order.findById(orderId)
+            .populate({
+                path: 'orderedItem.product',
+                model: 'Product',
+                select: 'productName productImage price'
+            });
+
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+        res.render('admin/orderDetails', { order, admin: req.session.admin, 
+            active: 'order'   });
+    } catch (error) {
+        console.error('Error fetching order details:', error.message);
+        res.status(500).send('Internal Server Error');
+    }
+};
+
+// update Orderdetails 
+const updateOrderStatus = async (req,res)=>{
+    try {
+        const { orderId, productId,status } = req.body;
+   
+        const order = await Order.updateOne(
+            { _id: orderId, "orderedItem.productId": productId }, 
+            { $set: { "orderedItem.$.productStatus": status } } 
+        );
+        
+        res.redirect()
+        
+      
+    } catch (error) {
+        console.error('Error:', error);
+        return res.status(500).json({ success: false, message: 'An error occurred', error });
+    }
+    
+}
+
+
+
+
+// update updateProduct details
+
+const updateProductStatus = async (req, res) => {
+    const { orderId, productId, status } = req.body;
+
+    
+
+    try {
+       
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).send('Order not found');
+        }
+
+       
+        const item = order.orderedItem.find(item => item.product.toString() === productId);
+        if (!item) {
+            console.error('Product not found in order:', order.orderedItem);
+            return res.status(404).send('Product not found in order');
+        }
+
+        order.status = status;
+        await order.save(); 
+
+        res.redirect(`/admin/orderDetails/${orderId}`);
+
+    } catch (error) {
+        console.error('Error updating product status:', error);
+        res.status(500).send('Internal Server Error');
+    }
+};
 
 
 export default {
-    loadOrderManagment 
+    loadOrderManagment ,
+    loadOrderDetails,
+    updateProductStatus,
+    updateOrderStatus
 }
