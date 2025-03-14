@@ -149,7 +149,7 @@
                     <i class="fas fa-times-circle mr-1"></i> Cancel
                   </button>
                 <% } else if (order.status === 'Delivered') { %>
-                  <button type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white py-2 px-4 rounded-md text-sm flex items-center mx-auto" onclick="openReturnModal('<%= order._id.$oid %>', '<%= item.product.$oid %>')">
+                  <button type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white py-2 px-4 rounded-md text-sm flex items-center mx-auto" onclick="openReturnModal('<%= order._id._id %>', '<%= item.product._id %>')">
                     <i class="fas fa-undo-alt mr-1"></i> Return
                   </button>
                 <% } %>
@@ -211,7 +211,7 @@
     <form id="returnReasonForm">
       <div class="mb-4">
         <label for="returnReason" class="block text-gray-700 mb-2">Please tell us why you're returning:</label>
-        <textarea id="returnReason" placeholder="Enter reason for return..." required class="w-full h-32 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
+        <textarea name="returnReason" id="returnReason" placeholder="Enter reason for return..." required class="w-full h-32 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
       </div>
       <div class="flex justify-end space-x-3">
         <button type="button" class="bg-gray-300 hover:bg-gray-400 text-gray-800 py-2 px-6 rounded-md flex items-center" onclick="closeReturnModal()">
@@ -299,9 +299,7 @@
   });
 
 
-    // Function to open the return modal
-    function openReturnModal(orderId, productId) {
-      console.log(orderId,productId,"This is frondend")
+  function openReturnModal(orderId, productId) {
     currentOrderId = orderId;
     currentProductId = productId;
     document.getElementById("returnModal").classList.remove("hidden");
@@ -310,6 +308,59 @@
   // Function to close the return modal
   function closeReturnModal() {
     document.getElementById("returnModal").classList.add("hidden");
-    document.getElementById("returnReason").value = ""; 
+    document.getElementById("returnReason").value = "";
   }
+
+    // Add event listeners when the document is loaded
+    document.addEventListener("DOMContentLoaded", function() {
+
+      // Set up the return form submission handler
+      const returnForm = document.getElementById("returnReasonForm");
+      if (returnForm) {
+        returnForm.addEventListener("submit", function(event) {
+          event.preventDefault(); // Prevent the default form submission
+          const returnReason = document.getElementById('returnReason').value;
+
+
+          fetch(`/returnOrder/${currentOrderId}/${currentProductId}`, {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ returnReason}),
+          })
+              .then(response => {
+                if (response.ok) {
+                  Swal.fire({
+                    title: "Order Return Requested",
+                    text: "Your return request has been submitted successfully",
+                    icon: "success",
+                    confirmButtonColor: "#4F46E5"
+                  }).then(() => {
+                    location.reload(); // Refresh the page
+                  });
+                } else {
+                  // Handle error
+                  Swal.fire({
+                    title: "Error",
+                    text: "Failed to request return. Please try again.",
+                    icon: "error",
+                    confirmButtonColor: "#4F46E5"
+                  });
+                }
+              })
+              .catch(error => {
+                console.error("Error:", error);
+                Swal.fire({
+                  title: "Error",
+                  text: "An unexpected error occurred",
+                  icon: "error",
+                  confirmButtonColor: "#4F46E5"
+                });
+              });
+
+          closeReturnModal();
+        });
+      }
+    });
 </script>

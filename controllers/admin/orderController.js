@@ -121,5 +121,6 @@ export default {
     loadOrderManagment ,
     loadOrderDetails,
     updateProductStatus,
-    updateOrderStatus
+    updateOrderStatus,
+    
 }

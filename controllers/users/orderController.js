@@ -1,7 +1,7 @@
 import User from "../../models/userSchema.js";
 import Order from "../../models/orderSchema.js";
 import mongoose from "mongoose";
-
+import Product from "../../models/productSchema.js";
 const orderDetails = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -116,10 +116,66 @@ const postCancelOrder = async (req,res) =>{
     }
 }
 
+
+// return product 
+
+const returnProduct = async (req,res) =>{
+   
+    try {
+        const { orderId, productId } = req.params;
+        console.log("Request body:", req.body);
+        const returnReason = req.body.returnReason
+        const user = req.session.user
+        console.log(orderId,productId,returnReason,"This is return")
+        if (!mongoose.Types.ObjectId.isValid(orderId) || !mongoose.Types.ObjectId.isValid(productId)) {
+            return res.status(400).json({ message: 'Invalid order or product ID' });
+        }
+
+        const order = await Order.findById(orderId);
+        if (!order) {
+            return res.status(404).json({ message: 'Order not found' });
+        }
+
+        const product = await Product.findById(productId);
+        console.log("This is product",product)
+        if (!product) {
+            return res.status(404).json({ message: 'Product not found' });
+        }
+
+        
+        const orderItem = order.orderedItem.find(item => item.product.toString() === productId);
+        if (!orderItem) {
+            return res.status(400).json({ message: 'Product not found in this order' });
+        }
+
+       
+        if (order.userId.toString() !== user) {
+            return res.status(403).json({ message: 'Unauthorized: Order does not belong to user' });
+        }
+       
+        order.status = 'Request';
+        order.returnReason = returnReason;
+        if(returnReason){
+
+            await order.save();
+        }
+
+
+        
+        res.status(200).json({ message: 'Return request submitted successfully' });
+
+    } catch (error) {
+        console.error('Error requesting return:', error.message);
+        res.status(500).json({ message: 'Failed to submit return request' });
+    }
+}
+
+
  
 
 export default {
     orderDetails,
     loadorderStatus,
-   postCancelOrder
+   postCancelOrder,
+   returnProduct
 }

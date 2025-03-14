@@ -57,6 +57,10 @@ const orderSchema = new Schema({
         type:String,
         default:null
     },
+    returnReason: {
+         type: String, 
+        default: null 
+    },
 
     invoiceDate:{
         type:Date

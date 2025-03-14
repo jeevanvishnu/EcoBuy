@@ -135,7 +135,7 @@
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
                   <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
                   <% if(order.cancelReason) {%>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Cancel Reason</th>
+                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Reason</th>
                     <% } %>
                 </tr>
               </thead>
@@ -209,7 +209,9 @@
                             <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
                             <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
                             <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
+                            <%if(order.returnReason){ %>
                             <option value="Return" <%= order.status === 'Return' ? 'selected' : '' %>>Return</option>
+                            <%} %>
                         <% } else { %>
                             <option value="Cancelled" selected>Cancelled</option>
                         <% } %>
