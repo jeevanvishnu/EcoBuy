@@ -202,16 +202,26 @@
                       <div class="flex space-x-2">
                         <select name="status" <%= order.status === 'Cancelled' ? 'disabled' : '' %>>
                          
-                          
-                          
-                        <% if (order.status !== 'Cancelled') { %>
-                            <option value="Pending" <%= order.status === 'Pending' ? 'selected' : '' %>>Pending</option>
-                            <option value="Processing" <%= order.status === 'Processing' ? 'selected' : '' %>>Processing</option>
-                            <option value="Shipped" <%= order.status === 'Shipped' ? 'selected' : '' %>>Shipped</option>
-                            <option value="Delivered" <%= order.status === 'Delivered' ? 'selected' : '' %>>Delivered</option>
-                            <%if(order.returnReason){ %>
+                          <% if (order.status !== 'Cancelled') { %>
+                          <% if(order.status === 'Pending'){ %>
+                            <option value="Pending" selected>Pending</option>
+                            <option value="Processing">Processing</option>
+                          <% } else if(order.status === 'Processing') { %>
+                            <option value="Processing" selected>Processing</option>
+                            <option value="Shipped">Shipped</option>
+                          <% } else if(order.status === 'Shipped') { %>
+                            <option value="Shipped" selected>Shipped</option>
+                            <option value="Delivered">Delivered</option>
+                          <% } else if(order.status === 'Delivered'){ %>
+                            <option value="Delivered" selected>Delivered</option>
+                          <% } %>
+                          <% if(order.returnReason){ %>
                             <option value="Return" <%= order.status === 'Return' ? 'selected' : '' %>>Return</option>
-                            <%} %>
+                          <% } %>
+
+                          
+                        
+                            
                         <% } else { %>
                             <option value="Cancelled" selected>Cancelled</option>
                         <% } %>
