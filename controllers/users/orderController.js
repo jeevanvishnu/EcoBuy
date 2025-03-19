@@ -2,6 +2,7 @@ import User from "../../models/userSchema.js";
 import Order from "../../models/orderSchema.js";
 import mongoose from "mongoose";
 import Product from "../../models/productSchema.js";
+
 const orderDetails = async (req, res) => {
     try {
         const userId = req.session.user;
@@ -12,7 +13,6 @@ const orderDetails = async (req, res) => {
         const skip = (page - 1) * limit;
 
         const totalOrders = await Order.countDocuments({ userId: userId });
-       
         const orders = await Order.find({ userId: userId })
         .populate('orderedItem.product') 
         .skip(skip)
@@ -36,7 +36,6 @@ const loadorderStatus = async (req, res) => {
         const orderId = req.params.id;
         const userId = req.session.user;
         const userData = await User.findOne({ _id:userId});
-        console.log(userId)
         console.log('Attempting to find order with ID:', orderId);
         
         if (!mongoose.Types.ObjectId.isValid(orderId)) {
@@ -89,32 +88,116 @@ const loadorderStatus = async (req, res) => {
     }
 };
 
-const postCancelOrder = async (req,res) =>{
-    const { orderId } = req.params;
-    const { reason } = req.body;
-    console.log(reason,"this is  reson")
+const postCancelOrder = async (req, res) => {
     try {
-        const order = await Order.findById(orderId);
+        const userId = req.session.user;
+        const orderId = req.params.orderId;
+        const productId = req.params.productId;
 
+        const order = await Order.findOne({ userId: userId, _id: orderId }).populate('orderedItem.product');
+        
+        const totalQuantity = order.orderedItem.reduce((sum, item) => sum + item.quantity, 0);
+        console.log('total quantity',totalQuantity)
+        
+        
         if (!order) {
-            return res.status(404).json({ message: 'Order not found' });
+            return res.status(404).render('orderStatus', {
+                message: 'Order not found',
+                order: null
+            });
         }
 
-        if (order.status !== 'Pending' && order.status !== 'Processing') {
-            return res.status(400).json({ message: 'Order cannot be cancelled at this stage' });
+        const itemToCancel = order.orderedItem.find(item => item.product._id.toString() === productId);
+        console.log(itemToCancel,"..............................................")
+        if (!itemToCancel) {
+            return res.status(404).render('user/orderStatus', {
+                message: 'Product not found in this order',
+                order: null
+            });
         }
 
-        order.status = 'Cancelled';
-        order.cancelReason = reason;
-        await order.save();
+     
+        console.log('order discount',order.couponDiscount>0)
+        let refundAmount;
 
-        res.status(200).json({ message: 'Order cancelled successfully' });
+        if (order.couponDiscount > 0) {
+            refundAmount = order.orderAmount / totalQuantity; 
+        } else {
+            refundAmount = itemToCancel.totalProductPrice; 
+        }
+        
+
+        const product = await Product.findById(itemToCancel.product._id);
+        if (product) {
+            
+     
+            Order.status = 'Cancelled';
+        }
+
+      
+        await Order.updateOne(
+            { _id: orderId, 'orderedItem.productId': productId },
+            { $set: { 'orderedItem.$.productStatus': 'Cancelled' } }
+        );
+
+
+        // let wallet = await Wallet.findOne({ userId: userId });
+        // if (!wallet) {
+        //     wallet = new Wallet({
+        //         userId: userId,
+        //         balance: 0,
+        //         transactions: [] 
+        //     });
+        //     await wallet.save();
+        // }
+
+       
+        // if (!wallet.transactions) {
+        //     wallet.transactions = []; 
+        // }
+
+     
+        // wallet.transactions.forEach(transaction => {
+        //     if (!transaction.transactionsMethod) {
+        //         console.warn('Found transaction without transactionsMethod:', transaction);
+        //     }
+        // });
+
+        // console.log('jdfbhbjdh',itemToCancel.quantity)
+        // wallet.balance += refundAmount
+
+
+   
+        // const newTransaction = {
+        //     amount: refundAmount,
+        //     transactionsMethod: 'Refund', 
+        //     date: new Date(),
+        //     orderId: orderId 
+        // };
+
+      
+    
+
+        // wallet.transactions.push(newTransaction);
+        // await wallet.save(); 
+
+    
+
+        res.render('user/orderStatus', {
+            message: `Product cancelled successfully. ₹${refundAmount} added to your wallet.`,
+            order: order
+        });
 
     } catch (error) {
-        console.error(error.message);
-        res.status(500).json({ message: 'Failed to cancel order' });
+        console.error('Error during order cancellation:', error);
+        res.status(500).render('orderStatus', {
+            message: 'Error processing cancellation',
+            order: null
+        });
     }
-}
+};
+
+
 
 
 // return product 

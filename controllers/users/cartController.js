@@ -1,6 +1,7 @@
 import Product from "../../models/productSchema.js";
 import User from "../../models/userSchema.js"
 import Cart from "../../models/cartSchema.js"
+import Coupon from "../../models/couponSchema.js";
 
 import mongoose from "mongoose";
 
@@ -74,7 +75,6 @@ const addToCart = async (req, res) => {
             return res.status(404).json({ success: false, message: "Product not found" });
         }
 
-       
         const maxQuantityPerProduct = 5;
         if (userQuantity > maxQuantityPerProduct) {
             console.log("Server: Requested quantity exceeds the per-product limit.", productId, `Requested ${userQuantity}, limit ${maxQuantityPerProduct}`);
@@ -101,40 +101,81 @@ const addToCart = async (req, res) => {
             item.productId.toString() === new mongoose.Types.ObjectId(productId).toString()
         );
 
+        const productPrice = product.salePrice || product.regularPrice || 0;
+
         if (existingItem) {
-           
             if (product.quantity < (existingItem.quantity + userQuantity)) {
                 console.log("Server: Exceeds product quantity after adding.", productId, `Requested ${userQuantity}, existing ${existingItem.quantity}, available ${product.quantity}`);
                 return res.status(400).json({ success: false, message: `Insufficient stock. Only ${product.quantity} available.  You already have ${existingItem.quantity} in your cart.` });
             }
 
-           
             if ((existingItem.quantity + userQuantity) > maxQuantityPerProduct) {
                console.log("Server: Quantity exceeds the per-product limit with existing item.", productId, `Existing ${existingItem.quantity}, requested ${userQuantity}, limit ${maxQuantityPerProduct}`);
                return res.status(400).json({ success: false, message: `You can only have a maximum of ${maxQuantityPerProduct} of this product in your cart. You already have ${existingItem.quantity}.` });
             }
 
             existingItem.quantity += userQuantity;  
-            existingItem.totalPrice = existingItem.quantity * (product.salePrice || product.regularPrice || 0);
+            existingItem.totalPrice = existingItem.quantity * productPrice;
         } else {
             cart.items.push({
                 productId,
                 quantity: userQuantity, 
-                totalPrice: userQuantity * (product.salePrice || product.regularPrice || 0)
+                totalPrice: userQuantity * productPrice
             });
+        }
+
+        // Calculate cart's total price from all items
+        cart.totalPrice = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
+
+        // Check if there's an active coupon for the user
+        const activeCoupon = await Coupon.findOne({
+            _id: cart.appliedCoupon,
+            expiryDate: { $gt: new Date() },
+            isActive: true
+        });
+
+        if (activeCoupon) {
+            // Calculate discount based on coupon type
+            if (activeCoupon.discountType === 'percentage') {
+                cart.discountAmount = (cart.totalPrice * activeCoupon.discountValue) / 100;
+            } else if (activeCoupon.discountType === 'fixed') {
+                cart.discountAmount = activeCoupon.discountValue;
+            }
+            
+            // Ensure discount doesn't exceed the total price
+            cart.discountAmount = Math.min(cart.discountAmount, cart.totalPrice);
+            
+            // Calculate discounted total
+            cart.discountedTotal = cart.totalPrice - cart.discountAmount;
+            
+            console.log(`Server: Applied coupon discount: ${cart.discountAmount}`);
+        } else {
+            // If no active coupon, reset discount values
+            cart.appliedCoupon = null;
+            cart.discountAmount = 0;
+            cart.discountedTotal = cart.totalPrice;
         }
 
         await cart.save();
         console.log("Server: Product added to cart successfully with quantity:", userQuantity);
 
-        res.json({ success: true, message: "Product added to cart" });
+        res.json({ 
+            success: true, 
+            message: "Product added to cart",
+            cart: {
+                totalPrice: cart.totalPrice,
+                discountAmount: cart.discountAmount,
+                discountedTotal: cart.discountedTotal,
+                itemCount: cart.items.length,
+                totalItems: cart.items.reduce((sum, item) => sum + item.quantity, 0)
+            }
+        });
 
     } catch (error) {
         console.error("Add to cart error:", error.message);
         res.status(500).json({ success: false, message: "Internal Server Error" });
     }
 };
-
 
 
 const changeQuantity = async (req, res) => {

@@ -29,8 +29,37 @@ const cartSchema = new Schema ({
             type:String,
             default:"none"
         }
-    }]
-})
+    }],
+
+    totalPrice: {  
+        type: Number,
+        default: 0
+    },
+
+    appliedCoupon: {
+        type: Schema.Types.ObjectId,
+        ref: 'Coupon',
+        default: null
+    },
+    discountAmount: {
+        type: Number,
+        default: 0
+    },
+    discountedTotal: {
+        type: Number,
+        default: 0
+    }
+}, {timestamps: true});
+
+cartSchema.pre('save', function(next) {
+    if (this.discountAmount) {
+        this.discountedTotal = this.totalPrice - this.discountAmount;
+    } else {
+        this.discountedTotal = this.totalPrice;
+    }
+    next();
+});
+
 
 const Cart = mongoose.model("Cart",cartSchema)
 export default Cart

@@ -46,7 +46,7 @@
                             </div>
                             
                             <div class="text-right font-medium text-gray-800 mt-2 text-sm">
-                                Total: ₹<%= order.finalAmount.toFixed(2) %>
+                                ₹<%= (order.finalAmount * 1.05).toFixed(2) %>
                             </div>
                         </div>
                     <% }); %>

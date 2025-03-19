@@ -80,6 +80,13 @@ router.get('/getCartTotal',userAuth.userAuth,checkoutController.getCartTotal)
 router.post('/placeOrder',userAuth.userAuth,checkoutController.placeOrder)
 router.get('/orders',userAuth.userAuth,checkoutController.orderSucess)
 
+// Razorpay
+router.post('/inital-razorpay',checkoutController.initiateRazorpay)
+router.post('/verify-Payment',checkoutController.verifyPayment)
+router.post('/retry-payment',checkoutController.retryPayment)
+router.post('/payment-failed',checkoutController.paymentFailed)
+
+
 // order Managment
 router.get('/order',userAuth.userAuth,orderController.orderDetails)
 router.get('/orderStatus/:id',userAuth.userAuth,orderController.loadorderStatus)

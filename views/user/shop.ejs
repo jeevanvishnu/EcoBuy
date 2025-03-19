@@ -159,7 +159,7 @@
                     <% } %>
                     
                     <!-- Pagination -->
-                    <% if (locals.totalPages && totalPages > 1) { %>
+                    <% if (locals.totalPages && totalPages > 0) { %>
                         <div class="flex justify-center gap-2 mt-8">
                             <% if (currentPage > 1) { %>
                                 <a href="<%= locals.paginationBaseUrl || '/shop' %>?page=<%= currentPage - 1 %><%= locals.sortParam ? '&' + locals.sortParam : '' %>" class="px-4 py-2 bg-gray-100 rounded-md text-gray-700 hover:bg-blue-500 hover:text-white transition">

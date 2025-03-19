@@ -468,48 +468,59 @@ const shopController = async (req, res) => {
     const categories = await Category.find({ isListed: true }).lean();
 
     let sort = req.query.sort || "newest";
-
-    let findProducts = await Product.find({
-      isBlocked: false,
-      quantity: { $gt: 0 },
-    }).lean();
+    let sortOptions = {}; 
 
     switch (sort) {
       case "price_asc":
-        findProducts.sort((a, b) => a.salePrice - b.salePrice);
+        sortOptions = { salePrice: 1 }; 
         break;
       case "price_desc":
-        findProducts.sort((a, b) => b.salePrice - a.salePrice);
+        sortOptions = { salePrice: -1 };
         break;
       case "name_asc":
-        findProducts.sort((a, b) => a.productName.localeCompare(b.productName));
+        sortOptions = { productName: 1 };
         break;
       case "name_desc":
-        findProducts.sort((a, b) => b.productName.localeCompare(a.productName));
+        sortOptions = { productName: -1 };
         break;
       default:
-        findProducts.sort(
-          (a, b) => new Date(b.createdOn) - new Date(a.createdOn)
-        );
+        sortOptions = { createdOn: -1 }; 
     }
 
     // Pagination
-    let itemsPerPage = 10;
+    let itemsPerPage = 6;
     let currentPage = parseInt(req.query.page) || 1;
-    let startIndex = (currentPage - 1) * itemsPerPage;
-    let endIndex = startIndex + itemsPerPage;
-    let totalPages = Math.ceil(findProducts.length / itemsPerPage);
-    const currentProduct = findProducts.slice(startIndex, endIndex);
+    let skip = (currentPage - 1) * itemsPerPage;  
+
+    // Database Query with Pagination and Sorting
+    const products = await Product.find({
+      isBlocked: false,
+      quantity: { $gt: 0 },
+    })
+      .sort(sortOptions) 
+      .skip(skip)       
+      .limit(itemsPerPage) 
+      .lean();
+
+    // Get total count for pagination
+    const totalProducts = await Product.countDocuments({
+      isBlocked: false,
+      quantity: { $gt: 0 },
+    });
+
+    let totalPages = Math.ceil(totalProducts / itemsPerPage);
 
     let sortParam = sort !== "newest" ? `sort=${sort}` : "";
-
+    let paginationBaseUrl = '/shop'; 
     res.render("user/shop", {
       user: userData,
-      products: currentProduct,
+      products: products,
       category: categories,
       totalPages,
       currentPage,
       sortParam,
+      paginationBaseUrl 
+
     });
   } catch (error) {
     console.log(error.message);

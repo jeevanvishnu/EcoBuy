@@ -68,7 +68,7 @@ const orderSchema = new Schema({
     paymentMethod: {
         type: String,
         required: true,
-        enum: ['Credit Card', 'PayPal', 'Cash on Delivery', 'Bank Transfer', 'Wallet']
+        enum: ['Cash on Delivery','Online Payment','Wallet']
     },
     status:{
         type:String,
@@ -84,6 +84,14 @@ const orderSchema = new Schema({
     couponApplied:{
         type:Boolean,
         default:false
+    },
+    paymentId: {
+        type: String
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'paid', 'failed'],
+        default: 'pending'
     },
     date: {
         type: Date,
