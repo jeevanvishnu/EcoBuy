@@ -92,4 +92,7 @@ router.get('/order',userAuth.userAuth,orderController.orderDetails)
 router.get('/orderStatus/:id',userAuth.userAuth,orderController.loadorderStatus)
 router.post('/cancelOrder/:orderId/:productId',userAuth.userAuth,orderController.postCancelOrder)
 router.post('/returnOrder/:orderId/:productId',userAuth.userAuth,orderController.returnProduct)
+
+// wallet payment
+router.post('/placeOrderWithWallet',checkoutController.loadWalletPayment)
 export default router

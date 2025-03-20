@@ -2,6 +2,7 @@ import User from "../../models/userSchema.js";
 import Order from "../../models/orderSchema.js";
 import mongoose from "mongoose";
 import Product from "../../models/productSchema.js";
+import Wallet from "../../models/walletSchema.js";
 
 const orderDetails = async (req, res) => {
     try {
@@ -9,12 +10,13 @@ const orderDetails = async (req, res) => {
         const user = await User.findOne({ _id:userId});
 
         const page = parseInt(req.query.page) || 1; 
-        const limit = parseInt(req.query.limit) || 5; 
+        const limit = parseInt(req.query.limit) || 3; 
         const skip = (page - 1) * limit;
 
         const totalOrders = await Order.countDocuments({ userId: userId });
         const orders = await Order.find({ userId: userId })
         .populate('orderedItem.product') 
+        .sort({ _id: -1 })
         .skip(skip)
         .limit(limit);
         const totalPages = Math.ceil(totalOrders / limit);
@@ -88,27 +90,130 @@ const loadorderStatus = async (req, res) => {
     }
 };
 
+// const postCancelOrder = async (req, res) => {
+//     try {
+//         const userId = req.session.user;
+//         const orderId = req.params.orderId;
+//         const productId = req.params.productId; 
+//         const {reason} = req.body
+        
+//         console.log(reason)
+//         const order = await Order.findOne({ userId: userId, _id: orderId }).populate('orderedItem.product');
+
+//         if (!order) {
+//             return res.status(404).render('user/orderStatus', {  
+//                 message: 'Order not found',
+//                 order: null
+//             });
+//         }
+
+        
+//         const itemToCancel = order.orderedItem.find(item => item.product._id.toString() === productId);
+
+//         if (!itemToCancel) {
+//             return res.status(404).render('user/orderStatus', {  
+//                 message: 'Product not found in this order',
+//                 order: null
+//             });
+//         }
+
+//         const quantityToCancel = itemToCancel.quantity;  
+
+       
+//         let refundAmount = 0;
+//         if (order.couponDiscount > 0) {
+            
+//             const discountRatio = order.couponDiscount / order.orderAmount;
+//             const itemDiscount = itemToCancel.price * discountRatio;
+//             refundAmount = itemToCancel.price - itemDiscount; 
+//         } else {
+//             refundAmount = itemToCancel.price;
+//         }
+
+      
+//         const product = await Product.findById(itemToCancel.product._id);  
+//         if (!product) {
+//             return res.status(404).render('user/orderStatus', { 
+//                 message: 'Product not found.', 
+//                 order: order
+//             });
+//         }
+
+//         product.quantity += quantityToCancel; 
+//         await product.save();
+        
+//         order.returnReason = reason;
+//         order.status = 'Cancelled'; 
+
+        
+//         const itemIndex = order.orderedItem.findIndex(item => item.product._id.toString() === productId);
+
+//         if (itemIndex !== -1) {
+//             order.orderedItem[itemIndex].productStatus = 'Cancelled';
+//         }
+
+//         await order.save(); 
+
+
+        
+//         let wallet = await Wallet.findOne({ userId: userId });
+//         if (!wallet) {
+//             wallet = new Wallet({
+//                 userId: userId,
+//                 balance: 0,
+//                 transactions: []
+//             });
+//         }
+
+//         wallet.balance += refundAmount;
+
+//         const newTransaction = {
+//             amount: refundAmount,
+//             transactionsMethod: 'Refund',
+//             date: new Date(),
+//             orderId: orderId
+//         };
+
+//         wallet.transactions.push(newTransaction);
+//         await wallet.save();
+
+//         // 7. Render Success
+//         res.render('user/orderStatus', {  
+//             message: `Product cancelled successfully. ₹${refundAmount} added to your wallet.`,
+//             order: order // Pass the UPDATED order object
+//         });
+
+//     } catch (error) {
+//         console.error('Error during order cancellation:', error);
+//         res.status(500).render('user/orderStatus', {  
+//             message: 'Error processing cancellation',
+//             order: null
+//         });
+//     }
+// };
+
+
+
 const postCancelOrder = async (req, res) => {
     try {
         const userId = req.session.user;
         const orderId = req.params.orderId;
         const productId = req.params.productId;
+        const {reason} = req.body
 
+        console.log(reason)
         const order = await Order.findOne({ userId: userId, _id: orderId }).populate('orderedItem.product');
-        
-        const totalQuantity = order.orderedItem.reduce((sum, item) => sum + item.quantity, 0);
-        console.log('total quantity',totalQuantity)
-        
-        
+
         if (!order) {
-            return res.status(404).render('orderStatus', {
+            return res.status(404).render('user/orderStatus', {
                 message: 'Order not found',
                 order: null
             });
         }
 
+
         const itemToCancel = order.orderedItem.find(item => item.product._id.toString() === productId);
-        console.log(itemToCancel,"..............................................")
+
         if (!itemToCancel) {
             return res.status(404).render('user/orderStatus', {
                 message: 'Product not found in this order',
@@ -116,88 +221,110 @@ const postCancelOrder = async (req, res) => {
             });
         }
 
-     
-        console.log('order discount',order.couponDiscount>0)
-        let refundAmount;
+        const quantityToCancel = itemToCancel.quantity;
 
+        let refundAmount = 0;
         if (order.couponDiscount > 0) {
-            refundAmount = order.orderAmount / totalQuantity; 
+
+            const discountRatio = order.couponDiscount / order.orderAmount;
+            const itemDiscount = itemToCancel.price * discountRatio;
+            refundAmount = itemToCancel.price - itemDiscount;
         } else {
-            refundAmount = itemToCancel.totalProductPrice; 
+            refundAmount = itemToCancel.price;
         }
-        
+
 
         const product = await Product.findById(itemToCancel.product._id);
-        if (product) {
-            
-     
-            Order.status = 'Cancelled';
+        if (!product) {
+            return res.status(404).render('user/orderStatus', {
+                message: 'Product not found.',
+                order: order
+            });
         }
 
-      
-        await Order.updateOne(
-            { _id: orderId, 'orderedItem.productId': productId },
-            { $set: { 'orderedItem.$.productStatus': 'Cancelled' } }
-        );
+        product.quantity += quantityToCancel;
+        await product.save();
+
+        order.returnReason = reason;
+        order.status = 'Cancelled';
 
 
-        // let wallet = await Wallet.findOne({ userId: userId });
-        // if (!wallet) {
-        //     wallet = new Wallet({
-        //         userId: userId,
-        //         balance: 0,
-        //         transactions: [] 
-        //     });
-        //     await wallet.save();
-        // }
+        const itemIndex = order.orderedItem.findIndex(item => item.product._id.toString() === productId);
 
-       
-        // if (!wallet.transactions) {
-        //     wallet.transactions = []; 
-        // }
+        if (itemIndex !== -1) {
+            order.orderedItem[itemIndex].productStatus = 'Cancelled';
+        }
 
-     
-        // wallet.transactions.forEach(transaction => {
-        //     if (!transaction.transactionsMethod) {
-        //         console.warn('Found transaction without transactionsMethod:', transaction);
-        //     }
-        // });
-
-        // console.log('jdfbhbjdh',itemToCancel.quantity)
-        // wallet.balance += refundAmount
+        await order.save();
 
 
-   
-        // const newTransaction = {
-        //     amount: refundAmount,
-        //     transactionsMethod: 'Refund', 
-        //     date: new Date(),
-        //     orderId: orderId 
-        // };
+        let wallet = await Wallet.findOne({ userId: userId });
+        if (!wallet) {
+            wallet = new Wallet({
+                userId: userId,
+                balance: 0,
+                transactions: []
+            });
+            await wallet.save(); // Save the new wallet immediately
+            console.log("New wallet created for user:", userId);
+        }
+        if (!wallet) {
+            console.error("Wallet not found or creation failed for user:", userId);
+            return res.status(500).render('user/orderStatus', {
+                message: 'Error processing cancellation: Wallet creation failed',
+                order: null
+            });
+        }
 
-      
-    
+        console.log("Wallet balance before refund:", wallet.balance);
+        console.log("Refund amount:", refundAmount);
 
-        // wallet.transactions.push(newTransaction);
-        // await wallet.save(); 
+        const initialBalance = wallet.balance; // Capture initial balance for comparison
 
-    
 
-        res.render('user/orderStatus', {
-            message: `Product cancelled successfully. ₹${refundAmount} added to your wallet.`,
-            order: order
-        });
+        wallet.balance += refundAmount;
 
+        const newTransaction = {
+            amount: refundAmount,
+            transactionsMethod: 'Refund',
+            date: new Date(),
+            orderId: orderId
+        };
+
+        wallet.transactions.push(newTransaction);
+
+        console.log("Wallet object before saving:", JSON.stringify(wallet)); // Log the wallet object
+
+        await wallet.save()
+            .then(savedWallet => {
+                console.log("Wallet saved successfully. New balance:", savedWallet.balance);
+
+                const finalBalance = savedWallet.balance;
+                if (finalBalance !== initialBalance + refundAmount) {
+                    console.warn("WARNING: Wallet balance mismatch! Expected:", initialBalance + refundAmount, "Actual:", finalBalance);
+                }
+
+                // 7. Render Success
+                res.render('user/orderStatus', {
+                    message: `Product cancelled successfully. ₹${refundAmount} added to your wallet.`,
+                    order: order
+                });
+            })
+            .catch(err => {
+                console.error("Error saving wallet:", err);
+                return res.status(500).render('user/orderStatus', {
+                    message: 'Error processing cancellation: Failed to update wallet',
+                    order: null
+                });
+            });
     } catch (error) {
         console.error('Error during order cancellation:', error);
-        res.status(500).render('orderStatus', {
+        res.status(500).render('user/orderStatus', {
             message: 'Error processing cancellation',
             order: null
         });
     }
 };
-
-
 
 
 // return product 

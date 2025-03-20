@@ -32,8 +32,7 @@ const getCheckout = async (req, res) => {
         const wallet = await Wallet.findOne({ userId: userId });
        
         const walletBalance = wallet ? wallet.balance : 0;
-
-        
+       
         const cart = await Cart.findOne({ userId: userId }).populate({
             path: "items.productId",
             select: "productName price productImage category",
@@ -674,6 +673,128 @@ const verifyPayment = async (req, res) => {
     }
 };
 
+// wallet payment
+const loadWalletPayment = async (req, res) => {
+    try {
+      const { addressId , paymentMethod} = req.body;
+      console.log(paymentMethod,"wallet payment")
+      const userId = req.session.user;
+
+      // 1. Get user's cart
+      const cart = await Cart.findOne({ userId }).populate("items.productId");
+      if (!cart || cart.items.length === 0) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Cart is empty" });
+      }
+
+      // 2. Check if address exists
+      const addressDocument = await Address.findOne({ userId });
+      if (!addressDocument || !addressDocument.address) {
+        return res.status(400).json({ success: false, message: "No addresses found" });
+      }
+
+      // Find the specific address by ID
+      let address;
+      try {
+        address = addressDocument.address.find(addr => addr._id.toString() === addressId);
+      } catch (error) {
+        console.error("Error finding address:", error);
+      }
+
+      if (!address) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Invalid address" });
+      }
+
+      // 3. Get user's wallet
+      const wallet = await Wallet.findOne({ userId });
+      if (!wallet) {
+        return res
+          .status(400)
+          .json({ success: false, message: "Wallet not found" });
+      }
+
+      // 4. Calculate total price from cart
+      const totalPrice = cart.totalPrice;
+      const discountAmount = cart.discountAmount || 0;
+      const discountedTotal = cart.discountedTotal || totalPrice;
+
+      // 5. Check if enough balance in wallet
+      if (wallet.balance < discountedTotal) {
+        return res.status(400).json({
+          success: false,
+          message: `Insufficient wallet balance. Available: ₹${wallet.balance}, Required: ₹${discountedTotal}`,
+        });
+      }
+      let cartTotal = 0
+      // 6. Create order items from cart items
+      const orderedItems = cart.items.map(item => {
+        const itemTotal = item.productId.salePrice * item.quantity; 
+        cartTotal += itemTotal;
+
+        return {
+            product: item.productId._id, 
+            quantity: item.quantity,
+            price: item.productId.salePrice
+        };
+    });
+
+      // 7. Create new order
+      const newOrder = new Order({
+        orderedItem: orderedItems,
+            cartId:cart._id,
+            userId,
+            totalPrice: cartTotal,
+            discount: discountAmount,
+            finalAmount: cartTotal,
+            deliveryAddress : address, 
+            paymentMethod:paymentMethod,
+            paymentStatus:'paid',
+            status: 'Pending', 
+      });
+
+      const savedOrder = await newOrder.save();
+
+      // 8. Deduct amount from wallet and add transaction record
+      wallet.balance -= discountedTotal;
+      wallet.transactions.push({
+        amount: discountedTotal,
+        transactionsMethod: "Purchase",
+        date: new Date(),
+        orderId: savedOrder._id,
+        status: "completed",
+      });
+      await wallet.save();
+
+      for (const item of orderedItems) {
+        const { product, quantity } = item;
+        await Product.findByIdAndUpdate(product, { $inc: { quantity: -quantity } });
+        console.log(`Updated stock for product ${product} by -${quantity}`);
+    }
+
+      // 9. Clear the cart
+      cart.items = [];
+      cart.totalPrice = 0;
+      cart.discountAmount = 0;
+      cart.discountedTotal = 0;
+      cart.appliedCoupon = null;
+      await cart.save();
+
+      return res.status(200).json({
+        success: true,
+        message: "Order placed successfully",
+        orderId: savedOrder._id,
+      });
+    } catch (error) {
+      console.error("Error processing wallet payment:", error);
+      return res.status(500).json({
+        success: false,
+        message: "An error occurred while processing your order",
+      });
+    }
+  };
 
 const retryPayment = async (req, res) => {
     try {
@@ -798,5 +919,6 @@ export default {
   initiateRazorpay,
   verifyPayment,
   retryPayment,
-  paymentFailed
+  paymentFailed,
+  loadWalletPayment
 };

@@ -251,7 +251,7 @@
                 </label>
                 
                 <label class="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:border-indigo-300 transition-colors <%= walletBalance >= totalAmount ? '' : 'opacity-60' %>">
-                  <input type="radio" name="payment" value="wallet" class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500" <%= walletBalance >= totalAmount ? '' : 'disabled' %>>
+                  <input type="radio" name="payment" value="Wallet" class="h-5 w-5 text-indigo-600 border-gray-300 focus:ring-indigo-500" <%= walletBalance >= totalAmount ? '' : 'disabled' %>>
                   <div class="ml-3">
                     <div class="flex items-center">
                       <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -420,7 +420,7 @@
           console.error('Error:', error);
           Swal.fire('Error', 'Failed to initiate payment', 'error');
         }
-      } else if (method === 'wallet') {
+      } else if (method === 'Wallet') {
         processWalletPayment(addressId);
       } else if (method === 'Cash on Delivery') {
         processCOD(addressId);
@@ -508,6 +508,7 @@
     }
   
     async function processWalletPayment(addressId) {
+      const paymentMethodInput = document.querySelector('input[name="payment"]:checked');
       try {
         const response = await fetch('/placeOrderWithWallet', {
           method: 'POST',
@@ -515,7 +516,9 @@
             'Content-Type': 'application/json'
           },
           body: JSON.stringify({
-            addressId: addressId
+            addressId: addressId,
+            paymentMethod:paymentMethodInput.value
+            
           })
         });
   
