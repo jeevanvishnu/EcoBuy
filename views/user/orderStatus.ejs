@@ -115,7 +115,7 @@
               </td>
               <td class="py-3 px-4 text-center text-gray-600"><%= item.product.productName %></td>
               <td class="py-3 px-4 text-center text-gray-600"><%= item.quantity %></td>
-              <td class="py-3 px-4 text-center text-gray-600">₹<%= item.price.toFixed(2) %></td>
+              <td class="py-3 px-4 text-center text-gray-600">₹<%= (item.price * item.quantity).toFixed(2) %></td>
               <td class="py-3 px-4 text-center text-gray-600">
                 
                 <%= ((item.price * item.quantity) * 1.05).toFixed(2) %>

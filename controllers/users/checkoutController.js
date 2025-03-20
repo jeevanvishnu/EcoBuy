@@ -329,9 +329,9 @@ const placeOrder = async (req, res) => {
             cartTotal += itemTotal;
 
             return {
-                productId: item.productId._id, 
+                product: item.productId._id, 
                 quantity: item.quantity,
-                price: item.salePrice, 
+                price: item.productId.salePrice
             };
         });
 
@@ -341,8 +341,8 @@ const placeOrder = async (req, res) => {
         for (const item of orderedItems) {
             const { product, quantity } = item;
 
-          
             const productDoc = await Product.findById(product);
+            
             if (!productDoc) {
                 return res.status(400).json({
                     success: false,
@@ -360,6 +360,13 @@ const placeOrder = async (req, res) => {
         }
 
         const finalAmount = cartTotal - discountAmount; 
+
+        if (finalAmount > 1000) {
+            return res.status(400).json({
+                success: false,
+                message: "Order amount exceeds the limit of 1000 Rupees."
+            });
+        }
       
 
 
@@ -496,194 +503,6 @@ const initiateRazorpay = async (req, res) => {
 
 
 
-
-// const verifyPayment = async (req, res) => {
-//     try {
-//         const { razorpay_payment_id, razorpay_order_id, razorpay_signature, couponCode, addressId } = req.body;
-
-//         console.log('Starting payment verification with details:');
-//         console.log('req.body:', req.body); // Log the entire request body
-       
-//         const generated_signature = crypto
-//             .createHmac('sha256', process.env.Razorpay_SCRECT)
-//             .update(razorpay_order_id + '|' + razorpay_payment_id)
-//             .digest('hex');
-
-         
-
-//         if (generated_signature === razorpay_signature) {
-//             console.log('Payment verified successfully!');
-
-//             const userId = req.session.user;
-//             if (!userId) {
-//                 console.error('Error: Missing userId in session');
-//                 return res.status(400).json({ error: 'User not authenticated' });
-//             }
-
-//             let wallet = await Wallet.findOne({ userId });
-//             if (!wallet) {
-//                 wallet = new Wallet({ userId, balance: 0 });
-//                 await wallet.save();
-//             }
-
-
-//             console.log(userId,"This is user id")
-
-//             const cart = await Cart.findOne({ userId });
-//             if (!cart || !cart.items || cart.items.length === 0) {
-//                 return res.status(400).json({ error: 'Cart is empty or invalid' });
-//             }
-//             const coupon = cart.appliedCoupon;
-
-//             // NEW ADDRESS RETRIEVAL LOGIC:
-//             const addressDocument = await Address.findOne({ 'address._id': addressId }); // Find the Address document that contains the address with the matching _id
-//             console.log("addressDocument",addressDocument);
-
-//             if (!addressDocument) {
-//                 console.log("Delivery address document not found")
-//                 return res.status(400).json({ error: 'Delivery address not found' });
-//             }
-
-//             const address = addressDocument.address.find(addr => addr._id.toString() === addressId);  // Find the specific address object within the array
-//             console.log("address",address)
-
-//             if (!address) {
-//                console.log("Delivery address not found")
-//                return res.status(400).json({ error: 'Delivery address not found' });
-//            }
-//             console.log(address,"This is address")
-
-           
-             
-//         let cartTotal = 0;
-      
-
-//         const orderedItems = cart.items.map(item => {
-//             const itemTotal = item.productId.salePrice * item.quantity; 
-//             cartTotal += itemTotal;
-
-//             return {
-//                 productId: item.productId._id, 
-//                 quantity: item.quantity,
-//                 price: item.salePrice, 
-//             };
-//         });
-
-//           // Validate stock and create the order items with populated data
-//           for (const item of orderedItems) {
-//             const { product, quantity, price } = item;
-
-//             // Find product
-//             const productDoc = await Product.findById(product);
-//             if (!productDoc) {
-//                 return res.status(400).json({
-//                     success: false,
-//                     message: `Product not found: ${product}`
-//                 });
-//             }
-
-//             // Check stock
-//             if (!productDoc.quantity || productDoc.quantity < quantity) {
-//                 return res.status(400).json({
-//                     success: false,
-//                     message: `Insufficient stock for ${productDoc.productName}. Available stock: ${productDoc.quantity}.  Ordered Quantity: ${quantity}`
-//                 });
-//             }
-//         }
-
-//            // Wallet Payment Handling
-        
-//            if (paymentMethod === 'Wallet') {
-//             if (wallet.balance <= 0 || finalAmount > wallet.balance) {
-//                 return res.status(400).send('Insufficient wallet balance.');
-//             }
-//             wallet.balance -= finalAmount; // Use finalAmount which reflects the actual amount to be paid
-//             await wallet.save();
-//         }
-
-           
-
-//             let totalDiscount = 0;
-
-//             if (coupon) {
-//                 const couponUsed = await Coupon.findOne({ _id: coupon });
-
-//                 if (couponUsed) {
-//                     totalDiscount = (cart.totalPrice * couponUsed.discount) / 100;
-//                     console.log('totalDiscount', totalDiscount);
-//                 }
-//             }
-
-//             const couponName = coupon ? await Coupon.findOne({ _id: coupon }) : null;
-
-
-//             const orderData = {
-//                 userId,
-//                 product:cart.productId,
-//                 cartId: cart._id,
-//                 orderedItems,
-//                 deliveryAddress: address,
-//                 totalPrice: Number(cart.totalPrice) - totalDiscount,
-//                 paymentMethod: 'Online Payment',
-//                 status:'Pending',
-//                 finalAmount:cart.totalPrice,
-//                 paymentStatus: 'paid',
-//                 paymentId: razorpay_payment_id,
-//                 couponCode: couponName ? couponName.couponCode : "",
-//                 couponDiscount: totalDiscount,
-//                 razorpayOrderId: razorpay_order_id
-//             };
-
-//             console.log('Creating order with data:', orderData);
-//             const order = new Order(orderData);
-//             await order.save();
-
-//             // Clear applied coupon & cart
-//             cart.appliedCoupon = null;
-//             await Cart.findOneAndDelete({ userId });
-
-//              // Remove coupon from session
-//         if (req.session.coupon) {
-//             delete req.session.coupon;
-//         }
-
-//         // Update product stock - After order creation success
-//         for (const item of orderedItems) {
-//             const { product, quantity } = item;
-//             await Product.findByIdAndUpdate(product, { $inc: { quantity: -quantity } });
-//             console.log(`Updated stock for product ${product} by -${quantity}`);
-//         }
-
-//         // Clear cart items and amounts
-//         await Cart.findOneAndUpdate({userId: userId}, { $set: { items: [], totalPrice: 0, discountAmount: 0 } }, { new: true });
-
-//             return res.json({
-//                 success: true,
-//                 orderId: order._id,
-//                 totalDiscount,
-//                 message: 'Order placed successfully'
-//             });
-
-//         } else {
-//             console.log('Payment verification failed!');
-//             return res.status(400).json({
-//                 success: false,
-//                 error: 'Payment verification failed. Signature mismatch.',
-//                 redirectUrl: '/payment-failed'
-//             });
-//         }
-//     } catch (error) {
-//         console.error('Error during payment verification:', error);
-//         res.status(500).json({
-//             success: false,
-//             error: 'Internal server error',
-//             message: error.message
-//         });
-//     }
-// };
-
-
-
 const verifyPayment = async (req, res) => {
     try {
         const { razorpay_payment_id, razorpay_order_id, razorpay_signature, couponCode, addressId } = req.body;
@@ -799,9 +618,9 @@ const verifyPayment = async (req, res) => {
                 cartId: cart._id,
                 orderedItem: orderedItems, // Match the property name in your schema
                 deliveryAddress: address,
-                totalPrice: cartTotal,
+                totalPrice: finalAmount,
                 discount: totalDiscount,
-                finalAmount: finalAmount, // Include GST
+                finalAmount: cartTotal, // Include GST
                 paymentMethod: 'Online Payment',
                 status: 'Pending',
                 paymentStatus: 'paid',

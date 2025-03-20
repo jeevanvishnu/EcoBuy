@@ -329,7 +329,7 @@
     const totalAmount = parseFloat("<%= totalAmount %>") || 0;
     const walletBalance = parseFloat("<%= userWallet ? userWallet.balance : 0 %>") || 0;
   
-    let razorpayOrderId = null; // Store the Razorpay order ID
+    let razorpayOrderId = null; 
   
     // Function to update total amount on the page
     function updateTotalAmount(newTotal) {
@@ -487,7 +487,7 @@
               razorpay_payment_id: response.error.metadata.payment_id,
               error_code: response.error.code,
               error_description: response.error.description,
-              addressId: addressId // Use the passed-in addressId
+              addressId: addressId
             })
           })
           .then(response => response.json())
