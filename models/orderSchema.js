@@ -32,7 +32,11 @@ const orderSchema = new Schema({
             type:Number,
             default:0
         },
-        
+        orderStatus:{
+            type:String,
+            required:true,
+            enum:['Pending','Processing','Shipped','Delivered','Cancelled','Return','Request','Returned']
+        },
 
     }],
     totalPrice:{
@@ -70,11 +74,7 @@ const orderSchema = new Schema({
         required: true,
         enum: ['Cash on Delivery','Online Payment','Wallet']
     },
-    status:{
-        type:String,
-        required:true,
-        enum:['Pending','Processing','Shipped','Delivered','Cancelled','Return','Request','Returned']
-    },
+   
     createdon:{
         type:Date,
         default:Date.now(),

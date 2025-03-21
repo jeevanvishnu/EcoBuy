@@ -10,49 +10,56 @@
     <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-2xl p-8 relative overflow-hidden shadow-md">
       <div class="flex justify-between items-center relative z-10 px-10">
         <%
+          // Calculate overall order progress based on item statuses
+          let totalItems = order.orderedItem.length;
+          let pendingCount = order.orderedItem.filter(item => item.orderStatus === 'Pending').length;
+          let processingCount = order.orderedItem.filter(item => item.orderStatus === 'Processing').length;
+          let shippedCount = order.orderedItem.filter(item => item.orderStatus === 'Shipped').length;
+          let deliveredCount = order.orderedItem.filter(item => item.orderStatus === 'Delivered').length;
+          
           let progressWidth = 0;
-          const status = order.status;
-          if (status === 'Pending') progressWidth = 25;
-          else if (status === 'Processing') progressWidth = 50;
-          else if (status === 'Shipped') progressWidth = 75;
-          else if (status === 'Delivered') progressWidth = 100;
+          if (pendingCount === totalItems) progressWidth = 25;
+          else if (processingCount === totalItems) progressWidth = 50;
+          else if (shippedCount === totalItems) progressWidth = 75;
+          else if (deliveredCount === totalItems) progressWidth = 100;
+          else progressWidth = ((processingCount * 2) + (shippedCount * 3) + (deliveredCount * 4)) / totalItems * 25;
         %>
         <div class="absolute top-1/2 left-0 h-1 bg-indigo-500 transform -translate-y-1/2 transition-width duration-1000 ease-in-out z-0" style="width: <%= progressWidth %>%"></div>
 
-        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= status === 'Pending' ? 'active' : (status === 'Processing' || status === 'Shipped' || status === 'Delivered') ? 'completed' : '' %>">
+        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= pendingCount > 0 ? 'active' : 'completed' %>">
           <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-2 relative transition-all duration-300 shadow-md">
-            <i class="fas fa-box text-xl <%= status === 'Pending' ? 'text-indigo-500' : (status === 'Processing' || status === 'Shipped' || status === 'Delivered') ? 'text-green-500' : 'text-gray-500' %> transition-all duration-300"></i>
+            <i class="fas fa-box text-xl <%= pendingCount > 0 ? 'text-indigo-500' : 'text-green-500' %> transition-all duration-300"></i>
           </div>
           <div class="font-semibold text-gray-600 mt-2 text-center text-sm">Order Placed</div>
           <div class="text-xs text-gray-500 mt-1"><%= new Date(order.date).toDateString() %></div>
         </div>
 
-        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= status === 'Processing' ? 'active' : (status === 'Shipped' || status === 'Delivered') ? 'completed' : '' %>">
+        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= processingCount > 0 ? 'active' : (shippedCount > 0 || deliveredCount > 0) ? 'completed' : '' %>">
           <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-2 relative transition-all duration-300 shadow-md">
-            <i class="fas fa-box-open text-xl <%= status === 'Processing' ? 'text-indigo-500' : (status === 'Shipped' || status === 'Delivered') ? 'text-green-500' : 'text-gray-500' %> transition-all duration-300"></i>
+            <i class="fas fa-box-open text-xl <%= processingCount > 0 ? 'text-indigo-500' : (shippedCount > 0 || deliveredCount > 0) ? 'text-green-500' : 'text-gray-500' %> transition-all duration-300"></i>
           </div>
           <div class="font-semibold text-gray-600 mt-2 text-center text-sm">Processing</div>
           <div class="text-xs text-gray-500 mt-1">Preparing Order</div>
         </div>
 
-        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= status === 'Shipped' ? 'active' : status === 'Delivered' ? 'completed' : '' %>">
+        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= shippedCount > 0 ? 'active' : deliveredCount > 0 ? 'completed' : '' %>">
           <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-2 relative transition-all duration-300 shadow-md">
-            <i class="fas fa-truck-fast text-xl <%= status === 'Shipped' ? 'text-indigo-500' : status === 'Delivered' ? 'text-green-500' : 'text-gray-500' %> transition-all duration-300"></i>
+            <i class="fas fa-truck-fast text-xl <%= shippedCount > 0 ? 'text-indigo-500' : deliveredCount > 0 ? 'text-green-500' : 'text-gray-500' %> transition-all duration-300"></i>
           </div>
           <div class="font-semibold text-gray-600 mt-2 text-center text-sm">On The Way</div>
           <div class="text-xs text-gray-500 mt-1">In Transit</div>
         </div>
 
-        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= status === 'Delivered' ? 'active' : '' %>">
+        <div class="flex flex-col items-center relative z-10 w-36 sm:w-40 mt-5 cursor-pointer <%= deliveredCount === totalItems ? 'active' : '' %>">
           <div class="w-14 h-14 bg-white rounded-xl flex items-center justify-center mb-2 relative transition-all duration-300 shadow-md">
-            <i class="fas fa-house-circle-check text-xl <%= status === 'Delivered' ? 'text-green-500' : 'text-gray-500' %> transition-all duration-300"></i>
+            <i class="fas fa-house-circle-check text-xl <%= deliveredCount === totalItems ? 'text-green-500' : 'text-gray-500' %> transition-all duration-300"></i>
           </div>
           <div class="font-semibold text-gray-600 mt-2 text-center text-sm">Delivered</div>
           <div class="text-xs text-gray-500 mt-1">Package Arrived</div>
         </div>
       </div>
 
-      <% if (status === 'Shipped') { %>
+      <% if (shippedCount > 0) { %>
         <div class="absolute bottom-5 left-0 w-full h-10 pointer-events-none">
           <div class="absolute bottom-2 left-0 text-2xl text-indigo-500 animate-moveTruck">
             <i class="fas fa-truck"></i>
@@ -116,42 +123,39 @@
               <td class="py-3 px-4 text-center text-gray-600"><%= item.product.productName %></td>
               <td class="py-3 px-4 text-center text-gray-600"><%= item.quantity %></td>
               <td class="py-3 px-4 text-center text-gray-600">₹<%= (item.price * item.quantity).toFixed(2) %></td>
-              <td class="py-3 px-4 text-center text-gray-600">
-                
-                <%= ((item.price * item.quantity) * 1.05).toFixed(2) %>
-              </td>
+              <td class="py-3 px-4 text-center text-gray-600">₹<%= ((item.price * item.quantity) * 1.05).toFixed(2) %></td>
               <td class="py-3 px-4 text-center">
                 <span class="px-3 py-1 rounded-full text-xs font-medium
-                  <% if (order.status === 'Delivered') { %>
+                  <% if (item.orderStatus === 'Delivered') { %>
                     bg-green-100 text-green-800
-                  <% } else if (order.status === 'Shipped') { %>
+                  <% } else if (item.orderStatus === 'Shipped') { %>
                     bg-blue-100 text-blue-800
-                  <% } else if (order.status === 'Processing') { %>
+                  <% } else if (item.orderStatus === 'Processing') { %>
                     bg-yellow-100 text-yellow-800
                   <% } else { %>
                     bg-gray-100 text-gray-800
                   <% } %>
                 ">
                   <i class="fas fa-circle text-xs mr-1
-                    <% if (order.status === 'Delivered') { %>
+                    <% if (item.orderStatus === 'Delivered') { %>
                       text-green-500
-                    <% } else if (order.status === 'Shipped') { %>
+                    <% } else if (item.orderStatus === 'Shipped') { %>
                       text-blue-500
-                    <% } else if (order.status === 'Processing') { %>
+                    <% } else if (item.orderStatus === 'Processing') { %>
                       text-yellow-500
                     <% } else { %>
                       text-gray-500
                     <% } %>
                   "></i>
-                  <%= order.status %>
+                  <%= item.orderStatus %>
                 </span>
               </td>
               <td class="py-3 px-4 text-center">
-                <% if (order.status === 'Pending' || order.status === 'Processing' || order.status === 'Shipped') { %>
+                <% if (item.orderStatus === 'Pending' || item.orderStatus === 'Processing' || item.orderStatus === 'Shipped') { %>
                   <button type="button" class="bg-red-500 hover:bg-red-700 text-white py-2 px-4 rounded-md text-sm flex items-center mx-auto" onclick="openCancelModal('<%= order._id %>', '<%= item.product._id %>')">
                     <i class="fas fa-times-circle mr-1"></i> Cancel
                   </button>
-                <% } else if (order.status === 'Delivered') { %>
+                <% } else if (item.orderStatus === 'Delivered') { %>
                   <button type="button" class="bg-indigo-500 hover:bg-indigo-700 text-white py-2 px-4 rounded-md text-sm flex items-center mx-auto" onclick="openReturnModal('<%= order._id %>', '<%= item.product._id %>')">
                     <i class="fas fa-undo-alt mr-1"></i> Return
                   </button>
@@ -165,11 +169,11 @@
 
     <!-- Total Section -->
     <div class="text-right mt-8 p-4 bg-gray-50 rounded-xl">
-      <p class="text-xl font-semibold text-gray-800"><i class="fas fa-receipt mr-2 text-indigo-500"></i>Total Amount: ₹<%= (order.finalAmount * 1.05).toFixed(2)  %></p>
+      <p class="text-xl font-semibold text-gray-800"><i class="fas fa-receipt mr-2 text-indigo-500"></i>Total Amount: ₹<%= (order.finalAmount * 1.05).toFixed(2) %></p>
     </div>
 
     <!-- Retry Payment -->
-    <% if (order.status === 'Payment Pending') { %>
+    <% if (order.paymentStatus === 'Payment Pending') { %>
       <div class="text-center mt-5">
         <p class="text-red-500 font-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Your payment failed. Please try again.</p>
         <button onclick="retryPayment('<%= order._id %>')" class="bg-indigo-500 hover:bg-indigo-700 text-white py-2 px-6 rounded-md text-lg flex items-center justify-center mx-auto mt-3">
@@ -187,6 +191,8 @@
       <i class="fas fa-times-circle text-red-500 mr-2"></i> Cancel Order
     </h2>
     <form id="cancelReasonForm">
+      <input type="hidden" id="cancelOrderId" name="orderId">
+      <input type="hidden" id="cancelProductId" name="productId">
       <div class="mb-4">
         <label for="cancelReason" class="block text-gray-700 mb-2">Please tell us why you're canceling:</label>
         <textarea name="reason" id="cancelReason" placeholder="Enter reason for cancellation..." required class="w-full h-32 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
@@ -203,7 +209,6 @@
   </div>
 </div>
 
-
 <!-- Modal for Return Reason -->
 <div id="returnModal" class="fixed z-50 top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center hidden">
   <div class="bg-white rounded-xl shadow-lg p-6 w-3/4 md:w-1/2 relative">
@@ -212,6 +217,8 @@
       <i class="fas fa-undo-alt text-blue-500 mr-2"></i> Return Order
     </h2>
     <form id="returnReasonForm">
+      <input type="hidden" id="returnOrderId" name="orderId">
+      <input type="hidden" id="returnProductId" name="productId">
       <div class="mb-4">
         <label for="returnReason" class="block text-gray-700 mb-2">Please tell us why you're returning:</label>
         <textarea name="returnReason" id="returnReason" placeholder="Enter reason for return..." required class="w-full h-32 p-2 border border-gray-300 rounded-md focus:ring-indigo-500 focus:border-indigo-500 resize-none"></textarea>
@@ -227,7 +234,6 @@
     </form>
   </div>
 </div>
-
 <!-- SweetAlert2 CDN -->
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 

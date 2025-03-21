@@ -90,118 +90,16 @@ const loadorderStatus = async (req, res) => {
     }
 };
 
-// const postCancelOrder = async (req, res) => {
-//     try {
-//         const userId = req.session.user;
-//         const orderId = req.params.orderId;
-//         const productId = req.params.productId; 
-//         const {reason} = req.body
-        
-//         console.log(reason)
-//         const order = await Order.findOne({ userId: userId, _id: orderId }).populate('orderedItem.product');
-
-//         if (!order) {
-//             return res.status(404).render('user/orderStatus', {  
-//                 message: 'Order not found',
-//                 order: null
-//             });
-//         }
-
-        
-//         const itemToCancel = order.orderedItem.find(item => item.product._id.toString() === productId);
-
-//         if (!itemToCancel) {
-//             return res.status(404).render('user/orderStatus', {  
-//                 message: 'Product not found in this order',
-//                 order: null
-//             });
-//         }
-
-//         const quantityToCancel = itemToCancel.quantity;  
-
-       
-//         let refundAmount = 0;
-//         if (order.couponDiscount > 0) {
-            
-//             const discountRatio = order.couponDiscount / order.orderAmount;
-//             const itemDiscount = itemToCancel.price * discountRatio;
-//             refundAmount = itemToCancel.price - itemDiscount; 
-//         } else {
-//             refundAmount = itemToCancel.price;
-//         }
-
-      
-//         const product = await Product.findById(itemToCancel.product._id);  
-//         if (!product) {
-//             return res.status(404).render('user/orderStatus', { 
-//                 message: 'Product not found.', 
-//                 order: order
-//             });
-//         }
-
-//         product.quantity += quantityToCancel; 
-//         await product.save();
-        
-//         order.returnReason = reason;
-//         order.status = 'Cancelled'; 
-
-        
-//         const itemIndex = order.orderedItem.findIndex(item => item.product._id.toString() === productId);
-
-//         if (itemIndex !== -1) {
-//             order.orderedItem[itemIndex].productStatus = 'Cancelled';
-//         }
-
-//         await order.save(); 
-
-
-        
-//         let wallet = await Wallet.findOne({ userId: userId });
-//         if (!wallet) {
-//             wallet = new Wallet({
-//                 userId: userId,
-//                 balance: 0,
-//                 transactions: []
-//             });
-//         }
-
-//         wallet.balance += refundAmount;
-
-//         const newTransaction = {
-//             amount: refundAmount,
-//             transactionsMethod: 'Refund',
-//             date: new Date(),
-//             orderId: orderId
-//         };
-
-//         wallet.transactions.push(newTransaction);
-//         await wallet.save();
-
-//         // 7. Render Success
-//         res.render('user/orderStatus', {  
-//             message: `Product cancelled successfully. ₹${refundAmount} added to your wallet.`,
-//             order: order // Pass the UPDATED order object
-//         });
-
-//     } catch (error) {
-//         console.error('Error during order cancellation:', error);
-//         res.status(500).render('user/orderStatus', {  
-//             message: 'Error processing cancellation',
-//             order: null
-//         });
-//     }
-// };
-
-
 
 const postCancelOrder = async (req, res) => {
     try {
         const userId = req.session.user;
         const orderId = req.params.orderId;
         const productId = req.params.productId;
-        const {reason} = req.body
+        const { reason } = req.body;
 
-        console.log(reason)
+        console.log("Cancellation Reason:", reason);
+
         const order = await Order.findOne({ userId: userId, _id: orderId }).populate('orderedItem.product');
 
         if (!order) {
@@ -210,7 +108,6 @@ const postCancelOrder = async (req, res) => {
                 order: null
             });
         }
-
 
         const itemToCancel = order.orderedItem.find(item => item.product._id.toString() === productId);
 
@@ -224,8 +121,7 @@ const postCancelOrder = async (req, res) => {
         const quantityToCancel = itemToCancel.quantity;
 
         let refundAmount = 0;
-        if (order.couponDiscount > 0) {
-
+        if (order.couponDiscount > 0 && order.orderAmount > 0) {
             const discountRatio = order.couponDiscount / order.orderAmount;
             const itemDiscount = itemToCancel.price * discountRatio;
             refundAmount = itemToCancel.price - itemDiscount;
@@ -233,8 +129,21 @@ const postCancelOrder = async (req, res) => {
             refundAmount = itemToCancel.price;
         }
 
+        // gst will be add 
+        const gstAmount = refundAmount * 0.05;
+        refundAmount += gstAmount; 
 
-        const product = await Product.findById(itemToCancel.product._id);
+        let product;
+        try {
+            product = await Product.findById(itemToCancel.product._id);
+        } catch (productFindError) {
+            console.error("Error finding product:", productFindError);
+            return res.status(500).render('user/orderStatus', {
+                message: 'Error finding product.',
+                order: order
+            });
+        }
+
         if (!product) {
             return res.status(404).render('user/orderStatus', {
                 message: 'Product not found.',
@@ -245,41 +154,54 @@ const postCancelOrder = async (req, res) => {
         product.quantity += quantityToCancel;
         await product.save();
 
-        order.returnReason = reason;
-        order.status = 'Cancelled';
 
+       
+        await Order.updateOne(
+            { _id: orderId, 'orderedItem.product._id': productId },
+            { $set: { 'orderedItem.$.status': 'Cancelled' } }
+        );
 
-        const itemIndex = order.orderedItem.findIndex(item => item.product._id.toString() === productId);
+       
+        order.orderedItem.forEach(item => {
+            if (item.product._id.toString() === productId) {
+                item.orderStatus = 'Cancelled';
+            }
+        });
 
-        if (itemIndex !== -1) {
-            order.orderedItem[itemIndex].productStatus = 'Cancelled';
+        
+        const allItemsCancelled = order.orderedItem.every(item => item.orderStatus === 'Cancelled');
+
+        if (allItemsCancelled) {
+            order.orderStatus = 'Cancelled';
+            order.cancelReason = reason
         }
-
-        await order.save();
-
+        await order.save()
+        //Wallet Logic
 
         let wallet = await Wallet.findOne({ userId: userId });
         if (!wallet) {
-            wallet = new Wallet({
-                userId: userId,
-                balance: 0,
-                transactions: []
-            });
-            await wallet.save(); // Save the new wallet immediately
-            console.log("New wallet created for user:", userId);
+            try {
+                wallet = new Wallet({
+                    userId: userId,
+                    balance: 0,
+                    transactions: []
+                });
+                await wallet.save(); 
+                console.log("New wallet created for user:", userId);
+            } catch (walletCreationError) {
+                console.error("Error creating wallet:", walletCreationError);
+                return res.status(500).render('user/orderStatus', {
+                    message: 'Error processing cancellation: Wallet creation failed',
+                    order: null
+                });
+            }
         }
-        if (!wallet) {
-            console.error("Wallet not found or creation failed for user:", userId);
-            return res.status(500).render('user/orderStatus', {
-                message: 'Error processing cancellation: Wallet creation failed',
-                order: null
-            });
-        }
+
 
         console.log("Wallet balance before refund:", wallet.balance);
         console.log("Refund amount:", refundAmount);
 
-        const initialBalance = wallet.balance; // Capture initial balance for comparison
+        const initialBalance = wallet.balance; 
 
 
         wallet.balance += refundAmount;
@@ -293,7 +215,7 @@ const postCancelOrder = async (req, res) => {
 
         wallet.transactions.push(newTransaction);
 
-        console.log("Wallet object before saving:", JSON.stringify(wallet)); // Log the wallet object
+         
 
         await wallet.save()
             .then(savedWallet => {

@@ -11,8 +11,6 @@ env.config()
 import Razorpay from 'razorpay'
 import crypto from 'crypto'
 import Coupon from "../../models/couponSchema.js";
-import product from "../../models/productSchema.js";
-
 
 const razorpay = new Razorpay ({
     key_id:process.env.Razorpay_API,
@@ -330,7 +328,8 @@ const placeOrder = async (req, res) => {
             return {
                 product: item.productId._id, 
                 quantity: item.quantity,
-                price: item.productId.salePrice
+                price: item.productId.salePrice,
+                orderStatus:"Pending"
             };
         });
 
@@ -388,7 +387,6 @@ const placeOrder = async (req, res) => {
             finalAmount: finalAmount,
             deliveryAddress : addressFound, 
             paymentMethod:paymentMethod,
-            status: 'Pending', 
             couponCode: couponUsed ? couponUsed.couponCode : null,
             couponDiscount: discountAmount,
         });
@@ -566,7 +564,8 @@ const verifyPayment = async (req, res) => {
                 return {
                     product: item.productId._id,
                     quantity: item.quantity,
-                    price: item.productId.salePrice, // Correctly use the product's salePrice
+                    price: item.productId.salePrice, 
+                    orderStatus:"Pending"
                 };
             });
 
@@ -737,7 +736,8 @@ const loadWalletPayment = async (req, res) => {
         return {
             product: item.productId._id, 
             quantity: item.quantity,
-            price: item.productId.salePrice
+            price: item.productId.salePrice,
+            orderStatus:'Pending'
         };
     });
 
@@ -856,7 +856,7 @@ const paymentFailed = async (req,res)=>{
         }
 
         const cart = await Cart.findOne({ userId });
-        if (!cart || !cart.item || cart.item.length === 0) {
+        if (!cart || !cart.items || cart.items.length === 0) {
             return res.status(400).json({ error: 'Cart is empty or invalid' });
         }
 
