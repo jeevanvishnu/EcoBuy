@@ -45,7 +45,7 @@
             <div class="text-right">
               <div class="text-lg font-bold">₹<%= order.finalAmount.toFixed(2) %></div>
               <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-blue-800 mt-1">
-                <%= order.status %>
+                <%= order.orderedItem[0]?.orderStatus || 'Processing' %>
               </span>
             </div>
           </div>
@@ -109,7 +109,7 @@
                 </div>
                 <div class="flex justify-between">
                   <span class="text-gray-600">Total Amount:</span>
-                  <span class="font-bold text-gray-800">₹<%= order.finalAmount.toFixed(2) %></span>
+                  <span class="font-bold text-gray-800">₹<%= (order.finalAmount * 1.05).toFixed(2) %></span>
                 </div>
               </div>
             </div>
@@ -148,12 +148,12 @@
                     'shipped': 'indigo',
                     'delivered': 'green',
                     'cancelled': 'red',
-                    'returned': 'purple'
+                    'return': 'purple'
                   };
                   
-                  // Get the status from either productStatus or create a default
-                  const productStatus = order.status ||"";
-                  const statusColor = statusColors[order.status.toLowerCase()] || 'gray';
+                  // Get the status from the item's orderStatus property (make it lowercase for the color mapping)
+                  const productStatus = item.orderStatus || "";
+                  const statusColor = statusColors[productStatus.toLowerCase()] || 'gray';
                 %>
                 <tr>
                   <td class="px-6 py-4 whitespace-nowrap">
@@ -186,61 +186,53 @@
                     <%= item.quantity %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ₹<%= (item.price * item.quantity).toFixed(2) %>
+                    ₹<%= ((item.price * item.quantity) * 1.05).toFixed(2) %>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-<%= statusColor %>-100 text-<%= statusColor %>-800">
-                      <%= order.status %>
+                      <%= item.orderStatus %>
                     </span>
                   </td>
                   <td class="px-6 py-4 whitespace-nowrap">
                     <form action="/admin/updateProductStatus" method="post">
                       <input type="hidden" name="orderId" value="<%= order._id %>">
                       <input type="hidden" name="productId" value="<%= item.product ? item.product._id : '' %>">
-                      
+                      <input type="hidden" name="itemId" value="<%= item._id %>">
                       
                       <div class="flex space-x-2">
-                        <select name="status" <%= order.status === 'Cancelled' ? 'disabled' : '' %>>
-                         
-                          <% if (order.status !== 'Cancelled') { %>
-                          <% if(order.status === 'Pending'){ %>
-                            <option value="Pending" selected>Pending</option>
-                            <option value="Processing">Processing</option>
-                          <% } else if(order.status === 'Processing') { %>
-                            <option value="Processing" selected>Processing</option>
-                            <option value="Shipped">Shipped</option>
-                          <% } else if(order.status === 'Shipped') { %>
-                            <option value="Shipped" selected>Shipped</option>
-                            <option value="Delivered">Delivered</option>
-                          <% } else if(order.status === 'Delivered'){ %>
-                            <option value="Delivered" selected>Delivered</option>
-                          <% } %>
-                          <% if(order.returnReason){ %>
-                            <option value="Return" <%= order.status === 'Return' ? 'selected' : '' %>>Return</option>
-                          <% } %>
-
-                          
-                        
-                            
-                        <% } else { %>
+                        <select name="status" <%= item.orderStatus === 'Cancelled' ? 'disabled' : '' %>>
+                          <% if (item.orderStatus !== 'Cancelled') { %>
+                            <% if(item.orderStatus === 'Pending'){ %>
+                              <option value="Pending" selected>Pending</option>
+                              <option value="Processing">Processing</option>
+                            <% } else if(item.orderStatus === 'Processing') { %>
+                              <option value="Processing" selected>Processing</option>
+                              <option value="Shipped">Shipped</option>
+                            <% } else if(item.orderStatus === 'Shipped') { %>
+                              <option value="Shipped" selected>Shipped</option>
+                              <option value="Delivered">Delivered</option>
+                            <% } else if(item.orderStatus === 'Delivered'){ %>
+                              <option value="Delivered" selected>Delivered</option>
+                            <% } %>
+                            <% if(order.returnReason){ %>
+                              <option value="Return" <%= item.orderStatus === 'Return' ? 'selected' : '' %>>Return</option>
+                            <% } %>
+                          <% } else { %>
                             <option value="Cancelled" selected>Cancelled</option>
-                        <% } %>
-                    </select>
-                    <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed" <%= (order.status && order.status === 'Cancelled') ? 'disabled' : '' %>>
-                      <%= (order.status && order.status === 'Cancelled') ? 'Cancelled' : 'Update' %>
-                  </button>
+                          <% } %>
+                        </select>
+                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed" 
+                          <%= (item.orderStatus && item.orderStatus === 'Cancelled') ? 'disabled' : '' %>>
+                          <%= (item.orderStatus && item.orderStatus === 'Cancelled') ? 'Cancelled' : 'Update' %>
+                        </button>
                       </div>
-                      
-                     
                     </form>
                   </td>
+                  <% if(order.cancelReason) { %>
                   <td class="px-6 py-4 whitespace-nowrap text-sm text-black font-bold">
-                    <% if(order.cancelReason) {%>
-                    <%= order.cancelReason  %>
-                      
-                        
-                        <% } %>
+                    <%= order.cancelReason %>
                   </td>
+                  <% } %>
                 </tr>
                 <% }); %>
               </tbody>

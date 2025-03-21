@@ -89,24 +89,27 @@ const updateOrderStatus = async (req,res)=>{
 const updateProductStatus = async (req, res) => {
     const { orderId, productId, status } = req.body;
 
-    
+    console.log("Status", status)
 
     try {
-       
         const order = await Order.findById(orderId);
         if (!order) {
             return res.status(404).send('Order not found');
         }
 
-       
-        const item = order.orderedItem.find(item => item.product.toString() === productId);
-        if (!item) {
+        // Find the item in the order
+        const itemIndex = order.orderedItem.findIndex(item => 
+            item.product.toString() === productId
+        );
+        
+        if (itemIndex === -1) {
             console.error('Product not found in order:', order.orderedItem);
             return res.status(404).send('Product not found in order');
         }
 
-        order.status = status;
-        await order.save(); 
+        // Update the specific item's status
+        order.orderedItem[itemIndex].orderStatus = status;
+        await order.save();
 
         res.redirect(`/admin/orderDetails/${orderId}`);
 
