@@ -3,10 +3,10 @@
 <body class="bg-gray-100 font-sans">
   <div class="min-h-screen">
     <!-- Main Content -->
-    <div class="w-full max-w-full px-4 py-8 md:px-6 lg:px-8">
+    <div class="w-full max-w-7xl mx-auto px-4 py-6 md:px-6 lg:px-8">
       <!-- Page Header with Breadcrumbs -->
-      <div class="mb-8">
-        <div class="flex justify-between items-center">
+      <div class="mb-6">
+        <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <h1 class="text-2xl font-bold text-gray-800">Order Details</h1>
           <a href="/admin/orderManagment" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md transition duration-200 flex items-center">
             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -16,7 +16,7 @@
           </a>
         </div>
         <nav class="text-sm text-gray-500 mt-2">
-          <ol class="list-none p-0 flex">
+          <ol class="list-none p-0 flex flex-wrap">
             <li class="flex items-center">
               <a href="/admin/dashboard" class="hover:text-blue-600">Dashboard</a>
               <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mx-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -35,14 +35,14 @@
       </div>
 
       <!-- Order Summary Card -->
-      <div class="bg-white rounded-lg shadow-md overflow-hidden mb-8">
+      <div class="bg-white rounded-lg shadow-md overflow-hidden mb-6">
         <div class="bg-blue-600 text-white p-5">
-          <div class="flex justify-between items-center">
+          <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
             <div>
-              <h2 class="text-2xl font-bold">Order #<%= order.orderId %></h2>
+              <h2 class="text-xl md:text-2xl font-bold">Order #<%= order.orderId %></h2>
               <p class="mt-1 opacity-90">Placed on <%= new Date(order.date).toLocaleDateString('en-US', {year: 'numeric', month: 'long', day: 'numeric'}) %></p>
             </div>
-            <div class="text-right">
+            <div class="text-left sm:text-right">
               <div class="text-lg font-bold">₹<%= order.finalAmount.toFixed(2) %></div>
               <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-white text-blue-800 mt-1">
                 <%= order.orderedItem[0]?.orderStatus || 'Processing' %>
@@ -65,6 +65,7 @@
                 <% if (order.deliveryAddress && order.deliveryAddress.length > 0) { %>
                   <p class="font-semibold text-gray-800"><%= order.deliveryAddress[0].name %></p>
                   <p class="text-gray-600 mt-1">Phone: <%= order.deliveryAddress[0].phone || 'Not provided' %></p>
+                  <p class="text-gray-600 mt-1">Email: <%= order.user?.email || 'Not provided' %></p>
                 <% } else { %>
                   <p class="text-gray-600">Customer information not available</p>
                 <% } %>
@@ -107,8 +108,16 @@
                   <span class="text-gray-600">Method:</span>
                   <span class="font-medium text-gray-800"><%= order.paymentMethod %></span>
                 </div>
-                <div class="flex justify-between">
-                  <span class="text-gray-600">Total Amount:</span>
+                <div class="flex justify-between mb-2">
+                  <span class="text-gray-600">Subtotal:</span>
+                  <span class="font-medium text-gray-800">₹<%= order.finalAmount.toFixed(2) %></span>
+                </div>
+                <div class="flex justify-between mb-2">
+                  <span class="text-gray-600">GST (5%):</span>
+                  <span class="font-medium text-gray-800">₹<%= (order.finalAmount * 0.05).toFixed(2) %></span>
+                </div>
+                <div class="flex justify-between pt-2 border-t border-gray-200 mt-2">
+                  <span class="text-gray-700 font-semibold">Total Amount:</span>
                   <span class="font-bold text-gray-800">₹<%= (order.finalAmount * 1.05).toFixed(2) %></span>
                 </div>
               </div>
@@ -128,15 +137,13 @@
             <table class="min-w-full divide-y divide-gray-200">
               <thead class="bg-gray-50">
                 <tr>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
-                  <% if(order.cancelReason) {%>
-                  <th scope="col" class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Return Reason</th>
-                    <% } %>
+                  <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Product</th>
+                  <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Price</th>
+                  <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Quantity</th>
+                  <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                  <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                  <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Action</th>
+                  <th scope="col" class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Special Requests</th>
                 </tr>
               </thead>
               <tbody class="bg-white divide-y divide-gray-200">
@@ -148,15 +155,17 @@
                     'shipped': 'indigo',
                     'delivered': 'green',
                     'cancelled': 'red',
-                    'return': 'purple'
+                    'return': 'purple',
+                    'request': 'purple',
+                    'returned': 'green'
                   };
                   
-                  // Get the status from the item's orderStatus property (make it lowercase for the color mapping)
                   const productStatus = item.orderStatus || "";
                   const statusColor = statusColors[productStatus.toLowerCase()] || 'gray';
+                  const hasReturnRequest = item.orderStatus === 'Request';
                 %>
                 <tr>
-                  <td class="px-6 py-4 whitespace-nowrap">
+                  <td class="px-4 py-4 whitespace-nowrap">
                     <div class="flex items-center">
                       <div class="flex-shrink-0 h-16 w-16">
                         <% if (item.product && item.product.productImage && item.product.productImage.length > 0) { %>
@@ -179,60 +188,146 @@
                       </div>
                     </div>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                     ₹<%= item.price ? item.price.toFixed(2) : "0.00" %>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                  <td class="px-4 py-4 whitespace-nowrap text-sm text-gray-500">
                     <%= item.quantity %>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                  <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
                     ₹<%= ((item.price * item.quantity) * 1.05).toFixed(2) %>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-<%= statusColor %>-100 text-<%= statusColor %>-800">
+                  <td class="px-4 py-4 whitespace-nowrap">
+                    <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-<%= statusColor %>-100 text-<%= statusColor %>-800">
                       <%= item.orderStatus %>
                     </span>
                   </td>
-                  <td class="px-6 py-4 whitespace-nowrap">
-                    <form action="/admin/updateProductStatus" method="post">
+                  <td class="px-4 py-4 whitespace-nowrap">
+                    <form action="/admin/updateProductStatus" method="post" class="status-update-form">
                       <input type="hidden" name="orderId" value="<%= order._id %>">
                       <input type="hidden" name="productId" value="<%= item.product ? item.product._id : '' %>">
                       <input type="hidden" name="itemId" value="<%= item._id %>">
                       
                       <div class="flex space-x-2">
-                        <select name="status" <%= item.orderStatus === 'Cancelled' ? 'disabled' : '' %>>
-                          <% if (item.orderStatus !== 'Cancelled') { %>
-                            <% if(item.orderStatus === 'Pending'){ %>
-                              <option value="Pending" selected>Pending</option>
-                              <option value="Processing">Processing</option>
-                            <% } else if(item.orderStatus === 'Processing') { %>
-                              <option value="Processing" selected>Processing</option>
-                              <option value="Shipped">Shipped</option>
-                            <% } else if(item.orderStatus === 'Shipped') { %>
-                              <option value="Shipped" selected>Shipped</option>
-                              <option value="Delivered">Delivered</option>
-                            <% } else if(item.orderStatus === 'Delivered'){ %>
-                              <option value="Delivered" selected>Delivered</option>
+                        <!-- Improved dropdown UI -->
+                        <div class="relative">
+                          <select name="status" 
+                            class="appearance-none bg-white border border-gray-300 rounded-md pl-3 pr-8 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 <%= item.orderStatus === 'Cancelled' || item.orderStatus === 'Return Declined' || item.orderStatus === 'Request' || item.orderStatus === 'Returned' ? 'bg-gray-100 text-gray-500' : '' %>"
+                            <%= item.orderStatus === 'Cancelled' || item.orderStatus === 'Return Declined' || item.orderStatus === 'Request' || item.orderStatus === 'Returned' ? 'disabled' : '' %>>
+                            <% if (item.orderStatus !== 'Cancelled' && item.orderStatus !== 'Return Declined' && item.orderStatus !== 'Request' && item.orderStatus !== 'Returned') { %>
+                              <% if(item.orderStatus === 'Pending'){ %>
+                                <option value="Pending" selected>Pending</option>
+                                <option value="Processing">Processing</option>
+                              <% } else if(item.orderStatus === 'Processing') { %>
+                                <option value="Processing" selected>Processing</option>
+                                <option value="Shipped">Shipped</option>
+                              <% } else if(item.orderStatus === 'Shipped') { %>
+                                <option value="Shipped" selected>Shipped</option>
+                                <option value="Delivered">Delivered</option>
+                              <% } else if(item.orderStatus === 'Delivered'){ %>
+                                <option value="Delivered" selected>Delivered</option>
+                              <% } %>
+                            <% } else { %>
+                              <option value="<%= item.orderStatus %>" selected><%= item.orderStatus %></option>
                             <% } %>
-                            <% if(order.returnReason){ %>
-                              <option value="Return" <%= item.orderStatus === 'Return' ? 'selected' : '' %>>Return</option>
-                            <% } %>
-                          <% } else { %>
-                            <option value="Cancelled" selected>Cancelled</option>
-                          <% } %>
-                        </select>
-                        <button type="submit" class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed" 
-                          <%= (item.orderStatus && item.orderStatus === 'Cancelled') ? 'disabled' : '' %>>
-                          <%= (item.orderStatus && item.orderStatus === 'Cancelled') ? 'Cancelled' : 'Update' %>
+                          </select>
+                          <!-- Dropdown arrow -->
+                          <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-gray-700">
+                            <svg class="h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                              <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                            </svg>
+                          </div>
+                        </div>
+                        <button type="submit" 
+                          class="inline-flex justify-center py-2 px-4 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors" 
+                          <%= (item.orderStatus === 'Cancelled' || item.orderStatus === 'Return Declined' || item.orderStatus === 'Request' || item.orderStatus === 'Returned') ? 'disabled' : '' %>>
+                          <%= (item.orderStatus === 'Cancelled' || item.orderStatus === 'Return Declined' || item.orderStatus === 'Request' || item.orderStatus === 'Returned') ? 'Locked' : 'Update' %>
                         </button>
                       </div>
                     </form>
                   </td>
-                  <% if(order.cancelReason) { %>
-                  <td class="px-6 py-4 whitespace-nowrap text-sm text-black font-bold">
-                    <%= order.cancelReason %>
+                  <td class="px-4 py-4">
+                    <!-- Improved Return Request UI -->
+                    <% if (item.orderStatus === 'Request') { %>
+                      <div class="bg-gray-50 rounded-lg border border-purple-200 overflow-hidden">
+                        <div class="p-3 bg-purple-50 border-b border-purple-200">
+                          <p class="text-sm font-bold text-purple-800 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                            Return Request
+                          </p>
+                        </div>
+                        <div class="p-3">
+                          <% if (item.returnReason) { %>
+                            <div class="mb-3 text-sm text-gray-700">
+                              <p class="font-medium mb-1">Reason:</p>
+                              <p class="bg-white p-2 rounded border border-gray-200"><%= item.returnReason %></p>
+                            </div>
+                          <% } else { %>
+                            <p class="text-sm text-gray-500 mb-3">No reason provided</p>
+                          <% } %>
+                          
+                          <!-- Improved Return accept/reject buttons -->
+                          <div class="flex flex-col sm:flex-row gap-2">
+                            <form action="/admin/approve-return/<%= order._id %>/<%= item.product._id %>" method="post" class="w-full sm:w-auto">
+                              <button type="submit" class="w-full py-2 px-4 bg-green-500 hover:bg-green-600 text-white rounded text-sm font-medium transition-colors flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                </svg>
+                                Approve Return
+                              </button>
+                            </form>
+                            <form action="/admin/decline-return/<%= order._id %>/<%= item.product._id %>" method="post" class="w-full sm:w-auto">
+                              <button type="submit" class="w-full py-2 px-4 bg-red-500 hover:bg-red-600 text-white rounded text-sm font-medium transition-colors flex items-center justify-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                                Reject Return
+                              </button>
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+                    <% } else if (item.orderStatus === 'Return' || item.orderStatus === 'Returned') { %>
+                      <!-- Return Status Display -->
+                      <div class="bg-gray-50 p-3 rounded-lg border <%= item.orderStatus === 'Returned' ? 'border-green-200' : 'border-purple-200' %>">
+                        <p class="text-sm font-bold <%= item.orderStatus === 'Returned' ? 'text-green-700' : 'text-purple-700' %> flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                          </svg>
+                          Return Status: 
+                          <span class="ml-1 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium <%= item.orderStatus === 'Returned' ? 'bg-green-100 text-green-800' : 'bg-purple-100 text-purple-800' %>">
+                            <%= item.orderStatus === 'Returned' ? 'Completed' : 'Processing' %>
+                          </span>
+                        </p>
+                        <% if (order.returnReason) { %>
+                          <div class="mt-2 text-sm text-gray-700">
+                            <p class="font-medium mb-1">Reason:</p>
+                            <p class="bg-white p-2 rounded border border-gray-200"><%= order.returnReason %></p>
+                          </div>
+                        <% } %>
+                      </div>
+                    <% } else if (item.orderStatus === 'Cancelled') { %>
+                      <!-- Cancel Status Display -->
+                      <div class="bg-gray-50 p-3 rounded-lg border border-red-200">
+                        <p class="text-sm font-bold text-red-700 flex items-center">
+                          <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                          </svg>
+                          Order Cancelled
+                        </p>
+                        <% if (item.cancelReason) { %>
+                          <div class="mt-2 text-sm text-gray-700">
+                            <p class="font-medium mb-1">Reason:</p>
+                            <p class="bg-white p-2 rounded border border-gray-200"><%= item.cancelReason %></p>
+                          </div>
+                        <% } %>
+                      </div>
+                    <% } else { %>
+                      <p class="text-sm text-gray-500">No special requests</p>
+                    <% } %>
                   </td>
-                  <% } %>
                 </tr>
                 <% }); %>
               </tbody>

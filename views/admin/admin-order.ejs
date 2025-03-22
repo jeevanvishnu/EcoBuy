@@ -10,127 +10,327 @@
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css">
   <title>Order Management</title>
   <style>
-    /* Custom CSS for a more modern look */
+    /* Modern status badges with better contrast */
     .status-badge {
-      @apply px-3 py-1 rounded-full text-xs font-medium;
+      display: inline-flex;
+      align-items: center;
+      padding: 0.5rem 0.75rem;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
     }
 
     .status-pending {
-      @apply bg-yellow-100 text-yellow-800;
+      background-color: #FEF3C7;
+      color: #92400E;
     }
 
     .status-processing {
-      @apply bg-blue-100 text-blue-800;
+      background-color: #DBEAFE;
+      color: #1E40AF;
     }
 
     .status-shipped {
-      @apply bg-indigo-100 text-indigo-800;
+      background-color: #E0E7FF;
+      color: #3730A3;
     }
 
     .status-delivered {
-      @apply bg-green-100 text-green-800;
+      background-color: #D1FAE5;
+      color: #065F46;
     }
 
     .status-cancelled {
-      @apply bg-red-100 text-red-800;
+      background-color: #FEE2E2;
+      color: #B91C1C;
     }
 
     .status-returned {
-      @apply bg-purple-100 text-purple-800;
+      background-color: #EDE9FE;
+      color: #5B21B6;
     }
 
-    .order-action-btn {
-      @apply px-4 py-2 rounded-md text-sm font-medium transition duration-200 ease-in-out;
+    .status-badge i {
+      margin-right: 0.375rem;
     }
 
-    .order-action-view {
-      @apply bg-blue-500 hover:bg-blue-700 text-white;
+    /* Better action buttons */
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 500;
+      padding: 0.5rem 1rem;
+      border-radius: 0.375rem;
+      transition: all 0.2s;
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
     }
 
-    .order-action-edit {
-      @apply bg-yellow-500 hover:bg-yellow-700 text-gray-800;
+    .btn-primary {
+      background-color: #3B82F6;
+      color: white;
     }
 
-    .order-action-delete {
-      @apply bg-red-500 hover:bg-red-700 text-white;
+    .btn-primary:hover {
+      background-color: #2563EB;
     }
 
-    /* Add a subtle gradient to the header row */
-    thead {
-      background: linear-gradient(to bottom, #f9fafb, #f3f4f6);
-      /* Light gray gradient */
+    .btn-back {
+      background-color: #F3F4F6;
+      color: #4B5563;
+    }
+
+    .btn-back:hover {
+      background-color: #E5E7EB;
+    }
+
+    /* Card design for better UI */
+    .card {
+      background-color: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
+
+    /* Table improvements */
+    .table-container {
+      border-radius: 0.5rem;
+      overflow: hidden;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
     }
 
     th {
-      color: #4b5563;
-      /* Darker gray text */
+      background-color: #F9FAFB;
+      color: #4B5563;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-size: 0.75rem;
+      padding: 0.75rem 1rem;
+      text-align: left;
+    }
+
+    td {
+      padding: 1rem;
+      vertical-align: middle;
+      border-bottom: 1px solid #E5E7EB;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    /* Product image style */
+    .product-image {
+      width: 3rem;
+      height: 3rem;
+      border-radius: 0.5rem;
+      object-fit: cover;
+      border: 1px solid #E5E7EB;
+    }
+
+    /* Hover effect for rows */
+    tbody tr {
+      transition: background-color 0.2s;
+    }
+
+    tbody tr:hover {
+      background-color: #F9FAFB;
+    }
+
+    /* Price and amount formatting */
+    .amount {
+      font-weight: 600;
+    }
+
+    /* Pagination styles */
+    .pagination {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1rem;
+      border-top: 1px solid #E5E7EB;
+    }
+
+    .page-item {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2rem;
+      height: 2rem;
+      margin: 0 0.125rem;
+      padding: 0 0.5rem;
+      border: 1px solid #E5E7EB;
+      border-radius: 0.375rem;
+      background-color: white;
+      color: #4B5563;
+      font-size: 0.875rem;
+      transition: all 0.2s;
+    }
+
+    .page-item:hover:not(.active):not(.disabled) {
+      background-color: #F3F4F6;
+      border-color: #D1D5DB;
+    }
+
+    .page-item.active {
+      background-color: #3B82F6;
+      border-color: #2563EB;
+      color: white;
+      font-weight: 600;
+    }
+
+    .page-item.disabled {
+      color: #9CA3AF;
+      cursor: not-allowed;
+      background-color: #F3F4F6;
+    }
+
+    .page-info {
+      color: #6B7280;
+      font-size: 0.875rem;
+    }
+
+    /* Responsive adjustments */
+    @media (max-width: 1024px) {
+      .responsive-table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+      }
+
+      .pagination-desktop {
+        display: none;
+      }
+    }
+
+    @media (min-width: 1025px) {
+      .pagination-mobile {
+        display: none;
+      }
     }
   </style>
 </head>
-<%- include('../partials/admin/header.ejs') %>
 
-  <body class="bg-gray-100">
+<body class="bg-gray-50 min-h-screen">
+  <%- include('../partials/admin/header.ejs') %>
 
-    <div class="container mx-auto mt-16 p-6">
-
-      <!-- Order Management Header -->
-      <div class="flex items-center justify-between mb-6">
-        <h1 class="text-2xl font-semibold text-gray-800">
-          <i class="fas fa-clipboard-list mr-2"></i> Order Management
+  <div class="container mx-auto px-4 py-8 max-w-7xl">
+    <!-- Page Header -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
+      <div>
+        <h1 class="text-2xl font-bold text-gray-900 flex items-center">
+          <i class="fas fa-shopping-cart text-blue-600 mr-3"></i>
+          Order Management
         </h1>
-        <a href="/admin/dashboard"
-          class="bg-gray-200 hover:bg-gray-300 text-gray-700 order-action-btn rounded-full"><i
-            class="fas fa-arrow-left mr-2"></i>Back to Dashboard</a>
+        <p class="text-gray-600 mt-1">View and manage all customer orders</p>
+      </div>
+      
+      <div class="flex items-center gap-3">
+        <a href="/admin/dashboard" class="btn btn-back">
+          <i class="fas fa-arrow-left mr-2"></i>
+          Back to Dashboard
+        </a>
+      </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div class="card p-4">
+        <div class="flex items-center">
+          <div class="bg-blue-100 p-3 rounded-full">
+            <i class="fas fa-shopping-bag text-blue-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-gray-500 text-sm">Total Orders</h3>
+            <p class="text-2xl font-bold text-gray-900"><%= totalOrders %></p>
+          </div>
+        </div>
       </div>
 
-      <!-- Order Table -->
-      <div class="bg-white shadow-md rounded-lg overflow-hidden">
-        <div class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-gray-200">
-            <thead class="bg-gray-50">
-              <tr>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Order ID
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Image
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Address
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Quantity
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Total Amount
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Payment
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Status
-                </th>
-                <th
-                  class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody class="bg-white divide-y divide-gray-200">
-              <% order.forEach(order => { %>
+      <div class="card p-4">
+        <div class="flex items-center">
+          <div class="bg-green-100 p-3 rounded-full">
+            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-gray-500 text-sm">Delivered</h3>
+            <p class="text-2xl font-bold text-gray-900">
+              <%= order.filter(o => 
+                  o.orderedItem && o.orderedItem.some(item => item.orderStatus === 'Delivered')
+                ).length %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center">
+          <div class="bg-yellow-100 p-3 rounded-full">
+            <i class="fas fa-clock text-yellow-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-gray-500 text-sm">Pending</h3>
+            <p class="text-2xl font-bold text-gray-900">
+              <%= order.filter(o => 
+                  o.orderedItem && o.orderedItem.some(item => item.orderStatus === 'Pending' || !item.orderStatus)
+                ).length %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="card p-4">
+        <div class="flex items-center">
+          <div class="bg-red-100 p-3 rounded-full">
+            <i class="fas fa-times-circle text-red-600 text-xl"></i>
+          </div>
+          <div class="ml-4">
+            <h3 class="text-gray-500 text-sm">Cancelled</h3>
+            <p class="text-2xl font-bold text-gray-900">
+              <%= order.filter(o => 
+                  o.orderedItem && o.orderedItem.some(item => item.orderStatus === 'Cancelled')
+                ).length %>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Order Table -->
+    <div class="card">
+      <div class="p-4 border-b border-gray-200">
+        <h2 class="text-lg font-semibold text-gray-800">Order List</h2>
+      </div>
+      
+      <div class="responsive-table">
+        <table class="table-container">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Product</th>
+              <th>Customer Details</th>
+              <th>Quantity</th>
+              <th>Amount</th>
+              <th>Payment</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% order.forEach(order => { %>
               <%
                 let totalQuantity = 0;
                 let totalAmount = 0;
                 let firstProductImage = '';
 
-                // Find the first product with an image to display
+                // Find the first product with an image
                 if (order.orderedItem && order.orderedItem.length > 0) {
                   for (const item of order.orderedItem) {
                     if (item.product && item.product.productImage && item.product.productImage.length > 0) {
@@ -141,85 +341,224 @@
                 }
 
                 // Calculate totals
-                order.orderedItem.forEach(item => {
-                  totalQuantity += item.quantity || 0;
-                  totalAmount += (item.price || 0) * (item.quantity || 0);
-                });
+                if (order.orderedItem && order.orderedItem.length > 0) {
+                  order.orderedItem.forEach(item => {
+                    totalQuantity += item.quantity || 0;
+                    totalAmount += (item.price || 0) * (item.quantity || 0);
+                  });
+                }
 
-                // Determine overall status based on items (Simplified)
-                let statusClass = 'status-pending'; // Default
-                let statusText = order.status || 'Pending'; // Use order.status if it exists
-                switch (order.status) {
+                // Get order status from the first ordered item
+                let orderStatus = 'Pending';
+                if (order.orderedItem && order.orderedItem.length > 0) {
+                  orderStatus = order.orderedItem[0].orderStatus || 'Pending';
+                }
+
+                // Status styling
+                let statusClass = 'status-pending';
+                let statusIcon = 'fa-clock';
+                
+                switch (orderStatus) {
                   case 'Processing':
                     statusClass = 'status-processing';
+                    statusIcon = 'fa-spinner';
                     break;
                   case 'Shipped':
                     statusClass = 'status-shipped';
+                    statusIcon = 'fa-shipping-fast';
                     break;
                   case 'Delivered':
                     statusClass = 'status-delivered';
+                    statusIcon = 'fa-check-circle';
                     break;
                   case 'Cancelled':
                     statusClass = 'status-cancelled';
+                    statusIcon = 'fa-times-circle';
                     break;
                   case 'Returned':
                     statusClass = 'status-returned';
+                    statusIcon = 'fa-undo';
                     break;
                   default:
                     statusClass = 'status-pending';
+                    statusIcon = 'fa-clock';
                 }
-                %>
+              %>
               <tr>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">#<%= order._id %></div>
+                <td>
+                  <span class="font-mono text-sm font-medium text-gray-700">#<%= order._id.toString().slice(-6).toUpperCase() %></span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
+                <td>
                   <div class="flex items-center">
-                    <div class="flex-shrink-0 h-10 w-10">
-                      <% if (firstProductImage) { %>
-                      <img class="h-10 w-10 rounded-full object-cover"
-                        src="/uploads/re-image/<%= firstProductImage %>" alt="Product Image">
-                      <% } else { %>
-                      <img class="h-10 w-10 rounded-full object-cover" src="/images/placeholder.png"
-                        alt="Product Image Placeholder">
-                      <% } %>
-                    </div>
-
+                    <% if (firstProductImage) { %>
+                      <img class="product-image" src="/uploads/re-image/<%= firstProductImage %>" alt="Product">
+                    <% } else { %>
+                      <div class="product-image bg-gray-200 flex items-center justify-center">
+                        <i class="fas fa-image text-gray-400"></i>
+                      </div>
+                    <% } %>
+                    <span class="ml-3 text-sm text-gray-600">
+                      <%= order.orderedItem && order.orderedItem.length > 0 ? 
+                         (order.orderedItem.length > 1 ? 
+                           `${order.orderedItem[0].product?.name || 'Product'} +${order.orderedItem.length-1} more` : 
+                           order.orderedItem[0].product?.name || 'Product') : 
+                         'No products' %>
+                    </span>
                   </div>
-                  <td class="p-4 text-gray-900">
-                    <p>
-                        <%= order.deliveryAddress.length > 0 
-                            ? `${order.deliveryAddress[0].name}, ${order.deliveryAddress[0].city}, ${order.deliveryAddress[0].state}` 
-                            : 'Address not available' %>
-                    </p>
                 </td>
-                
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900"><%= totalQuantity %></div>
+                <td>
+                  <% if (order.deliveryAddress && order.deliveryAddress.length > 0) { %>
+                    <div class="text-sm">
+                      <p class="font-medium text-gray-900"><%= order.deliveryAddress[0].name %></p>
+                      <p class="text-gray-600"><%= order.deliveryAddress[0].city %>, <%= order.deliveryAddress[0].state %></p>
+                    </div>
+                  <% } else { %>
+                    <span class="text-gray-500 text-sm">Address not available</span>
+                  <% } %>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900">₹<%= totalAmount.toFixed(2) %></div>
+                <td>
+                  <span class="text-sm font-medium text-gray-900"><%= totalQuantity %></span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <div class="text-sm text-gray-900"><%= order.paymentMethod || 'Not specified' %></div>
+                <td>
+                  <span class="amount text-sm">₹<%= (totalAmount * 1.05).toFixed(2) %></span>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap">
-                  <span class="<%= statusClass %> status-badge"><%= statusText %></span>
+                <td>
+                  <div class="flex items-center">
+                    <% if (order.paymentMethod === 'COD' || order.paymentMethod === 'Cash on Delivery') { %>
+                      <i class="fas fa-money-bill-wave text-gray-600 mr-2"></i>
+                    <% } else if (order.paymentMethod === 'Online Payment') { %>
+                      <i class="fas fa-credit-card text-gray-600 mr-2"></i>
+                    <% } else { %>
+                      <i class="fas fa-wallet text-gray-600 mr-2"></i>
+                    <% } %>
+                    <span class="text-sm text-gray-700"><%= order.paymentMethod || 'Not specified' %></span>
+                  </div>
                 </td>
-                <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                  <a href="/admin/orderDetails/<%= order._id %>" class="order-action-btn order-action-view"><i
-                      class="fas fa-eye mr-1"></i> View</a>
-                 
+                <td>
+                  <span class="<%= statusClass %> status-badge">
+                    <i class="fas <%= statusIcon %>"></i>
+                    <%= orderStatus %>
+                  </span>
+                </td>
+                <td>
+                  <div class="flex space-x-2">
+                    <a href="/admin/orderDetails/<%= order._id %>" class="btn btn-primary text-xs">
+                      <i class="fas fa-eye mr-1"></i> View
+                    </a>
+                  </div>
                 </td>
               </tr>
-              <% }); %>
-            </tbody>
-          </table>
+            <% }); %>
+            
+            <% if (order.length === 0) { %>
+              <tr>
+                <td colspan="8" class="text-center py-8">
+                  <div class="flex flex-col items-center">
+                    <i class="fas fa-inbox text-gray-300 text-4xl mb-3"></i>
+                    <p class="text-gray-500">No orders found</p>
+                  </div>
+                </td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+      
+      <!-- Pagination - Mobile Version -->
+      <div class="pagination pagination-mobile">
+        <div class="flex justify-between w-full">
+          <% if (currentPage > 1) { %>
+            <a href="/admin/orderManagment?page=<%= currentPage - 1 %>" class="btn btn-back text-sm">
+              <i class="fas fa-chevron-left mr-1"></i> Previous
+            </a>
+          <% } else { %>
+            <button disabled class="btn btn-back text-sm opacity-50 cursor-not-allowed">
+              <i class="fas fa-chevron-left mr-1"></i> Previous
+            </button>
+          <% } %>
+          
+          <span class="flex items-center text-sm text-gray-600">
+            Page <%= currentPage %> of <%= totalPages %>
+          </span>
+          
+          <% if (currentPage < totalPages) { %>
+            <a href="/admin/orderManagment?page=<%= currentPage + 1 %>" class="btn btn-primary text-sm">
+              Next <i class="fas fa-chevron-right ml-1"></i>
+            </a>
+          <% } else { %>
+            <button disabled class="btn btn-primary text-sm opacity-50 cursor-not-allowed">
+              Next <i class="fas fa-chevron-right ml-1"></i>
+            </button>
+          <% } %>
         </div>
       </div>
-
+      
+      <!-- Pagination - Desktop Version -->
+      <div class="pagination pagination-desktop">
+        <div class="flex justify-between items-center w-full">
+          <div class="page-info">
+            Showing <span class="font-medium"><%= ((currentPage - 1) * 5) + 1 %></span> to 
+            <span class="font-medium"><%= Math.min(currentPage * 5, totalOrders) %></span> of 
+            <span class="font-medium"><%= totalOrders %></span> orders
+          </div>
+          
+          <div class="flex items-center">
+            <!-- First Page -->
+            <% if (currentPage > 1) { %>
+              <a href="/admin/orderManagment?page=1" class="page-item">
+                <i class="fas fa-angle-double-left"></i>
+              </a>
+              <a href="/admin/orderManagment?page=<%= currentPage - 1 %>" class="page-item">
+                <i class="fas fa-angle-left"></i>
+              </a>
+            <% } else { %>
+              <span class="page-item disabled">
+                <i class="fas fa-angle-double-left"></i>
+              </span>
+              <span class="page-item disabled">
+                <i class="fas fa-angle-left"></i>
+              </span>
+            <% } %>
+            
+            <!-- Page Numbers -->
+            <% 
+            let startPage = Math.max(1, currentPage - 2);
+            let endPage = Math.min(totalPages, startPage + 4);
+            
+            if (endPage - startPage < 4 && totalPages > 5) {
+              startPage = Math.max(1, endPage - 4);
+            }
+            
+            for (let i = startPage; i <= endPage; i++) { 
+            %>
+              <% if (i === currentPage) { %>
+                <span class="page-item active"><%= i %></span>
+              <% } else { %>
+                <a href="/admin/orderManagment?page=<%= i %>" class="page-item"><%= i %></a>
+              <% } %>
+            <% } %>
+            
+            <!-- Last Page -->
+            <% if (currentPage < totalPages) { %>
+              <a href="/admin/orderManagment?page=<%= currentPage + 1 %>" class="page-item">
+                <i class="fas fa-angle-right"></i>
+              </a>
+              <a href="/admin/orderManagment?page=<%= totalPages %>" class="page-item">
+                <i class="fas fa-angle-double-right"></i>
+              </a>
+            <% } else { %>
+              <span class="page-item disabled">
+                <i class="fas fa-angle-right"></i>
+              </span>
+              <span class="page-item disabled">
+                <i class="fas fa-angle-double-right"></i>
+              </span>
+            <% } %>
+          </div>
+        </div>
+      </div>
     </div>
-
-  </body>
+  </div>
+</body>
 
 </html>

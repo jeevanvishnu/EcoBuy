@@ -78,4 +78,6 @@ router.get('/orderManagment',adminAuth,orderController.loadOrderManagment)
 router.post('/updateOrderStatus',adminAuth,orderController.updateOrderStatus)
 router.get('/orderDetails/:id',adminAuth,orderController.loadOrderDetails)
 router.post('/updateProductStatus',adminAuth,orderController.updateProductStatus)
+router.post('/approve-return/:orderid/:productid',adminAuth,orderController.returnApprove)
+router.post('/decline-return/:orderid/:productid',adminAuth,orderController.returnDecline);
 export default router;

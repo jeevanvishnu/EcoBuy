@@ -1,29 +1,30 @@
 import Order from "../../models/orderSchema.js"
-
+import Wallet from "../../models/walletSchema.js";
+import Product from "../../models/productSchema.js";
 // In loadOrderManagment
 const loadOrderManagment = async (req, res) => {
     try {
         const page = parseInt(req.query.page) || 1;
-        const limit = 5;
+        const limit = 3;
         const skip = (page - 1) * limit;
-
+        
         const totalOrders = await Order.countDocuments();
         const totalPages = Math.ceil(totalOrders / limit);
-
+        
         const orders = await Order.find()
             .populate({
                 path: "orderedItem.product",
                 model: "Product",
                 select: 'productName productImage salePrice'
             })
-            
-            .sort({ createdAt: -1 })
+            .sort({ _id: -1 }) 
             .limit(limit)
             .skip(skip);
-
-        console.log(orders, "orders")
+        
+        console.log(orders, "orders");
         res.render('admin/admin-order', {
-            order: orders,
+            order: orders, 
+            totalOrders,   
             currentPage: page,
             totalPages,
             admin: req.session.admin,
@@ -85,7 +86,6 @@ const updateOrderStatus = async (req,res)=>{
 
 
 // update updateProduct details
-
 const updateProductStatus = async (req, res) => {
     const { orderId, productId, status } = req.body;
 
@@ -96,6 +96,7 @@ const updateProductStatus = async (req, res) => {
         if (!order) {
             return res.status(404).send('Order not found');
         }
+
 
         // Find the item in the order
         const itemIndex = order.orderedItem.findIndex(item => 
@@ -119,11 +120,107 @@ const updateProductStatus = async (req, res) => {
     }
 };
 
+const returnApprove = async (req, res) => {
+    try {
+      const orderId = req.params.orderid;
+      const productId = req.params.productid;
+  
+      console.log(orderId, productId, "This is orderId and productId");
+  
+      // Fetch the order and populate product details
+      const order = await Order.findById(orderId).populate("orderedItem.product");
+      if (!order) return res.status(404).send("Order not found");
+  
+      // Find the item to return
+      const itemToReturn = order.orderedItem.find(
+        (item) => item.product._id.toString() === productId
+      );
+      if (!itemToReturn) return res.status(404).send("Product not found in order");
+  
+      // Check if the item is eligible for return approval (e.g., status is "Request")
+      if (itemToReturn.orderStatus !== "Request") {
+        return res.status(400).send("Item is not in a return-requested state");
+      }
+  
+      // Calculate total quantity of items in the order
+      const totalQuantity = order.orderedItem.reduce((sum, item) => sum + item.quantity, 0);
+  
+      // Calculate refund amount
+      let refundAmount;
+      if (order.couponApplied) { // Changed from couponCode to couponApplied per schema
+        refundAmount = (order.finalAmount / totalQuantity) * itemToReturn.quantity; // Use finalAmount
+      } else {
+        refundAmount = itemToReturn.price * itemToReturn.quantity; // Use price from orderedItem
+      }
+  
+      // Add 5% to the refund amount
+      const finalRefundAmount = refundAmount * 1.05; // Increase by 5%
+      console.log(`Refund Amount: ${refundAmount}, Final Refund with 5%: ${finalRefundAmount}`);
+  
+      // Increase product stock quantity
+      const product = await Product.findById(productId);
+      if (!product) return res.status(404).send("Product not found");
+      product.quantity = (product.quantity || 0) + itemToReturn.quantity; // Assuming Product has a quantity field
+      await product.save();
+  
+      // Update wallet
+      let wallet = await Wallet.findOne({ userId: order.userId });
+      if (!wallet) {
+        wallet = new Wallet({
+          userId: order.userId,
+          balance: 0,
+          transactions: [],
+        });
+      }
+      wallet.balance += finalRefundAmount; // Add refund + 5%
+      wallet.transactions.push({
+        amount: finalRefundAmount,
+        transactionsMethod: "Refund",
+        date: new Date(),
+        orderId: orderId,
+      });
+      await wallet.save();
+  
+      // Update item status to "Returned"
+      itemToReturn.orderStatus = "Returned"; // Correct field name
+      await order.save();
+  
+      res.redirect("/admin/orderManagment");
+    } catch (error) {
+      console.error("Error approving return:", error);
+      res.status(500).send("Error processing return approval");
+    }
+  };
+
+
+  const returnDecline = async (req,res)=>{
+    try {
+        const orderId = req.params.orderid;
+        const productId = req.params.productid;
+
+        const order = await Order.findById(orderId);
+        if (!order) return res.status(404).send('Order not found');
+
+        const itemToReturn = order.orderedItem.find(item => item.product._id.toString() === productId);
+        if (!itemToReturn) return res.status(404).send('Product not found in order');
+
+     
+        itemToReturn.orderStatus = 'Return Declined';
+        await order.save();
+
+        res.redirect('/admin/orderManagment'); 
+    } catch (error) {
+        console.error('Error declining return:', error);
+        res.status(500).send('Error processing return decline');
+    }
+}
 
 export default {
     loadOrderManagment ,
     loadOrderDetails,
     updateProductStatus,
     updateOrderStatus,
-    
+    returnApprove,
+    returnDecline
+ 
 }
