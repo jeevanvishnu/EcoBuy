@@ -80,4 +80,10 @@ router.get('/orderDetails/:id',adminAuth,orderController.loadOrderDetails)
 router.post('/updateProductStatus',adminAuth,orderController.updateProductStatus)
 router.post('/approve-return/:orderid/:productid',adminAuth,orderController.returnApprove)
 router.post('/decline-return/:orderid/:productid',adminAuth,orderController.returnDecline);
+
+// coupon managment
+router.get('/coupons',adminAuth,customerController.couponMangment)
+router.post('/addCoupons',adminAuth,customerController.addCoupon)
+router.post('/editCoupon',adminAuth,customerController.editCoupon)
+router.get('/deleteCoupon/:id',adminAuth,customerController.deleteCoupon)
 export default router;

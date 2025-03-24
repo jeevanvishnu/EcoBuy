@@ -460,27 +460,37 @@ const initiateRazorpay = async (req, res) => {
             return res.status(404).json({ error: 'Cart not found' });
         }
 
+        let totalPrice = 0;
         let totalDiscount = 0;
 
+        // Calculate total price from all items
+        for (const item of cart.items) {
+            let itemPrice = item.totalPrice * item.quantity;
+            totalPrice += itemPrice;
+        }
+
+        // Apply coupon if available
         if (cart.appliedCoupon) {
             const couponUsed = await Coupon.findOne({ _id: cart.appliedCoupon });
 
             if (couponUsed) {
-                totalDiscount = (cart.totalPrice * couponUsed.discount) / 100;
+                totalDiscount = (totalPrice * couponUsed.discount) / 100;
             }
         }
 
-        const discountedTotal = cart.totalPrice - totalDiscount;
-        const gstRate = 5
+        const discountedTotal = totalPrice - totalDiscount;
+        const gstRate = 5;
         const gstAmount = (discountedTotal * gstRate) / 100;
-        const finalAmountWithGST = discountedTotal + gstAmount; 
-
+        const finalAmountWithGST = discountedTotal + gstAmount;
+        
+        console.log("cartPrice", totalPrice);
+        
         const options = {
             amount: Math.round(finalAmountWithGST * 100),
             currency: 'INR',
             receipt: 'order_' + Date.now(),
         };
-        console.log(options,"check inital payment")
+        console.log(options, "check inital payment");
 
         const order = await razorpay.orders.create(options);
 
@@ -488,7 +498,7 @@ const initiateRazorpay = async (req, res) => {
             success: true,
             order: {
                 id: order.id,
-                amount: discountedTotal,
+                amount: finalAmountWithGST,
             },
         });
 

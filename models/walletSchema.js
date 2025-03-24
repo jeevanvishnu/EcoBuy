@@ -18,6 +18,9 @@ const transactionSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order' 
     },
+    razorpayOrderId: {
+        type: String
+    },
     status: {
         type: String,
         enum: ['completed', 'pending'],

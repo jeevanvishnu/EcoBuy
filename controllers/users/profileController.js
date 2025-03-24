@@ -4,8 +4,19 @@ import bcrypt from 'bcrypt'
 import dotEnv from 'dotenv'
 dotEnv.config()
 import session from "express-session"
+import Order from "../../models/orderSchema.js"
 import Address  from "../../models/addressSchema.js"
 import mongoose from "mongoose"
+import Wallet from "../../models/walletSchema.js"
+import Razorpay from "razorpay"
+import crypto from 'crypto'
+import doEnv from 'dotenv'
+doEnv.config()
+
+const razorpay = new Razorpay({
+    key_id: process.env.Razorpay_API,
+    key_secret: process.env.Razorpay_SCRECT
+});
 
 const getForgotPassPage = async (req,res)=>{
     try {
@@ -583,8 +594,182 @@ const postEditProfile = async (req, res) => {
     }
 };
 
+const loadWallet = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.redirect('/login');
+        }
+
+     
+        const user = await User.findById(userId);
+        
+        let wallet = await Wallet.findOne({ userId });
+
+        const walletBalance = wallet ? wallet.balance : 0;
+
+        const page = parseInt(req.query.page) || 1;
+        const limit = parseInt(req.query.limit) || 5; 
+        const skip = (page - 1) * limit;
+
+     
+        const transactions = wallet 
+    ? wallet.transactions
+        .slice()
+        .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)) 
+        .slice(skip, skip + limit)
+    : [];
 
 
+       
+        const totalTransactions = wallet ? wallet.transactions.length : 0; 
+        const totalPages = Math.ceil(totalTransactions / limit); 
+
+        res.render('user/wallet', {
+            user,
+            walletBalance,
+            transactions,
+            currentPage: page,
+            totalPages,
+            message: null 
+        });
+    } catch (error) {
+        console.error('Error while rendering wallet:', error);
+        res.status(500).send('Internal server error');
+    }
+};
+
+const createWallet = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        if (!userId) {
+            return res.status(401).json({
+                success: false,
+                message: 'User not authenticated'
+            });
+        }
+
+       
+        let wallet = await Wallet.findOne({ userId });
+        if (wallet) {
+            return res.status(400).json({
+                success: false,
+                message: 'Wallet already exists'
+            });
+        }
+
+  
+        wallet = new Wallet({
+            userId,
+            balance: 0,  
+            transactions: []  
+        });
+
+      
+        await wallet.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Wallet created successfully'
+        });
+    } catch (error) {
+        console.error('Error creating wallet:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Internal server error'
+        });
+    }
+};
+
+
+const addMoney = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { amount } = req.body;
+
+        if (!amount || amount <= 0) {
+            return res.status(400).json({ message: 'Invalid amount' });
+        }
+        if (amount > 10000) {
+            return res.status(400).json({ message: '₹10,000 is the one-time limit' });
+        }
+
+        let wallet = await Wallet.findOne({ userId });
+
+        if (!wallet) {
+            return res.status(400).json({ message: 'Wallet not found' });
+        }
+
+       
+        const options = {
+            amount: amount * 100, 
+            currency: 'INR',
+            receipt: `wallet_${Date.now()}`,
+            payment_capture: 1,
+        };
+
+        const order = await razorpay.orders.create(options);
+        res.json({ success: true, order });
+
+    } catch (error) {
+        console.error('Error while adding money:', error);
+        res.status(500).json({ message: 'Internal server error' });
+    }
+};
+
+const VerifyPayment = async (req, res) => {
+    try {
+        const { razorpay_payment_id, razorpay_order_id, razorpay_signature, amount } = req.body;
+        console.log(req.body);
+        const userId = req.session.user;
+
+        if (!razorpay_payment_id || !razorpay_order_id || !razorpay_signature) {
+            console.log("Missing payment details");
+            return res.status(400).json({ message: 'Missing payment details' });
+        }
+
+        const generated_signature = crypto
+            .createHmac("sha256", process.env.Razorpay_SCRECT)
+            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
+            .digest("hex");
+
+        console.log("Generated Signature:", generated_signature);
+        console.log("Received Signature:", razorpay_signature);
+
+        if (generated_signature !== razorpay_signature) {
+            console.log("Signature mismatch - verification failed");
+            return res.status(400).json({ message: "Payment verification failed! Signature mismatch." });
+        }
+
+        let wallet = await Wallet.findOne({ userId });
+        if (!wallet) {
+            console.log("Wallet not found for user:", userId);
+            return res.status(400).json({ message: "Wallet not found" });
+        }
+
+        // Add the transaction to the wallet
+        wallet.transactions.push({
+            amount: parseFloat(amount),
+            transactionsMethod: 'Money Added via Razorpay', 
+            date: new Date(),
+            razorpayOrderId: razorpay_order_id,
+            status: 'completed'
+        });
+
+        // Update the balance
+        wallet.balance += parseFloat(amount);
+        
+        // Save the updated wallet
+        await wallet.save();
+
+        console.log(`Money added successfully! New balance: ₹${wallet.balance}`);
+        return res.json({ message: "Money added successfully!", newBalance: wallet.balance });
+
+    } catch (error) {
+        console.error("Error verifying payment:", error);
+        res.status(500).json({ message: "Payment verification failed due to server error." });
+    }
+};
 
 
 export default {
@@ -609,5 +794,9 @@ export default {
     postEditAddress,
     deleteAddress,
     editProfile,
-    postEditProfile
+    postEditProfile,
+    loadWallet,
+    createWallet,
+    addMoney,
+    VerifyPayment
 }

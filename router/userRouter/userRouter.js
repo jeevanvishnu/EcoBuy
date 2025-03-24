@@ -79,6 +79,8 @@ router.get('/checkoutDelete',userAuth.userAuth,checkoutController.checkoutDelete
 router.get('/getCartTotal',userAuth.userAuth,checkoutController.getCartTotal)
 router.post('/placeOrder',userAuth.userAuth,checkoutController.placeOrder)
 router.get('/orders',userAuth.userAuth,checkoutController.orderSucess)
+router.post('/placeOrderWithWallet',userAuth.userAuth,checkoutController.loadWalletPayment)
+router.post('/applyCoupon',userAuth.userAuth)
 
 // Razorpay
 router.post('/inital-razorpay',checkoutController.initiateRazorpay)
@@ -94,5 +96,9 @@ router.post('/cancelOrder/:orderId/:productId',userAuth.userAuth,orderController
 router.post('/returnOrder/:orderId/:productId',userAuth.userAuth,orderController.returnProduct)
 
 // wallet payment
-router.post('/placeOrderWithWallet',checkoutController.loadWalletPayment)
+router.get('/wallet',userAuth.userAuth,profileController.loadWallet)
+router.post('/create-wallet',userAuth.userAuth,profileController.createWallet)
+router.post('/add-money',userAuth.userAuth,profileController.addMoney)
+router.post('/verify-wallet-payment',userAuth.userAuth,profileController.VerifyPayment)
+
 export default router
