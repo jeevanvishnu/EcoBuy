@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Invoice #<%= orderId %></title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            background-color: #f4f4f4;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .invoice-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+        }
+        .invoice-header {
+            margin-bottom: 30px;
+        }
+        .order-number {
+            color: #333;
+            font-size: 24px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 10px;
+        }
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .info-section {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 6px;
+        }
+        .info-section h2 {
+            color: #444;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-bottom: 1px solid #ddd;
+            padding-bottom: 5px;
+        }
+        .info-section p {
+            color: #666;
+            margin-bottom: 5px;
+        }
+        .products-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+        .products-table th {
+            background-color: #f1f1f1;
+            color: #333;
+            padding: 12px;
+            text-align: left;
+            border: 1px solid #ddd;
+        }
+        .products-table td {
+            padding: 12px;
+            border: 1px solid #ddd;
+            color: #666;
+        }
+        .status-pending {
+            background-color: #f0ad4e;
+            color: white;
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+        }
+        .total-amount {
+            text-align: right;
+            font-weight: bold;
+            font-size: 18px;
+            color: #333;
+            padding: 10px;
+            background-color: #f1f1f1;
+            border-radius: 6px;
+        }
+        @media print {
+            body {
+                background-color: white;
+            }
+            .invoice-container {
+                box-shadow: none;
+                padding: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <div class="invoice-header">
+            <h1 class="order-number">Invoice #<%= orderId %></h1>
+            
+            <div class="info-grid">
+                <div class="info-section">
+                    <h2>Customer Details</h2>
+                    <p><strong>Name:</strong> <%= customerDetails.name %></p>
+                    <p><strong>Email:</strong> <%= customerDetails.email %></p>
+                    <p><strong>Phone:</strong> <%= customerDetails.mobile %></p>
+                </div>
+
+                <div class="info-section">
+                    <h2>Company Details</h2>
+                    <p><strong><%= companyDetails.name %></strong></p>
+                    <p><%= companyDetails.address %></p>
+                    <p><strong>Email:</strong> <%= companyDetails.email %></p>
+                    <p><strong>Phone:</strong> <%= companyDetails.phone %></p>
+                    <p><strong>GST:</strong> <%= companyDetails.gst %></p>
+                </div>
+            </div>
+
+            <div class="info-grid">
+                <div class="info-section">
+                    <h2>Shipping Address</h2>
+                    <p><strong>Type:</strong> <%= shippingAddress.addressType %></p>
+                    <p><%= shippingAddress.city %>, <%= shippingAddress.state %></p>
+                    <p><strong>Pincode:</strong> <%= shippingAddress.pincode %></p>
+                    <p><strong>Landmark:</strong> <%= shippingAddress.landMark %></p>
+                </div>
+                
+                <div class="info-section">
+                    <h2>Invoice Details</h2>
+                    <p><strong>Invoice Date:</strong> <%= invoiceDate %></p>
+                    <p><strong>Due Date:</strong> <%= dueDate %></p>
+                    <p><strong>Payment Method:</strong> <%= paymentMethod %></p>
+                </div>
+            </div>
+        </div>
+
+        <table class="products-table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Quantity</th>
+                    <th>Price</th>
+                    <th>Total</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                <% orderedItem.forEach(item => { %>
+                    <tr>
+                        <td><%= item.productName || 'Product Name' %></td>
+                        <td><%= item.quantity %></td>
+                        <td>₹<%= item.price.toFixed(2) %></td>
+                        <td>₹<%= (item.price * item.quantity).toFixed(2) %></td>
+                        <td><span class="status-pending"><%= item.orderStatus %></span></td>
+                    </tr>
+                <% }); %>
+            </tbody>
+        </table>
+
+        <div class="total-amount">
+            <p>Total Amount: ₹<%= finalAmount.toFixed(2) %></p>
+        </div>
+    </div>
+</body>
+</html>

@@ -96,6 +96,7 @@ router.get('/order',userAuth.userAuth,orderController.orderDetails)
 router.get('/orderStatus/:id',userAuth.userAuth,orderController.loadorderStatus)
 router.post('/cancelOrder/:orderId/:productId',userAuth.userAuth,orderController.postCancelOrder)
 router.post('/returnOrder/:orderId/:productId',userAuth.userAuth,orderController.returnProduct)
+router.get('/downloadInvoice/:orderId',orderController.invoiceController.generateAndDownload)
 
 // wallet payment
 router.get('/wallet',userAuth.userAuth,profileController.loadWallet)

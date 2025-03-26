@@ -32,12 +32,12 @@
                                                 <% } %>
                                             </td>
                                             <td class="py-3 px-3 border-b border-gray-200">
-                                                <% let invoiceShown = false; %>
-                                                <% order.orderedItem.forEach(item => { %>
-                                                    <% if (item.productStatus === 'delivered' && !invoiceShown) { %>
-                                                        <a href="/downloadInvoice/<%= order._id %>" class="bg-black text-white px-2 py-1.5 rounded text-xs hover:bg-gray-800 transition-colors duration-200">Download</a>
-                                                        <% invoiceShown = true; %>
-                                                    <% } %>
+                                                <% let invoiceShown = false; %>                                                 
+                                                <% order.orderedItem.forEach(item => { %>                                                     
+                                                    <% if (item.orderStatus === 'Delivered' && !invoiceShown) { %>                                                         
+                                                        <a href="/downloadInvoice/<%= order._id %>" class="bg-black text-white px-2 py-1.5 rounded text-xs hover:bg-gray-800 transition-colors duration-200">Download</a>                                                         
+                                                        <% invoiceShown = true; %>                                                     
+                                                    <% } %>                                                 
                                                 <% }) %>
                                             </td>
                                         </tr>
