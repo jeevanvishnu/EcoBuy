@@ -80,7 +80,9 @@ router.get('/getCartTotal',userAuth.userAuth,checkoutController.getCartTotal)
 router.post('/placeOrder',userAuth.userAuth,checkoutController.placeOrder)
 router.get('/orders',userAuth.userAuth,checkoutController.orderSucess)
 router.post('/placeOrderWithWallet',userAuth.userAuth,checkoutController.loadWalletPayment)
-router.post('/applyCoupon',userAuth.userAuth)
+router.post('/applyCoupon',userAuth.userAuth,checkoutController.applyCoupon)
+router.get('/get-available-coupons',userAuth.userAuth,checkoutController.getApplyCoupon)
+router.post('/remove-coupon',userAuth.userAuth,checkoutController.removeCoupon)
 
 // Razorpay
 router.post('/inital-razorpay',checkoutController.initiateRazorpay)

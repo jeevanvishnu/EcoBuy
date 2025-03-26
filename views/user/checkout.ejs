@@ -192,11 +192,64 @@
             
             <!-- Coupon Code -->
             <div class="mb-6">
-              <div class="flex mb-2">
-                <input type="text" id="couponCode" placeholder="Enter coupon code" class="flex-grow border border-gray-300 rounded-l-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                <button onclick="applyCoupon()" class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-r-md transition duration-150 ease-in-out">Apply</button>
+              <div class="flex space-x-2">
+                <div class="flex-grow">
+                  <input 
+                    type="text" 
+                    id="couponCode" 
+                    placeholder="Enter coupon code" 
+                    class="w-full border border-gray-300 rounded-md py-2 px-3 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  >
+                </div>
+                <button 
+                  onclick="applyCoupon()" 
+                  class="bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
+                >
+                  Apply Coupon
+                </button>
+                <button 
+                  onclick="showAvailableCoupons()" 
+                  class="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition duration-150 ease-in-out"
+                >
+                  Available Coupons
+                </button>
               </div>
-              <p id="couponError" class="text-red-500 text-sm mt-1 hidden">Invalid coupon code.</p>
+              
+              <!-- Coupon Status and Remove Option -->
+              <div id="couponStatus" class="mt-2 flex justify-between items-center">
+                <p id="couponMessage" class="text-sm"></p>
+                <button 
+                  id="removeCouponBtn" 
+                  onclick="removeCoupon()" 
+                  class="text-red-600 hover:text-red-800 text-sm hidden"
+                >
+                  Remove Coupon
+                </button>
+              </div>
+              
+              <!-- Available Coupons Modal -->
+              <div 
+                id="availableCouponsModal" 
+                class="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center hidden"
+              >
+                <div class="bg-white rounded-lg max-w-md w-full p-6">
+                  <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-xl font-bold text-gray-800">Available Coupons</h3>
+                    <button 
+                      onclick="closeAvailableCouponsModal()" 
+                      class="text-gray-400 hover:text-gray-600"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                  
+                  <div id="couponsList" class="space-y-4">
+                    <!-- Coupon items will be dynamically populated here -->
+                  </div>
+                </div>
+              </div>
             </div>
             
             <!-- Price Summary -->
@@ -315,6 +368,7 @@
 </div>
 
 
+
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://checkout.razorpay.com/v1/checkout.js"></script>  <!-- Razorpay Checkout Script -->
 
@@ -328,6 +382,8 @@
     const gstAmount = parseFloat("<%= gstAmount %>") || 0;
     const totalAmount = parseFloat("<%= totalAmount %>") || 0;
     const walletBalance = parseFloat("<%= userWallet ? userWallet.balance : 0 %>") || 0;
+
+
   
     let razorpayOrderId = null; 
   
@@ -345,40 +401,245 @@
       });
     }
   
-    async function applyCoupon() {
-      const couponCode = document.getElementById('couponCode').value;
-      const couponError = document.getElementById('couponError');
+    // async function applyCoupon() {
+    //   const couponCode = document.getElementById('couponCode').value;
+    //   const couponError = document.getElementById('couponError');
   
-      try {
-        const response = await fetch('/applyCoupon', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            couponCode
-          })
-        });
+    //   try {
+    //     const response = await fetch('/applyCoupon', {
+    //       method: 'POST',
+    //       headers: {
+    //         'Content-Type': 'application/json'
+    //       },
+    //       body: JSON.stringify({
+    //         couponCode
+    //       })
+    //     });
   
-        const data = await response.json();
+    //     const data = await response.json();
   
-        if (data.success) {
+    //     if (data.success) {
+         
           
-          document.getElementById('couponDiscount').innerText = `(-) ₹ ${data.discountAmount.toFixed(2)}`;
-          updateTotalAmount(data.newTotal); 
-          couponError.classList.add('hidden');
-        } else {
-          couponError.textContent = data.message || 'Invalid coupon code.';
-          couponError.classList.remove('hidden');
-          document.getElementById('couponDiscount').innerText = `(-) ₹ 0.00`;
-          updateTotalAmount(subtotal); 
-        }
-      } catch (error) {
-        console.error('Error applying coupon:', error);
-        couponError.textContent = 'An error occurred. Please try again.';
-        couponError.classList.remove('hidden');
-      }
+    //       document.getElementById('couponDiscount').innerText = `(-) ₹ ${data.discountAmount.toFixed(2)}`;
+    //       updateTotalAmount(data.newTotal); 
+    //       couponError.classList.add('hidden');
+    //     } else {
+         
+          
+    //       couponError.textContent = data.message || 'Invalid coupon code.';
+    //       couponError.classList.remove('hidden');
+    //       document.getElementById('couponDiscount').innerText = `(-) ₹ 0.00`;
+    //       updateTotalAmount(subtotal); 
+    //     }
+    //   } catch (error) {
+    //     console.error('Error applying coupon:', error);
+    //     couponError.textContent = 'An error occurred. Please try again.';
+    //     couponError.classList.remove('hidden');
+    //   }
+    // }
+
+    function applyCoupon() {
+  const couponCode = document.getElementById('couponCode').value.trim();
+  const couponMessage = document.getElementById('couponMessage'); // You might not need this with SweetAlert
+  const removeCouponBtn = document.getElementById('removeCouponBtn');
+  const totalAmountElement = document.getElementById('totalAmount');
+
+  if (!couponCode) {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'warning',
+      title: 'Please enter a coupon code.',
+      showConfirmButton: false,
+      timer: 3000
+    });
+    return;
+  }
+
+  fetch('/applyCoupon', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ couponCode: couponCode })
+  })
+  .then(response => {
+    if (!response.ok) {
+      throw new Error('Network response was not ok');
     }
+    return response.json();
+  })
+  .then(data => {
+    if (data.success) {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'success',
+        title: `Coupon applied! Discount: ₹${data.discountAmount.toFixed(2)}`,
+        showConfirmButton: false,
+        timer: 3000
+      });
+
+      removeCouponBtn.classList.remove('hidden');
+      totalAmountElement.textContent = `₹${data.newTotal.toFixed(2)}`;
+      document.getElementById('couponDiscount').innerText = `(-) ₹ ${data.discountAmount.toFixed(2)}`;
+    } else {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: data.message || 'Invalid coupon code.',
+        showConfirmButton: false,
+        timer: 3000
+      });
+
+      removeCouponBtn.classList.add('hidden');
+      totalAmountElement.textContent = `₹${data.originalTotal.toFixed(2)}`;
+      document.getElementById('couponDiscount').innerText = `(-) ₹0.00`;
+    }
+    
+  })
+  .catch(error => {
+    console.error('Error applying coupon:', error);
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'error',
+      title: 'Invalid coupon.',
+      showConfirmButton: false,
+      timer: 3000
+    });
+  });
+}
+
+async function removeCoupon() {
+  try {
+    const response = await fetch('/remove-coupon', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) {
+      throw new Error(`HTTP error! Status: ${response.status}`); 
+    }
+
+    const data = await response.json();
+
+    if (data.success) {
+      Swal.fire({
+        text: 'Coupon removed successfully',
+        icon: 'success',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+      });
+
+      // UI updates AFTER successful server response
+      const couponCodeInput = document.getElementById('couponCode');
+      const couponMessage = document.getElementById('couponMessage');
+      const removeCouponBtn = document.getElementById('removeCouponBtn');
+
+      couponCodeInput.value = '';
+      couponMessage.textContent = '';
+      removeCouponBtn.classList.add('hidden');
+
+      // Reset order total to original price
+      resetOrderTotal();
+    } else {
+      // Handle server-side error (data.success is false)
+      Swal.fire({
+        text: data.message || 'Failed to remove coupon',
+        icon: 'error',
+        toast: true,
+        position: 'top-end',
+        showConfirmButton: false,
+        timer: 3000,
+      });
+      resetOrderTotal();
+    }
+  } catch (error) {
+    console.error('Error during removeCoupon fetch:', error);
+    Swal.fire({
+      text: 'Error removing coupon',
+      icon: 'error',
+      toast: true,
+      position: 'top-end',
+      showConfirmButton: false,
+      timer: 3000,
+    });
+    resetOrderTotal();
+  }
+}
+
+  function showAvailableCoupons() {
+    const modal = document.getElementById('availableCouponsModal');
+    const couponsList = document.getElementById('couponsList');
+
+    if (!modal || !couponsList) {
+        console.error('Modal or coupons list element not found');
+        return;
+    }
+
+    fetch('/get-available-coupons')
+    .then(response => {
+        if (!response.ok) throw new Error('Network response was not ok');
+        return response.json();
+    })
+    .then(coupons => {
+        couponsList.innerHTML = '';
+        
+        coupons.forEach(coupon => {
+            const couponElement = document.createElement('div');
+            couponElement.className = 'border rounded-lg p-4 hover:bg-gray-50 cursor-pointer';
+            couponElement.innerHTML = `
+                <div class="flex justify-between items-center">
+                    <div>
+                        <h4 class="font-bold text-gray-800">${coupon.couponCode}</h4>
+                       
+                    </div>
+                    <span class="text-green-600 font-medium">${coupon.discount}% Off</span>
+                </div>
+            `;
+            couponElement.onclick = () => {
+                const couponInput = document.getElementById('couponCode');
+                if (couponInput) {
+                    couponInput.value = coupon.couponCode;
+                    closeAvailableCouponsModal();
+                    applyCoupon();
+                }
+            };
+            couponsList.appendChild(couponElement);
+        });
+
+        modal.classList.remove('hidden');
+    })
+    .catch(error => {
+        console.error('Error fetching coupons:', error);
+    });
+}
+
+  function closeAvailableCouponsModal() {
+    const modal = document.getElementById('availableCouponsModal');
+    modal.classList.add('hidden');
+  }
+
+  function updateOrderTotal(discount) {
+    const totalAmountElement = document.getElementById('totalAmount');
+    const currentTotal = parseFloat(totalAmountElement.textContent.replace('₹', ''));
+    const discountedTotal = currentTotal * (1 - discount / 100);
+    totalAmountElement.textContent = `₹${discountedTotal.toFixed(2)}`;
+  }
+
+  function resetOrderTotal() {
+    // This would typically fetch the original total from the server or a data attribute
+    const originalTotal = <%= totalAmount.toFixed(2) %>;
+    const totalAmountElement = document.getElementById('totalAmount');
+    totalAmountElement.textContent = `₹${originalTotal}`;
+  }
   
     async function placeOrder() {
       const selectedAddressInput = document.querySelector('input[name="selectedAddress"]:checked');

@@ -483,7 +483,7 @@ const initiateRazorpay = async (req, res) => {
         const gstAmount = (discountedTotal * gstRate) / 100;
         const finalAmountWithGST = discountedTotal + gstAmount;
         
-        console.log("cartPrice", totalPrice);
+        console.log("cartPrice", totalDiscount);
         
         const options = {
             amount: Math.round(finalAmountWithGST * 100),
@@ -915,6 +915,162 @@ const paymentFailed = async (req,res)=>{
         });
     }
 }
+
+const applyCoupon = async (req, res) => {
+    try {
+        const userId = req.session.user;
+        const { couponCode } = req.body;
+        const GST_RATE = 0.05; // 5% GST
+
+        const cart = await Cart.findOne({ userId });
+        const coupon = await Coupon.findOne({
+            couponCode: couponCode.toUpperCase()
+        });
+
+        
+        if (!coupon) {
+            return res.status(400).json({
+                success: false,
+                message: 'Invalid coupon code'
+            });
+        }
+
+        if (coupon.status === false) {
+            return res.status(400).json({
+                success: false,
+                message: 'Coupon code is inactive'
+            });
+        }
+
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cart not found'
+            });
+        }
+
+       
+
+        
+        if (cart.totalPrice > coupon.maxRedeem) {
+            return res.status(400).json({
+                success: false,
+                message: `Coupon is valid only for purchases up to ₹${coupon.maxPurchaseAmount}`
+            });
+        }
+
+        // Corrected GST and Discount Calculation
+        const subtotal = cart.totalPrice;
+        const gstAmount = subtotal * GST_RATE;
+        const totalWithGST = subtotal + gstAmount;
+
+        // Calculate discount based on pre-GST total
+        let discountAmount = (subtotal * coupon.discount) / 100;
+        discountAmount = Math.min(discountAmount, subtotal);
+
+        // Recalculate total after discount and before GST
+        const discountedSubtotal = subtotal - discountAmount;
+        const discountedGSTAmount = discountedSubtotal * GST_RATE;
+        const finalTotal = discountedSubtotal + discountedGSTAmount;
+
+        // Update cart details
+        cart.appliedCoupon = coupon._id;
+        cart.gstAmount = discountedGSTAmount;
+        cart.totalWithGST = finalTotal;
+        cart.discountAmount = discountAmount;
+        cart.discountedTotal = finalTotal;
+
+        await cart.save();
+
+        coupon.usedCount += 1;
+        await coupon.save();
+
+        res.json({
+            success: true,
+            subtotal: subtotal,
+            gstAmount: discountedGSTAmount,
+            totalWithGST: finalTotal,
+            discountAmount: discountAmount,
+            newTotal: finalTotal,
+            message: 'Coupon applied successfully'
+        });
+
+    } catch (error) {
+        console.error('Error applying coupon:', error);
+        res.status(500).json({
+            success: false,
+            message: 'Error applying coupon'
+        });
+    }
+};
+
+
+const getApplyCoupon =  async (req, res) => {
+    try {
+      const currentDate = new Date();
+      
+      const availableCoupons = await Coupon.find({
+        status: true,
+        expiry: { $gte: currentDate }
+      }).select('couponCode discount description');
+  
+      res.json(availableCoupons);
+    } catch (error) {
+      console.error('Error fetching available coupons:', error);
+      res.status(500).json({ 
+        message: 'Error retrieving available coupons',
+        error: error.message 
+      });
+    }
+  };
+
+
+  const removeCoupon = async (req, res) => {
+    try {
+        console.log("Removing coupon");
+        const userId = req.session.user;
+        
+        const cart = await Cart.findOne({ userId: userId });
+        
+        if (!cart) {
+            return res.status(404).json({
+                success: false,
+                message: 'Cart not found'
+            });
+        }
+
+        // Reset to the original total price before discount
+        const originalTotal = cart.totalPrice;
+
+        const updatedCart = await Cart.findOneAndUpdate(
+            { userId: userId },
+            {
+                cartTotal: originalTotal,
+                appliedCoupon: null,
+                discountAmount: 0,
+                discountedTotal: originalTotal
+            },
+            { new: true } // Return the updated document
+        );
+
+        req.session.appliedCoupon = null;
+
+        res.json({
+            success: true,
+            newTotal: originalTotal,
+            message: 'Coupon removed successfully'
+        });
+
+    } catch (error) {
+        console.error('Error while removing the coupon', error);
+        res.status(500).json({
+            success: false,
+            message: 'An error occurred while removing the coupon',
+            error: error.message
+        });
+    }
+};
+
   
 export default {
   getCheckout,
@@ -930,5 +1086,8 @@ export default {
   verifyPayment,
   retryPayment,
   paymentFailed,
-  loadWalletPayment
+  loadWalletPayment,
+  applyCoupon,
+  getApplyCoupon,
+  removeCoupon
 };
