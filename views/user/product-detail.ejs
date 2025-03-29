@@ -196,6 +196,141 @@
                 box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
                 overflow: hidden;
             }
+
+            /* New wishlist button styling */
+            .wishlist-btn {
+                position: absolute;
+                top: 15px;
+                right: 15px;
+                background-color: rgba(255, 255, 255, 0.8);
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                transition: all 0.3s;
+                z-index: 10;
+                border: none;
+            }
+
+            .wishlist-btn:hover {
+                background-color: rgba(255, 255, 255, 1);
+                transform: scale(1.1);
+            }
+
+            .wishlist-btn svg {
+                color: #6b7280;
+                transition: all 0.3s;
+            }
+
+            .wishlist-btn:hover svg {
+                color: #ef4444;
+            }
+
+            .wishlist-btn.active svg {
+                color: #ef4444;
+                fill: #ef4444;
+            }
+
+            /* Ratings styling */
+            .ratings-container {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-bottom: 1rem;
+            }
+
+            .stars {
+                display: flex;
+                gap: 4px;
+            }
+
+            .star {
+                color: #fbbf24;
+            }
+
+            .empty-star {
+                color: #d1d5db;
+            }
+
+            .ratings-count {
+                color: #6b7280;
+                font-size: 0.875rem;
+            }
+
+            /* Action buttons container */
+            .action-buttons {
+                display: flex;
+                gap: 12px;
+                margin-top: 1rem;
+            }
+
+            /* Wishlist button styling for product details */
+            .product-wishlist-btn {
+                background-color: #f3f4f6;
+                color: #374151;
+                font-size: 1.125rem;
+                font-weight: 500;
+                padding: 0.75rem 1.5rem;
+                border-radius: 0.5rem;
+                transition: all 0.3s;
+                border: none;
+                cursor: pointer;
+                display: inline-flex;
+                align-items: center;
+                gap: 0.5rem;
+            }
+
+            .product-wishlist-btn:hover {
+                background-color: #e5e7eb;
+                transform: translateY(-2px);
+            }
+
+            .product-wishlist-btn svg {
+                transition: all 0.3s;
+            }
+
+            .product-wishlist-btn:hover svg {
+                color: #ef4444;
+            }
+
+            .product-wishlist-btn.active {
+                color: #ef4444;
+            }
+
+            .product-wishlist-btn.active svg {
+                color: #ef4444;
+                fill: #ef4444;
+            }
+
+            /* Recommended product card wishlist and rating */
+            .card-top {
+                position: relative;
+            }
+
+            .recommended-rating {
+                position: absolute;
+                bottom: 10px;
+                left: 10px;
+                background-color: rgba(0, 0, 0, 0.6);
+                padding: 4px 8px;
+                border-radius: 12px;
+                display: flex;
+                align-items: center;
+                gap: 4px;
+            }
+
+            .recommended-rating .star {
+                font-size: 14px;
+            }
+
+            .recommended-rating .rating-value {
+                color: white;
+                font-weight: 600;
+                font-size: 14px;
+            }
         </style>
 </head>
 
@@ -225,6 +360,14 @@
                 <div id="imageContainer" class="image-container">
                     <img id="mainImage" class="product-image" src="/uploads/re-image/<%= product.productImage[0] %>"
                         alt="<%= product.productName %>">
+                    <button id="wishlistBtn" class="wishlist-btn" title="Add to Wishlist">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                            </path>
+                        </svg>
+                    </button>
                 </div>
                 <div class="thumbnails-container">
                     <% product.productImage.forEach((image, i)=> { %>
@@ -240,6 +383,18 @@
                 <h1 class="product-title">
                     <%= product.productName %>
                 </h1>
+
+                <!-- Rating Section (Added) -->
+                <div class="ratings-container">
+                    <div class="stars">
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="star">★</span>
+                        <span class="empty-star">★</span>
+                    </div>
+                    <span class="ratings-count">4.0 (128 reviews)</span>
+                </div>
 
                 <div class="price-container">
                     <span class="sale-price">₹<%= product.salePrice.toLocaleString('en-IN') %></span>
@@ -291,8 +446,6 @@
                                             </span>
                                         </div>
                                         <% } %>
-
-
                 </div>
 
                 <div class="quantity-selector">
@@ -301,15 +454,27 @@
                     <div id="increaseQty" class="qty-btn">+</div>
                 </div>
 
-                <button id="addToCartBtn" class="add-to-cart-btn">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="9" cy="21" r="1"></circle>
-                        <circle cx="20" cy="21" r="1"></circle>
-                        <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
-                    </svg>
-                    Add to Cart
-                </button>
+                <div class="action-buttons">
+                    <button id="addToCartBtn" class="add-to-cart-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="9" cy="21" r="1"></circle>
+                            <circle cx="20" cy="21" r="1"></circle>
+                            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+                        </svg>
+                        Add to Cart
+                    </button>
+
+                    <button id="productWishlistBtn" class="product-wishlist-btn">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <path
+                                d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                            </path>
+                        </svg>
+                        Wishlist
+                    </button>
+                </div>
             </div>
         </div>
     </main>
@@ -323,10 +488,26 @@
                 <% recommendedProducts.forEach(function(recommendedProduct) { %>
                     <div
                         class="border rounded-lg overflow-hidden shadow-md bg-white transform transition duration-300 hover:scale-105 hover:shadow-lg min-h-[400px] flex flex-col">
-                        <div class="relative overflow-hidden">
+                        <div class="relative overflow-hidden card-top">
                             <img src="/uploads/re-image/<%= recommendedProduct.productImage[0] %>"
                                 class="w-full h-64 object-cover transition-transform duration-300 hover:scale-110"
                                 alt="<%= recommendedProduct.productName %>">
+                            
+                            <!-- Add wishlist button to recommended product card -->
+                                                        
+                                <button class="wishlist-btn recommend-wishlist-btn" data-debug-id="<%= recommendedProduct._id %>">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
+                                        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="wishlist-icon">
+                                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z">
+                                        </path>
+                                    </svg>
+                                </button>
+                            
+                            <!-- Add rating badge to recommended product card -->
+                            <div class="recommended-rating">
+                                <span class="star">★</span>
+                                <span class="rating-value"><%= (Math.random() * 1 + 4).toFixed(1) %></span>
+                            </div>
                         </div>
 
                         <div class="p-4 text-center flex-grow flex flex-col justify-between">
@@ -407,10 +588,73 @@
                 quantityElement.textContent = quantity + 1;
             } else {
 
-                alert(`Sorry, only ${maxQuantity} items available in stock.`);
+               
+               Swal.fire({
+                    title: `Sorry, only ${maxQuantity} items available in stock.`,
+                    icon: "warning",
+                    timer: 5000,
+                    showConfirmButton: true
+                });
+
             }
         });
 
+        document.getElementById('productWishlistBtn').addEventListener('click', (event) => {
+    let button = event.currentTarget;
+    
+    // Get the product ID
+    let productId = "<%= product._id %>"
+    if (!productId) {
+        Swal.fire({
+            title: "Error!",
+            text: "Invalid Product ID",
+            icon: "error"
+        });
+        return;
+    }
+    
+    fetch("/addToWishlist", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ productId })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            button.classList.add("active");
+            
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                text: data.message || "Product added to wishlist successfully.",
+                timer: 1500,
+                showConfirmButton: false
+            });
+        } else {
+            
+            button.classList.add("active");
+            
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: data.message || 'Already in the Wishlist',
+                showConfirmButton: false,
+                timer: 3000
+            });
+        }
+    })
+    .catch(error => {
+        console.error("Error:", error);
+        Swal.fire({
+            title: "Error!",
+            text: "Please login to add item to the wishlist",
+            icon: "error"
+        });
+    });
+});
+     
 
         document.getElementById('addToCartBtn').addEventListener('click', () => {
             const quantity = parseInt(document.getElementById('quantity').textContent);

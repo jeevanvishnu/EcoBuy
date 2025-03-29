@@ -221,7 +221,7 @@
                 <button 
                   id="removeCouponBtn" 
                   onclick="removeCoupon()" 
-                  class="text-red-600 hover:text-red-800 text-sm hidden"
+                  class="text-white text-sm hidden bg-red-700 px-2 py-3 border rounded-md"
                 >
                   Remove Coupon
                 </button>
@@ -401,47 +401,11 @@
       });
     }
   
-    // async function applyCoupon() {
-    //   const couponCode = document.getElementById('couponCode').value;
-    //   const couponError = document.getElementById('couponError');
-  
-    //   try {
-    //     const response = await fetch('/applyCoupon', {
-    //       method: 'POST',
-    //       headers: {
-    //         'Content-Type': 'application/json'
-    //       },
-    //       body: JSON.stringify({
-    //         couponCode
-    //       })
-    //     });
-  
-    //     const data = await response.json();
-  
-    //     if (data.success) {
-         
-          
-    //       document.getElementById('couponDiscount').innerText = `(-) ₹ ${data.discountAmount.toFixed(2)}`;
-    //       updateTotalAmount(data.newTotal); 
-    //       couponError.classList.add('hidden');
-    //     } else {
-         
-          
-    //       couponError.textContent = data.message || 'Invalid coupon code.';
-    //       couponError.classList.remove('hidden');
-    //       document.getElementById('couponDiscount').innerText = `(-) ₹ 0.00`;
-    //       updateTotalAmount(subtotal); 
-    //     }
-    //   } catch (error) {
-    //     console.error('Error applying coupon:', error);
-    //     couponError.textContent = 'An error occurred. Please try again.';
-    //     couponError.classList.remove('hidden');
-    //   }
-    // }
+   
 
     function applyCoupon() {
   const couponCode = document.getElementById('couponCode').value.trim();
-  const couponMessage = document.getElementById('couponMessage'); // You might not need this with SweetAlert
+  const couponMessage = document.getElementById('couponMessage'); 
   const removeCouponBtn = document.getElementById('removeCouponBtn');
   const totalAmountElement = document.getElementById('totalAmount');
 
@@ -596,12 +560,24 @@ async function removeCoupon() {
             const couponElement = document.createElement('div');
             couponElement.className = 'border rounded-lg p-4 hover:bg-gray-50 cursor-pointer';
             couponElement.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h4 class="font-bold text-gray-800">${coupon.couponCode}</h4>
-                       
+                <div class="flex items-center">
+                    <div class="bg-blue-50 p-3 rounded-lg mr-4">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 100-4 2 2 0 000 4z" />
+                        </svg>
                     </div>
-                    <span class="text-green-600 font-medium">${coupon.discount}% Off</span>
+                    <div className="flex-grow">
+                        <div class="flex justify-between items-center mb-1">
+                            <h4 class="text-lg font-semibold text-gray-800">${coupon.couponCode}</h4>
+                            <span class="text-green-600 font-bold">${coupon.discount}% OFF</span>
+                        </div>
+                        <div class="flex justify-between items-center text-sm text-gray-500">
+                            <p>Max Redemptions: ${coupon.maxRedeem}</p>
+                            <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-300 text-blue-600 font-medium">
+                                Apply Coupon →
+                            </div>
+                        </div>
+                    </div>
                 </div>
             `;
             couponElement.onclick = () => {

@@ -9,6 +9,7 @@ import productController from "../../controllers/admin/productControll.js";
 // import upload from "../../public/upload.js";
 import bannerController from "../../controllers/admin/bannerController.js"
 import orderController from "../../controllers/admin/orderController.js";
+import * as saleController from '../../controllers/admin/salesController.js'
 import multer from "multer";
 import storage from "../../helpers/upload.js";
 import uploads from '../../helpers/bannerUpload.js'
@@ -86,4 +87,10 @@ router.get('/coupons',adminAuth,customerController.couponMangment)
 router.post('/addCoupons',adminAuth,customerController.addCoupon)
 router.post('/editCoupon',adminAuth,customerController.editCoupon)
 router.get('/deleteCoupon/:id',adminAuth,customerController.deleteCoupon)
+
+// sales report 
+router.get('/saleReport', adminAuth, saleController.salesreport);
+router.post('/generate-sales-report',adminAuth,saleController.generateSalesReport)
+router.post('/export-sales-pdf',adminAuth,saleController.exportSalesPDF)
+router.post('/export-sales-excel',adminAuth,saleController.exportSalesPDF)
 export default router;

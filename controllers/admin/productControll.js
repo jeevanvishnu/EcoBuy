@@ -249,12 +249,12 @@ const editProduct = async (req, res) => {
             return res.status(400).json({ error: "Product with this name already exists. Please try with another name" });
         }
 
-        let images = product.productImage || []; // Keep old images
+        let images = product.productImage || []; 
 
         // If new images are uploaded, merge them
         if (req.files && req.files.length > 0) {
             const newImages = req.files.map(file => file.filename);
-            images = [...images, ...newImages]; // Combine old and new images
+            images = [...images, ...newImages]; 
         }
 
         const updateField = {

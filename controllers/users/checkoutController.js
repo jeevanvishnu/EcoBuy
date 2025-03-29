@@ -40,6 +40,8 @@ const getCheckout = async (req, res) => {
             }
         });
 
+        
+
         if (!cart || cart.items.length === 0) {
             return res.redirect('/cart?empty=true');
         }
@@ -58,26 +60,26 @@ const getCheckout = async (req, res) => {
 
         const discount = 0; 
 
-        // GST Calculation
-        const gstRate = 0.05; // 5% GST (adjust as needed)
+        
+        const gstRate = 0.05; 
         const gstAmount = subtotal * gstRate;
 
         const totalAmount = subtotal + gstAmount - discount;
 
-        // Get user addresses
+       
         const addresses = await Address.find({ userId: userId });
         console.log(addresses, "get Address")
 
-        // Render checkout page with all necessary data
+       
         res.render("user/checkout", {
             addresses: addresses || [],
             cart: cart,
             key: process.env.Razorpay_API,
             userWallet: wallet,
-            walletBalance: walletBalance, // Pass the wallet balance
+            walletBalance: walletBalance, 
             products: cart.items,
             subtotal: subtotal,
-            gstRate: gstRate * 100, //Pass the gst percentage
+            gstRate: gstRate * 100,
             gstAmount: gstAmount,
             discount: discount,
             totalAmount: totalAmount,
@@ -454,44 +456,52 @@ const orderSucess = async (req,res) =>{
 const initiateRazorpay = async (req, res) => {
     try {
         const userId = req.session.user;
-        const cart = await Cart.findOne({ userId: userId });
+        const cart = await Cart.findOne({ userId: userId }).populate('appliedCoupon');
 
         if (!cart) {
             return res.status(404).json({ error: 'Cart not found' });
         }
 
-        let totalPrice = 0;
+       
+        const totalPrice = cart.items.reduce((acc, item) => acc + item.totalPrice, 0);
+        
+        
+        // const totalQuantity = cart.items.reduce((acc, item) => acc + item.quantity, 0);
+
+        
         let totalDiscount = 0;
 
-        // Calculate total price from all items
-        for (const item of cart.items) {
-            let itemPrice = item.totalPrice * item.quantity;
-            totalPrice += itemPrice;
-        }
-
-        // Apply coupon if available
+       
         if (cart.appliedCoupon) {
-            const couponUsed = await Coupon.findOne({ _id: cart.appliedCoupon });
-
-            if (couponUsed) {
-                totalDiscount = (totalPrice * couponUsed.discount) / 100;
-            }
+            totalDiscount = cart.discountAmount || 
+          (totalPrice * cart.appliedCoupon.discount) / 100;
         }
 
+        
         const discountedTotal = totalPrice - totalDiscount;
+
+       
         const gstRate = 5;
         const gstAmount = (discountedTotal * gstRate) / 100;
         const finalAmountWithGST = discountedTotal + gstAmount;
         
-        console.log("cartPrice", totalDiscount);
+        
+        console.log({
+            totalPrice,
+            totalDiscount,
+            discountedTotal,
+            gstAmount,
+            finalAmountWithGST
+        });
+        
         
         const options = {
-            amount: Math.round(finalAmountWithGST * 100),
+            amount: Math.round(finalAmountWithGST * 100), // Convert to paise
             currency: 'INR',
             receipt: 'order_' + Date.now(),
         };
-        console.log(options, "check inital payment");
 
+       
         const order = await razorpay.orders.create(options);
 
         res.json({
@@ -920,14 +930,13 @@ const applyCoupon = async (req, res) => {
     try {
         const userId = req.session.user;
         const { couponCode } = req.body;
-        const GST_RATE = 0.05; // 5% GST
+        const GST_RATE = 0.05; 
 
         const cart = await Cart.findOne({ userId });
         const coupon = await Coupon.findOne({
             couponCode: couponCode.toUpperCase()
         });
 
-        
         if (!coupon) {
             return res.status(400).json({
                 success: false,
@@ -949,31 +958,38 @@ const applyCoupon = async (req, res) => {
             });
         }
 
-       
-
+        // Calculate subtotal by summing individual item totals
+        const subtotal = cart.items.reduce((acc, item) => acc + item.totalPrice, 0);
+        console.log(subtotal,"Subtotal")
         
-        if (cart.totalPrice > coupon.maxRedeem) {
+        
+        // const totalQuantity = cart.items.reduce((acc, item) => acc + item.quantity, 0);
+        
+
+        if (coupon.maxRedeem < subtotal) {
             return res.status(400).json({
                 success: false,
                 message: `Coupon is valid only for purchases up to ₹${coupon.maxPurchaseAmount}`
             });
         }
 
-        // Corrected GST and Discount Calculation
-        const subtotal = cart.totalPrice;
+        if(subtotal < coupon.minimumPrice){
+            return res.status(400).json({
+                success:false,
+                message:`Coupon is valid only for purchases up to ₹${coupon.minimumPrice}`
+            })
+        }
+
         const gstAmount = subtotal * GST_RATE;
         const totalWithGST = subtotal + gstAmount;
-
-        // Calculate discount based on pre-GST total
+        
         let discountAmount = (subtotal * coupon.discount) / 100;
         discountAmount = Math.min(discountAmount, subtotal);
 
-        // Recalculate total after discount and before GST
         const discountedSubtotal = subtotal - discountAmount;
         const discountedGSTAmount = discountedSubtotal * GST_RATE;
         const finalTotal = discountedSubtotal + discountedGSTAmount;
 
-        // Update cart details
         cart.appliedCoupon = coupon._id;
         cart.gstAmount = discountedGSTAmount;
         cart.totalWithGST = finalTotal;
@@ -1004,7 +1020,6 @@ const applyCoupon = async (req, res) => {
     }
 };
 
-
 const getApplyCoupon =  async (req, res) => {
     try {
       const currentDate = new Date();
@@ -1012,7 +1027,7 @@ const getApplyCoupon =  async (req, res) => {
       const availableCoupons = await Coupon.find({
         status: true,
         expiry: { $gte: currentDate }
-      }).select('couponCode discount description');
+      }).select('couponCode discount maxRedeem');
   
       res.json(availableCoupons);
     } catch (error) {
@@ -1039,7 +1054,7 @@ const getApplyCoupon =  async (req, res) => {
             });
         }
 
-        // Reset to the original total price before discount
+        
         const originalTotal = cart.totalPrice;
 
         const updatedCart = await Cart.findOneAndUpdate(
@@ -1050,7 +1065,7 @@ const getApplyCoupon =  async (req, res) => {
                 discountAmount: 0,
                 discountedTotal: originalTotal
             },
-            { new: true } // Return the updated document
+            { new: true } 
         );
 
         req.session.appliedCoupon = null;
@@ -1070,6 +1085,8 @@ const getApplyCoupon =  async (req, res) => {
         });
     }
 };
+
+
 
   
 export default {

@@ -122,9 +122,9 @@ const addCoupon = async (req,res)=>{
         });
     } catch (error) {
         console.log('error while creating coupons',error)   
+        res.redirect('pageerror')
     }
 }
-
 const editCoupon = async (req,res)=>{
 
     try {

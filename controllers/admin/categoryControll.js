@@ -60,41 +60,53 @@ const addCategory = async (req, res) => {
     }
 }
 
-
 const addCategoryOffer = async (req, res) => {
-
     try {
         const percentage = parseInt(req.body.percentage);
         const categoryId = req.body.categoryId;
-        const category = await Category.findById(categoryId)
+
+        if (isNaN(percentage)) {
+            return res.status(400).json({ status: false, message: 'Invalid percentage value' });
+        }
+
+        if (percentage < 0 || percentage > 100) {
+            return res.status(400).json({status:false, message:"Percentage must be within 0 - 100"})
+        }
+
+        const category = await Category.findById(categoryId);
 
         if (!category) {
-            return res.status(400).json({ status: false, message: 'Category not found' })
+            return res.status(400).json({ status: false, message: 'Category not found' });
         }
 
-        const products = await Product.find({ category: category._id })
-        const hasProductOffer = products.some((product) => product.productOffer > percentage)
+        const products = await Product.find({ category: category._id });
+
+        const hasProductOffer = products.some((product) => product.productOffer > 0); 
 
         if (hasProductOffer) {
-            return res.json({ status: false, message: "Product within this category already have offer" })
+            return res.json({ status: false, message: "Product within this category already have offer" });
         }
 
-        await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } })
+        await Category.updateOne({ _id: categoryId }, { $set: { categoryOffer: percentage } });
 
-        for (let product of products) {
-            product.productOffer = 0
-            product.salePrice = product.regularPrice
-            await product.save()
-        }
+        
+        await Promise.all(products.map(async (product) => {
+           
+            const discountAmount = (product.regularPrice * percentage) / 100;
+            product.salePrice = product.regularPrice - discountAmount;
+            product.productOffer = percentage; 
 
-        res.json({ status: true })
+            await product.save();
+        }));
+
+        res.json({ status: true });
 
     } catch (error) {
+        console.error(error, "addCategoryoffer"); 
 
-        res.status(500).json({ status: false, message: "Internal server error" })
-        console.log(error.message, "addCategoryoffer")
+        res.status(500).json({ status: false, message: "Internal server error" });
     }
-}
+};
 
 
 // Remove category function setup

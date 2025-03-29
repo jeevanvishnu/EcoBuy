@@ -11,6 +11,12 @@ import passport from "./config/passport.js";
 import adminRouter from './router/adminRouter/adminRouter.js'
 import morgan from "morgan";
 import MongoStore from "connect-mongo";
+import cors from 'cors'
+
+app.use(cors({
+  origin:'http://localhost:4001',
+  credentials: true
+}))
 
 // ENV config
 dotEnv.config();

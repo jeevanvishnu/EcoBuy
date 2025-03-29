@@ -53,6 +53,7 @@ const getCartPage = async (req, res) => {
 const addToCart = async (req, res) => {
     try {
         const { productId, quantity } = req.body;
+        console.log(productId,"Cart product id")
         const userQuantity = parseInt(quantity) || 1;
         const userId = req.session.user;
 
@@ -124,33 +125,35 @@ const addToCart = async (req, res) => {
             });
         }
 
-        // Calculate cart's total price from all items
+        
         cart.totalPrice = cart.items.reduce((sum, item) => sum + item.totalPrice, 0);
 
-        // Check if there's an active coupon for the user
+        
         const activeCoupon = await Coupon.findOne({
             _id: cart.appliedCoupon,
             expiryDate: { $gt: new Date() },
             isActive: true
         });
 
+         
+
         if (activeCoupon) {
-            // Calculate discount based on coupon type
-            if (activeCoupon.discountType === 'percentage') {
+            
+            if (activeCoupon.discount === 'Number') {
                 cart.discountAmount = (cart.totalPrice * activeCoupon.discountValue) / 100;
-            } else if (activeCoupon.discountType === 'fixed') {
+            } else if (activeCoupon.discount === 'fixed') {
                 cart.discountAmount = activeCoupon.discountValue;
             }
             
-            // Ensure discount doesn't exceed the total price
+           
             cart.discountAmount = Math.min(cart.discountAmount, cart.totalPrice);
             
-            // Calculate discounted total
+            
             cart.discountedTotal = cart.totalPrice - cart.discountAmount;
             
             console.log(`Server: Applied coupon discount: ${cart.discountAmount}`);
         } else {
-            // If no active coupon, reset discount values
+            
             cart.appliedCoupon = null;
             cart.discountAmount = 0;
             cart.discountedTotal = cart.totalPrice;

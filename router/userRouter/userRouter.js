@@ -9,6 +9,8 @@ import userAuth from '../../middlewares/auth.js'
 import cartController from "../../controllers/users/cartController.js"
 import checkoutController from "../../controllers/users/checkoutController.js"
 import orderController from "../../controllers/users/orderController.js"
+import wishlistController from "../../controllers/users/wishllistController.js"
+
 
 router.get('/',userMiddleWare.checkBlockedUser,userController.loadHome)
 router.get('/signup',userMiddleWare.loginMiddle,userController.loadSignUp)
@@ -62,7 +64,11 @@ router.get('/editAddress',userAuth.userAuth,profileController.editAddress)
 router.post('/editAddress',userAuth.userAuth,profileController.postEditAddress)
 router.get('/deleteAddress',userAuth.userAuth,profileController.deleteAddress)
 
-
+// wishlist
+router.get('/wishlist',userAuth.userAuth,wishlistController.loadAddToWishlist)
+router.post('/addToWishlist',userAuth.userAuth,wishlistController.postAddToWishlist)
+router.post('/removeFromWishlist',userAuth.userAuth,wishlistController.removeWishlist)
+router.post('/addToCartFromWishlist',userAuth.userAuth,wishlistController.addToCartFromWishlist)
 // Cart Managment
 router.get('/cart',userAuth.userAuth,cartController.getCartPage)
 router.post('/addToCart',userAuth.userAuth,cartController.addToCart)
@@ -103,5 +109,7 @@ router.get('/wallet',userAuth.userAuth,profileController.loadWallet)
 router.post('/create-wallet',userAuth.userAuth,profileController.createWallet)
 router.post('/add-money',userAuth.userAuth,profileController.addMoney)
 router.post('/verify-wallet-payment',userAuth.userAuth,profileController.VerifyPayment)
+
+
 
 export default router
