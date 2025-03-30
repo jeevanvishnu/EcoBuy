@@ -4,38 +4,53 @@ import Wishlist from "../../models/wishlistSchema.js";
 import Cart from "../../models/cartSchema.js";
 import Coupon from "../../models/couponSchema.js";
 
-
-const loadAddToWishlist = async (req,res) =>{
+const loadAddToWishlist = async (req, res) => {
     try {
         const userId = req.session.user;
-        const userData = await User.findById({_id:userId})
-      
+        const userData = await User.findById({ _id: userId });
+
+        
+        const page = parseInt(req.query.page) || 1; 
+        const limit = 3; // Number of items per page
+        const skip = (page - 1) * limit;
+
+       
+        const totalWishlistItems = await Wishlist.countDocuments({ user: userId });
+
         const wishlistItems = await Wishlist.find({ user: userId })
-          .populate('product')
-          .sort({ addedAt: -1 }); 
-        
-        
+            .populate('product')
+            .sort({ addedAt: -1 })
+            .skip(skip)
+            .limit(limit);
+
+
+
         const cartItems = await Cart.find({ user: userId }).select('product');
         const cartProductIds = cartItems.map(item => item.product.toString());
-        
-       
+
+
         const wishlist = wishlistItems.map(item => {
-          return {
-            ...item._doc,
-            isInCart: cartProductIds.includes(item.product._id.toString())
-          };
+            return {
+                ...item._doc,
+                isInCart: cartProductIds.includes(item.product._id.toString())
+            };
         });
-        
-        res.render('user/wishlist', { 
-          wishlist,
-          user:userData,
-          pageTitle: 'My Wishlist' 
+
+        const totalPages = Math.ceil(totalWishlistItems / limit);
+
+        res.render('user/wishlist', {
+            wishlist,
+            user: userData,
+            pageTitle: 'My Wishlist',
+            currentPage: page,
+            totalPages: totalPages,
         });
-      } catch (error) {
+    } catch (error) {
         console.error('Error fetching wishlist:', error.message);
         res.status(500).render('error', { message: 'Failed to load wishlist' });
-      }
-}
+    }
+};
+
 
 
 const postAddToWishlist = async (req,res) =>{

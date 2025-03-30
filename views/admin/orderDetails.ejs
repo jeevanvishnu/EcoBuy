@@ -118,7 +118,7 @@
                 </div>
                 <div class="flex justify-between pt-2 border-t border-gray-200 mt-2">
                   <span class="text-gray-700 font-semibold">Total Amount:</span>
-                  <span class="font-bold text-gray-800">₹<%= (order.finalAmount * 1.05).toFixed(2) %></span>
+                  <span class="font-bold text-gray-800">₹<%= (order.finalAmount ).toFixed(2) %></span>
                 </div>
               </div>
             </div>
@@ -195,7 +195,7 @@
                     <%= item.quantity %>
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                    ₹<%= ((item.price * item.quantity) * 1.05).toFixed(2) %>
+                    ₹<%= ((item.price * item.quantity)).toFixed(2) %>
                   </td>
                   <td class="px-4 py-4 whitespace-nowrap">
                     <span class="px-2 py-1 inline-flex text-xs leading-5 font-semibold rounded-full bg-<%= statusColor %>-100 text-<%= statusColor %>-800">

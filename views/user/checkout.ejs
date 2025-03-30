@@ -502,7 +502,7 @@ async function removeCoupon() {
         timer: 3000,
       });
 
-      // UI updates AFTER successful server response
+      
       const couponCodeInput = document.getElementById('couponCode');
       const couponMessage = document.getElementById('couponMessage');
       const removeCouponBtn = document.getElementById('removeCouponBtn');
@@ -511,10 +511,10 @@ async function removeCoupon() {
       couponMessage.textContent = '';
       removeCouponBtn.classList.add('hidden');
 
-      // Reset order total to original price
+      
       resetOrderTotal();
     } else {
-      // Handle server-side error (data.success is false)
+      
       Swal.fire({
         text: data.message || 'Failed to remove coupon',
         icon: 'error',
@@ -611,7 +611,6 @@ async function removeCoupon() {
   }
 
   function resetOrderTotal() {
-    // This would typically fetch the original total from the server or a data attribute
     const originalTotal = <%= totalAmount.toFixed(2) %>;
     const totalAmountElement = document.getElementById('totalAmount');
     totalAmountElement.textContent = `₹${originalTotal}`;
@@ -729,15 +728,15 @@ async function removeCoupon() {
           })
           .then(response => response.json())
           .then(data => {
-            if (data.success) {
-              window.location.href = '/orderDetails';
+            if (data.success == true) {
+              window.location.href = '/order';
             } else {
-              Swal.fire('Error', 'Failed to save payment failure details.', 'error');
+              Swal.fire(data.error || 'Error', 'Failed to save payment failure details','error');
             }
           })
           .catch(error => {
             console.error('Error:', error.message);
-            Swal.fire('Error', 'Failed to save payment failure details.', 'error');
+            Swal.fire(data.error ||'Error', 'Error saving failed order', error.message);
           });
       });
   

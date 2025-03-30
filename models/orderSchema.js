@@ -76,6 +76,10 @@ const orderSchema = new Schema({
         required: true,
         enum: ['Cash on Delivery','Online Payment','Wallet']
     },
+    razorpayOrderId: { 
+        type: String, 
+        default: null 
+    },
    
     createdon:{
         type:Date,

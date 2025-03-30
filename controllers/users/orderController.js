@@ -120,20 +120,23 @@ const postCancelOrder = async (req, res) => {
         }
 
         const quantityToCancel = itemToCancel.quantity;
+        const itemPrice = itemToCancel.price;
 
-        let refundAmount = 0;
-        if (order.couponDiscount > 0 && order.orderAmount > 0) {
-            const discountRatio = order.couponDiscount / order.orderAmount;
-            const itemDiscount = itemToCancel.price * discountRatio;
-            refundAmount = itemToCancel.price - itemDiscount;
-        } else {
-            refundAmount = itemToCancel.price;
+        // Calculate proportional discount for this item
+        let itemDiscount = 0;
+        if (order.discount > 0 && order.totalPrice > 0) {
+            const discountRatio = order.discount / order.totalPrice;
+            itemDiscount = itemPrice * discountRatio;
         }
 
-        // gst will be add 
-        const gstAmount = refundAmount * 0.05;
-        refundAmount += gstAmount; 
+        // Calculate refund amount (item price minus proportional discount)
+        let refundAmount = itemPrice - itemDiscount;
 
+        
+        const gstAmount = refundAmount * 0.05; 
+        const totalRefundAmount = refundAmount + gstAmount;
+
+        // Find the product to update inventory
         let product;
         try {
             product = await Product.findById(itemToCancel.product._id);
@@ -152,36 +155,57 @@ const postCancelOrder = async (req, res) => {
             });
         }
 
+        // Update product inventory
         product.quantity += quantityToCancel;
         await product.save();
 
-
-       
+        // Mark item as cancelled in the database
         await Order.updateOne(
-            { _id: orderId, 'orderedItem.product._id': productId },
-            { $set: { 'orderedItem.$.status': 'Cancelled' } }
+            { _id: orderId, 'orderedItem.product': productId },
+            { $set: { 'orderedItem.$.orderStatus': 'Cancelled', 'orderedItem.$.cancelReason': reason } }
         );
 
         
-
-       
         order.orderedItem.forEach(item => {
             if (item.product._id.toString() === productId) {
                 item.orderStatus = 'Cancelled';
-                item.cancelReason = reason
+                item.cancelReason = reason;
             }
         });
 
-        
-        const allItemsCancelled = order.orderedItem.every(item => item.orderStatus === 'Cancelled');
+        // Recalculate totalPrice based on non-cancelled items only
+        const activeTotalPrice = order.orderedItem.reduce((total, item) => {
+            if (item.orderStatus !== 'Cancelled') {
+                return total + item.price;
+            }
+            return total;
+        }, 0);
 
+        // Update the totalPrice with the new calculated value
+        order.totalPrice = activeTotalPrice;
+
+        // Check if all items are cancelled
+        const allItemsCancelled = order.orderedItem.every(item => item.orderStatus === 'Cancelled');
         if (allItemsCancelled) {
             order.orderStatus = 'Cancelled';
-            order.cancelReason = reason
+            order.discount = 0;
+            order.finalAmount = 0;
+        } else {
+            // Recalculate discount for the remaining items
+            if (order.couponApplied && order.totalPrice > 0) {
+                const originalDiscountPercentage = (order.discount / (order.totalPrice + itemPrice)) * 100;
+                order.discount = (order.totalPrice * originalDiscountPercentage) / 100;
+            }
+            
+            // Calculate final amount including GST
+            const remainingAfterDiscount = order.totalPrice - order.discount;
+            order.finalAmount = remainingAfterDiscount + (remainingAfterDiscount * 0.05); // Adding 5% GST
         }
-        await order.save()
-        //Wallet Logic
 
+        // Save the updated order
+        await order.save();
+
+        // Wallet Logic
         let wallet = await Wallet.findOne({ userId: userId });
         if (!wallet) {
             try {
@@ -201,17 +225,15 @@ const postCancelOrder = async (req, res) => {
             }
         }
 
-
         console.log("Wallet balance before refund:", wallet.balance);
-        console.log("Refund amount:", refundAmount);
+        console.log("Refund amount:", totalRefundAmount);
 
         const initialBalance = wallet.balance; 
 
-
-        wallet.balance += refundAmount;
+        wallet.balance += totalRefundAmount;
 
         const newTransaction = {
-            amount: refundAmount,
+            amount: totalRefundAmount,
             transactionsMethod: 'Refund',
             date: new Date(),
             orderId: orderId
@@ -219,20 +241,23 @@ const postCancelOrder = async (req, res) => {
 
         wallet.transactions.push(newTransaction);
 
-         
-
         await wallet.save()
             .then(savedWallet => {
                 console.log("Wallet saved successfully. New balance:", savedWallet.balance);
+                console.log("Order after cancellation:", {
+                    totalPrice: order.totalPrice,
+                    discount: order.discount,
+                    finalAmount: order.finalAmount
+                });
 
                 const finalBalance = savedWallet.balance;
-                if (finalBalance !== initialBalance + refundAmount) {
-                    console.warn("WARNING: Wallet balance mismatch! Expected:", initialBalance + refundAmount, "Actual:", finalBalance);
+                if (finalBalance !== initialBalance + totalRefundAmount) {
+                    console.warn("WARNING: Wallet balance mismatch! Expected:", initialBalance + totalRefundAmount, "Actual:", finalBalance);
                 }
 
-                // 7. Render Success
+                // Render success
                 res.render('user/orderStatus', {
-                    message: `Product cancelled successfully. ₹${refundAmount} added to your wallet.`,
+                    message: `Product cancelled successfully. ₹${totalRefundAmount.toFixed(2)} added to your wallet.`,
                     order: order
                 });
             })

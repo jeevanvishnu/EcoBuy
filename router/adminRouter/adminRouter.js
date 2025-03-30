@@ -92,5 +92,5 @@ router.get('/deleteCoupon/:id',adminAuth,customerController.deleteCoupon)
 router.get('/saleReport', adminAuth, saleController.salesreport);
 router.post('/generate-sales-report',adminAuth,saleController.generateSalesReport)
 router.post('/export-sales-pdf',adminAuth,saleController.exportSalesPDF)
-router.post('/export-sales-excel',adminAuth,saleController.exportSalesPDF)
+router.post('/export-sales-excel',adminAuth,saleController.exportSalesExcel)
 export default router;

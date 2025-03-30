@@ -592,7 +592,18 @@
                     }
                 } catch (error) {
                     console.error('Error generating report:', error);
-                    alert('Error generating report: ' + error.message);
+                    Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Error generating report'+error.message,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
+                    
                     salesTableBody.innerHTML = `
                         <tr>
                             <td colspan="6" style="text-align: center;">
@@ -690,7 +701,18 @@
                     window.URL.revokeObjectURL(url);
                 } catch (error) {
                     console.error('Error exporting PDF:', error);
-                    alert('Error exporting PDF: ' + error.message);
+                    Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Error exporting PDF:'+error.message,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
+                  
                 } finally {
                     hideLoading();
                 }
@@ -724,7 +746,17 @@
                     window.URL.revokeObjectURL(url);
                 } catch (error) {
                     console.error('Error exporting Excel:', error);
-                    alert('Error exporting Excel: ' + error.message);
+                    Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'Error exporting Excel:'+error.message,
+                    toast: true,
+                    position: 'top-end',
+                    showConfirmButton: false,
+                    timer: 3000,
+                    timerProgressBar: true
+                });
+
                 } finally {
                     hideLoading();
                 }
