@@ -41,9 +41,11 @@
                             <div class="animate-card-entry group relative bg-white rounded-2xl shadow-lg overflow-hidden transform transition-all duration-300 hover:scale-[1.02] hover:shadow-2xl">
                                 <div class="p-6 relative z-10">
                                     <div class="absolute top-4 right-4 opacity-0 group-hover:opacity-100 transition-all duration-300 address-delete">
-                                        <a href="/deleteAddress?id=<%= addr._id %>" onclick="return confirm('Are you sure?');" class="text-red-500 hover:text-red-700">
-                                            <i class="ri-delete-bin-2-line text-2xl"></i>
-                                        </a>
+                                        <a href="#" 
+                                            onclick="confirmDelete('<%= addr._id %>')" 
+                                            class="text-red-500 hover:text-red-700">
+                                                <i class="ri-delete-bin-2-line text-2xl"></i>
+                                            </a>
                                     </div>
                                     <div class="mb-4">
                                         <h3 class="text-xl font-bold text-gray-800 mb-2 flex items-center">
@@ -93,7 +95,7 @@
     </div>
 
     <%- include('../partials/users/footer.ejs') %>
-
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         // Optional: Add subtle hover effects or interactions
         document.querySelectorAll('.group').forEach(group => {
@@ -104,6 +106,48 @@
                 group.classList.remove('hover:scale-105');
             });
         });
+        
+
+
+        async function confirmDelete(addressId) {
+    const result = await Swal.fire({
+        title: 'Are you sure?',
+        text: "You won't be able to revert this!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#d33',
+        cancelButtonColor: '#3085d6',
+        confirmButtonText: 'Yes, delete it!',
+        cancelButtonText: 'No, keep it'
+    });
+
+    if (result.isConfirmed) {
+        try {
+            
+            const response = await fetch(`/deleteAddress?id=${addressId}`, {
+                method: 'GET'
+            });
+
+            if (response.ok) {
+                await Swal.fire(
+                    'Deleted!',
+                    'Your address has been deleted.',
+                    'success'
+                );
+                
+                location.reload();
+            } else {
+                throw new Error('Delete failed');
+            }
+        } catch (error) {
+            Swal.fire(
+                'Error!',
+                'Failed to delete address.',
+                'error'
+            );
+        }
+    }
+}
     </script>
 </body>
 </html>

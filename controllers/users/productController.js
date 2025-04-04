@@ -1,9 +1,12 @@
 import Product from "../../models/productSchema.js";
 import User from "../../models/userSchema.js";
-
+import Cart from '../../models/cartSchema.js'
+import Wishlist from '../../models/wishlistSchema.js'
 
 const productDetails = async (req, res) => {
     try {
+        let cartCount = 0
+        let wishlistCount = 0
         console.log('Fetching product details');
 
         const userId = req.session.user;
@@ -20,6 +23,18 @@ const productDetails = async (req, res) => {
         const productOffer = product.productOffer || 0;
         const totalOffer = categorOffer + productOffer;
 
+        if (userId) {
+            const cart = await Cart.findOne({ userId: userId });
+            
+            if (cart && cart.items) {
+              cartCount = cart.items.length;
+              console.log(cartCount)
+            }
+            const wishlist = await Wishlist.find({ user: userId });
+            wishlistCount = wishlist.length;
+          }
+           
+
         const recommendedProducts = await Product.find({
             category: findCategory._id,
             _id: { $ne: productId }
@@ -31,7 +46,9 @@ const productDetails = async (req, res) => {
             quantity: product.quantity,
             totalOffer: totalOffer,
             category: findCategory,
-            recommendedProducts: recommendedProducts
+            recommendedProducts: recommendedProducts,
+            cartCount,
+            wishlistCount
         });
 
     } catch (error) {

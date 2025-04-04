@@ -9,7 +9,9 @@ const loadAddToWishlist = async (req, res) => {
         const userId = req.session.user;
         const userData = await User.findById({ _id: userId });
 
-        
+        let cartCount =0
+        let wishlistCount =0 
+
         const page = parseInt(req.query.page) || 1; 
         const limit = 3; // Number of items per page
         const skip = (page - 1) * limit;
@@ -29,6 +31,17 @@ const loadAddToWishlist = async (req, res) => {
         const cartProductIds = cartItems.map(item => item.product.toString());
 
 
+        if (userId) {
+            const cart = await Cart.findOne({ userId: userId });
+            
+            if (cart && cart.items) {
+              cartCount = cart.items.length;
+              console.log(cartCount)
+            }
+            const wishlist = await Wishlist.find({ user: userId});
+            wishlistCount = wishlist.length;
+          }
+
         const wishlist = wishlistItems.map(item => {
             return {
                 ...item._doc,
@@ -44,6 +57,8 @@ const loadAddToWishlist = async (req, res) => {
             pageTitle: 'My Wishlist',
             currentPage: page,
             totalPages: totalPages,
+            cartCount,
+            wishlistCount
         });
     } catch (error) {
         console.error('Error fetching wishlist:', error.message);
@@ -79,7 +94,9 @@ const postAddToWishlist = async (req,res) =>{
         const wishlistItem = new Wishlist({
           user: userId,
           product: productId,
-          addedAt: new Date()
+          addedAt: new Date(),
+          wishlist:true
+
         });
     
         await wishlistItem.save();

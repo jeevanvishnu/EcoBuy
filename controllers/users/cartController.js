@@ -2,15 +2,17 @@ import Product from "../../models/productSchema.js";
 import User from "../../models/userSchema.js"
 import Cart from "../../models/cartSchema.js"
 import Coupon from "../../models/couponSchema.js";
-
+import Wishlist from '../../models/wishlistSchema.js'
 import mongoose from "mongoose";
 
 const getCartPage = async (req, res) => {
     try {
+        let cartCount = 0
+        let wishlistCount = 0
         if (!req.session.user) {
             return res.status(401).send("Unauthorized");
         }
-
+        const userId = req.session.user
         const user = await User.findById(req.session.user);
         if (!user) {
             return res.status(404).send("User not found");
@@ -24,6 +26,17 @@ const getCartPage = async (req, res) => {
 
         let totalAmount = 0;
         let cartData = [];
+
+         if (userId) {
+               const cart = await Cart.findOne({ userId: userId });
+               
+               if (cart && cart.items) {
+                 cartCount = cart.items.length;
+                 console.log(cartCount)
+               }
+               const wishlist = await Wishlist.find({ user: userId });
+               wishlistCount = wishlist.length;
+             }
 
         
         if (productDetails && Array.isArray(productDetails.items)) {
@@ -39,7 +52,9 @@ const getCartPage = async (req, res) => {
         res.render('user/cart', {
             user,
             data: cartData,
-            totalAmount
+            totalAmount,
+            cartCount,
+            wishlistCount
         });
 
     } catch (error) {

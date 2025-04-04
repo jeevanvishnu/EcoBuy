@@ -11,6 +11,7 @@ env.config()
 import Razorpay from 'razorpay'
 import crypto from 'crypto'
 import Coupon from "../../models/couponSchema.js";
+import Wishlist from "../../models/wishlistSchema.js";
 
 const razorpay = new Razorpay ({
     key_id:process.env.Razorpay_API,
@@ -18,7 +19,11 @@ const razorpay = new Razorpay ({
    
 })
 
-const getCheckout = async (req, res) => {
+const getCheckout = async (req, res) => {   
+
+    let cartCount = 0
+    let wishlistCount = 0
+
     try {
         const userId = req.session.user;
         console.log("User ID:", userId);
@@ -40,7 +45,16 @@ const getCheckout = async (req, res) => {
             }
         });
 
-        
+        if (userId) {
+            const cart = await Cart.findOne({ userId: userId });
+            
+            if (cart && cart.items) {
+              cartCount = cart.items.length;
+              console.log(cartCount)
+            }
+            const wishlist = await Wishlist.find({ user: userId });
+            wishlistCount = wishlist.length;
+          }
 
         if (!cart || cart.items.length === 0) {
             return res.redirect('/cart?empty=true');
@@ -84,7 +98,9 @@ const getCheckout = async (req, res) => {
             discount: discount,
             totalAmount: totalAmount,
             userId: userId,
-            user: userData
+            user: userData,
+            cartCount,
+            wishlistCount
         });
 
     } catch (error) {
@@ -161,6 +177,10 @@ const checkoutAddAddress = async (req, res) => {
 
 
 const getCheckoutEdit = async (req, res) => {
+
+    let cartCount =0
+    let wishlistCount =0
+
     try {
         const addressId = req.query.id
         const user = req.session.user
@@ -174,6 +194,17 @@ const getCheckoutEdit = async (req, res) => {
             return res.redirect('/page')
         }
 
+        if (user) {
+              const cart = await Cart.findOne({ userId: user });
+              
+              if (cart && cart.items) {
+                cartCount = cart.items.length;
+                console.log(cartCount)
+              }
+              const wishlist = await Wishlist.find({ user: user });
+              wishlistCount = wishlist.length;
+            }
+
         const addressData = currentAddress.address.find((item)=>{
             return item._id.toString() === addressId.toString()
         })
@@ -181,7 +212,13 @@ const getCheckoutEdit = async (req, res) => {
         if(!addressData){
             return res.redirect('/page')
         }
-        res.render('user/edit-checkout',{address:addressData ,user : userData})
+        res.render('user/edit-checkout',
+            {address:addressData ,
+                user : userData,
+                cartCount,
+                wishlistCount
+
+            })
 
     } catch (error) {
         console.error("Error of edit Address", error.message)
@@ -302,7 +339,7 @@ const placeOrder = async (req, res) => {
         const coupon = cart.appliedCoupon;
         const couponUsed = coupon ? await Coupon.findOne({ _id: coupon }) : null;
 
-        // Find delivery address
+       
         const userAddressDoc = await Address.findOne({ userId });
         if (!userAddressDoc) {
             return res.status(400).json({ success: false, message: "No addresses found for user" });
@@ -358,9 +395,14 @@ const placeOrder = async (req, res) => {
 
         const finalAmount = cartTotal - discountAmount; 
 
+        const gstRate = 0.05;
+        const gstAmount = finalAmount * gstRate;
+        const finalAmountWithGST = finalAmount + gstAmount;
+
+        console.log(gstAmount,finalAmount,finalAmountWithGST,"Place order>>>>>")
         
 
-        if (finalAmount > 1000) {
+        if (finalAmountWithGST > 1000) {
             return res.status(400).json({
                 success: false,
                 message: "Order amount exceeds the limit of 1000 Rupees."
@@ -369,7 +411,7 @@ const placeOrder = async (req, res) => {
       
 
 
-        // Wallet Payment Handling
+        
         if (paymentMethod === 'Wallet') {
             if (wallet.balance <= 0 || cart.cartTotal > wallet.balance) {
                 return res.status(400).send('Insufficient wallet balance.');
@@ -378,17 +420,18 @@ const placeOrder = async (req, res) => {
             await wallet.save();
         }
 
-        // Create order
+       
         const order = new Order({
             orderedItem: orderedItems,
             cartId:cart._id,
             userId,
             totalPrice: cartTotal,
             discount: discountAmount,
-            finalAmount: finalAmount,
+            finalAmount: finalAmountWithGST,
             deliveryAddress : addressFound, 
             paymentMethod:paymentMethod,
             couponCode: couponUsed ? couponUsed.couponCode : null,
+            couponApplied:couponUsed ? true :false,
             couponDiscount: discountAmount,
         });
         
@@ -396,7 +439,7 @@ const placeOrder = async (req, res) => {
         console.log('order placed successfully', order);
         await order.save();
 
-        // Clear cart
+        
         await Cart.deleteOne({ userId });
 
         await order.save();
@@ -438,12 +481,28 @@ const placeOrder = async (req, res) => {
 
 
 const orderSucess = async (req,res) =>{
+
+    let cartCount = 0
+    let wishlistCount = 0
+
     try {
         const user = req.session.user
         const userData = await User.findById(user)
         const order = Order.find()
 
-        res.render('user/order-sucess',{order,user:userData})
+        if (user) {
+            const cart = await Cart.findOne({ userId: user });
+            
+            if (cart && cart.items) {
+              cartCount = cart.items.length;
+              console.log(cartCount)
+            }
+            const wishlist = await Wishlist.find({ user: user });
+            wishlistCount = wishlist.length;
+          }
+      
+
+        res.render('user/order-sucess',{order,user:userData , cartCount ,wishlistCount})
         
     } catch (error) {
         console.error("Error has been orderSuceess",error.message)
@@ -465,7 +524,6 @@ const initiateRazorpay = async (req, res) => {
         const totalPrice = cart.items.reduce((acc, item) => acc + item.totalPrice, 0);
         
         
-        // const totalQuantity = cart.items.reduce((acc, item) => acc + item.quantity, 0);
 
         
         let totalDiscount = 0;
@@ -555,7 +613,7 @@ const verifyPayment = async (req, res) => {
             
             const coupon = cart.appliedCoupon;
 
-            // Address retrieval logic
+          
             const addressDocument = await Address.findOne({ userId });
             console.log("addressDocument", addressDocument);
 
@@ -575,7 +633,7 @@ const verifyPayment = async (req, res) => {
              
             let cartTotal = 0;
             
-            // Correctly map cart items to ordered items
+           
             const orderedItems = cart.items.map(item => {
                 const itemTotal = item.productId.salePrice * item.quantity;
                 cartTotal += itemTotal;
@@ -590,11 +648,11 @@ const verifyPayment = async (req, res) => {
 
             console.log("Ordered items:", orderedItems);
 
-            // Validate stock
+            
             for (const item of orderedItems) {
                 const { product, quantity } = item;
 
-                // Find product
+                
                 const productDoc = await Product.findById(product);
                 if (!productDoc) {
                     return res.status(400).json({
@@ -603,7 +661,7 @@ const verifyPayment = async (req, res) => {
                     });
                 }
 
-                // Check stock
+              
                 if (!productDoc.quantity || productDoc.quantity < quantity) {
                     return res.status(400).json({
                         success: false,
@@ -612,7 +670,7 @@ const verifyPayment = async (req, res) => {
                 }
             }
 
-            // Calculate discount if coupon is applied
+            
             let totalDiscount = 0;
             if (coupon) {
                 const couponUsed = await Coupon.findOne({ _id: coupon });
@@ -624,14 +682,12 @@ const verifyPayment = async (req, res) => {
 
             const couponName = coupon ? await Coupon.findOne({ _id: coupon }) : null;
             
-            // Calculate final amount with GST
+           
             const subtotal = cartTotal - totalDiscount;
             const gstAmount = subtotal * 0.05; // 5% GST
             const finalAmount = subtotal + gstAmount;
-
-            console.log(finalAmount,cartTotal,">>>>>>>>>>>>Hekko")
-
-            // Prepare order data
+           
+            
             const orderData = {
                 userId,
                 cartId: cart._id,
@@ -653,15 +709,15 @@ const verifyPayment = async (req, res) => {
             const order = new Order(orderData);
             await order.save();
 
-            // Clear applied coupon & cart
+            
             await Cart.findOneAndDelete({ userId });
 
-            // Remove coupon from session
+           
             if (req.session.coupon) {
                 delete req.session.coupon;
             }
 
-            // Update product stock
+            
             for (const item of orderedItems) {
                 const { product, quantity } = item;
                 await Product.findByIdAndUpdate(product, { $inc: { quantity: -quantity } });
@@ -699,7 +755,7 @@ const loadWalletPayment = async (req, res) => {
       console.log(paymentMethod, "wallet payment");
       const userId = req.session.user;
   
-      // 1. Get user's cart
+      
       const cart = await Cart.findOne({ userId }).populate("items.productId");
       if (!cart || cart.items.length === 0) {
         return res
@@ -707,13 +763,13 @@ const loadWalletPayment = async (req, res) => {
           .json({ success: false, message: "Cart is empty" });
       }
   
-      // 2. Check if address exists
+     
       const addressDocument = await Address.findOne({ userId });
       if (!addressDocument || !addressDocument.address) {
         return res.status(400).json({ success: false, message: "No addresses found" });
       }
   
-      // Find the specific address by ID
+      
       let address;
       try {
         address = addressDocument.address.find(addr => addr._id.toString() === addressId);
@@ -727,7 +783,7 @@ const loadWalletPayment = async (req, res) => {
           .json({ success: false, message: "Invalid address" });
       }
   
-      // 3. Get user's wallet
+      
       const wallet = await Wallet.findOne({ userId });
       if (!wallet) {
         return res
@@ -735,23 +791,23 @@ const loadWalletPayment = async (req, res) => {
           .json({ success: false, message: "Wallet not found" });
       }
   
-      // 4. Calculate total price from cart
+     
       const totalPrice = cart.items.reduce((acc, item) => acc + item.totalPrice, 0);
       
-      // 5. Calculate discount if coupon is applied
+      
       let totalDiscount = 0;
       if (cart.appliedCoupon) {
         totalDiscount = cart.discountAmount || (totalPrice * cart.appliedCoupon.discount) / 100;
       }
       
-      // 6. Calculate price after discount
+      
       const subtotal = totalPrice - totalDiscount;
-      const gstAmount = subtotal * 0.05; // 5% GST
+      const gstAmount = subtotal * 0.05; 
       const finalAmount = subtotal + gstAmount;
   
       console.log(subtotal, finalAmount, gstAmount, ">>>>>>>wla");
   
-      // 9. Check if enough balance in wallet
+     
       if (wallet.balance < finalAmount) {
         return res.status(400).json({
           success: false,
@@ -759,7 +815,7 @@ const loadWalletPayment = async (req, res) => {
         });
       }
   
-      // 10. Create order items from cart items
+    
       const orderedItems = cart.items.map(item => {
         return {
           product: item.productId._id, 
@@ -769,7 +825,7 @@ const loadWalletPayment = async (req, res) => {
         };
       });
   
-      // 11. Create new order with correct price information
+      
       const newOrder = new Order({
         userId,
         cartId: cart._id,
@@ -785,7 +841,7 @@ const loadWalletPayment = async (req, res) => {
   
       const savedOrder = await newOrder.save();
   
-      // 12. Deduct the FULL amount (with GST) from wallet
+      
       wallet.balance -= finalAmount;
       wallet.transactions.push({
         amount: finalAmount,
@@ -796,14 +852,14 @@ const loadWalletPayment = async (req, res) => {
       });
       await wallet.save();
   
-      // 13. Update product inventory
+      
       for (const item of orderedItems) {
         const { product, quantity } = item;
         await Product.findByIdAndUpdate(product, { $inc: { quantity: -quantity } });
         console.log(`Updated stock for product ${product} by -${quantity}`);
       }
   
-      // 14. Clear the cart
+     
       cart.items = [];
       cart.totalPrice = 0;
       cart.discountAmount = 0;
@@ -854,12 +910,12 @@ const loadWalletPayment = async (req, res) => {
             return res.status(403).json({ success: false, error: 'Unauthorized access to this order' });
         }
         
-        // Verify payment status can be retried
+       
         if (order.paymentStatus !== 'failed' && order.paymentStatus !== 'pending') {
             return res.status(400).json({ success: false, error: 'Only failed or pending payments can be retried' });
         }
 
-        // Initialize Razorpay
+       
         const razorpay = new Razorpay ({
             key_id:process.env.Razorpay_API,
             key_secret:process.env.Razorpay_SCRECT
@@ -955,7 +1011,7 @@ const paymentFailed = async (req, res) => {
             discount: 0, 
             finalAmount: cartTotal, 
             paymentMethod: 'Online Payment',
-            paymentStatus: 'pending', 
+            paymentStatus: 'failed', 
             paymentId: razorpay_payment_id,
             razorpayOrderId: razorpay_order_id 
         });

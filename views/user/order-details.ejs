@@ -30,7 +30,7 @@
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= new Date(order.date).toLocaleDateString() %></td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">₹<%= (order.finalAmount ).toFixed(2) %></td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        <% if (order.paymentMethod === 'Online Payment' && order.paymentStatus === 'pending') { %>
+                        <% if (order.paymentMethod === 'Online Payment' && order.paymentStatus === 'failed') { %>
                           <button onclick="retryPayment('<%= order.razorpayOrderId %>')" class="bg-indigo-600 text-white px-3 py-1.5 rounded text-sm hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Retry
                           </button>

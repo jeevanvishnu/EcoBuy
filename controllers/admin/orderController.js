@@ -127,40 +127,40 @@ const returnApprove = async (req, res) => {
   
       console.log(orderId, productId, "This is orderId and productId");
   
-      // Fetch the order and populate product details
+      
       const order = await Order.findById(orderId).populate("orderedItem.product");
       if (!order) return res.status(404).send("Order not found");
   
-      // Find the item to return
+      
       const itemToReturn = order.orderedItem.find(
         (item) => item.product._id.toString() === productId
       );
       if (!itemToReturn) return res.status(404).send("Product not found in order");
   
-      // Check if the item is eligible for return approval (e.g., status is "Request")
+     
       if (itemToReturn.orderStatus !== "Request") {
         return res.status(400).send("Item is not in a return-requested state");
       }
   
-      // Calculate total quantity of items in the order
+    
       const totalQuantity = order.orderedItem.reduce((sum, item) => sum + item.quantity, 0);
   
-      // Calculate refund amount
+      
       let refundAmount;
-      if (order.couponApplied) { // Changed from couponCode to couponApplied per schema
-        refundAmount = (order.finalAmount / totalQuantity) * itemToReturn.quantity; // Use finalAmount
+      if (order.couponApplied) {
+        refundAmount = (order.finalAmount / totalQuantity) * itemToReturn.quantity; 
       } else {
-        refundAmount = itemToReturn.price * itemToReturn.quantity; // Use price from orderedItem
+        refundAmount = itemToReturn.price * itemToReturn.quantity;
       }
   
       // Add 5% to the refund amount
-      const finalRefundAmount = refundAmount * 1.05; // Increase by 5%
+      const finalRefundAmount = refundAmount * 1.05; 
       console.log(`Refund Amount: ${refundAmount}, Final Refund with 5%: ${finalRefundAmount}`);
   
       // Increase product stock quantity
       const product = await Product.findById(productId);
       if (!product) return res.status(404).send("Product not found");
-      product.quantity = (product.quantity || 0) + itemToReturn.quantity; // Assuming Product has a quantity field
+      product.quantity = (product.quantity || 0) + itemToReturn.quantity; 
       await product.save();
   
       // Update wallet
@@ -172,7 +172,7 @@ const returnApprove = async (req, res) => {
           transactions: [],
         });
       }
-      wallet.balance += finalRefundAmount; // Add refund + 5%
+      wallet.balance += finalRefundAmount; 
       wallet.transactions.push({
         amount: finalRefundAmount,
         transactionsMethod: "Refund",
@@ -181,8 +181,8 @@ const returnApprove = async (req, res) => {
       });
       await wallet.save();
   
-      // Update item status to "Returned"
-      itemToReturn.orderStatus = "Returned"; // Correct field name
+      
+      itemToReturn.orderStatus = "Returned"; 
       await order.save();
   
       res.redirect("/admin/orderManagment");

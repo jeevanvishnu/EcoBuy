@@ -156,10 +156,10 @@ export const exportSalesPDF = async (req, res) => {
         const doc = new PDFDocument({
             margin: 50,
             size: 'A4',
-            bufferPages: true // Enable page numbering
+            bufferPages: true 
         });
 
-        // Set up response
+        
         res.setHeader('Content-Type', 'application/pdf');
         res.setHeader('Content-Disposition', `attachment; filename=sales-report-${reportType}.pdf`);
         doc.pipe(res);

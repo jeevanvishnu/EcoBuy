@@ -40,9 +40,13 @@
                   </a>
                   <form action="/addToWishlist" method="post">
                     
-                    <button data-debug-id="<%= product._id %>" class="hover:scale-105 absolute top-3 right-3 bg-white w-10 h-10 flex items-center justify-center rounded-full text-gray-500 shadow-md">
-                      <i class="fas fa-heart text-md"></i>
-                    </button>
+                    <button 
+                    data-debug-id="<%= product._id %>" 
+                    class="hover:scale-105 transition-transform duration-200 absolute top-3 right-3 w-10 h-10 flex items-center justify-center rounded-full shadow-md 
+                          <%= product.isInWishlist ? 'bg-red-500 text-white' : 'bg-white text-gray-500' %>">
+                    <i class="fas fa-heart text-md <%= product.isInWishlist ? 'text-white' : 'text-gray-500' %>"></i>
+                  </button>
+
                   </form>
                   
                 </div>
@@ -115,7 +119,10 @@ document.addEventListener("DOMContentLoaded", function() {
             icon: "success",
             timer: 1500,
             showConfirmButton: false
-          });
+          }).then(()=>{
+            location.reload();
+          })
+          
         } else {
           Swal.fire({
             title: "Error!",

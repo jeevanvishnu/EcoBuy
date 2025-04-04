@@ -16,6 +16,10 @@ const wishlistSchema = new Schema({
   addedAt: {
     type: Date,
     default: Date.now
+  },
+  wishlist:{
+    type:Boolean,
+    default:false
   }
 }, { timestamps: true });
 

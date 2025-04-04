@@ -122,21 +122,17 @@
               >
             </li>
             <li class="relative">
-              <a
-                href="/cart"
-                class="flex items-center hover:text-lime-200 transition-colors space-x-1 group"
-              >
+              <a href="/cart" class="flex items-center hover:text-lime-200 transition-colors space-x-1 group relative">
                 <i class="fa-solid fa-cart-shopping text-lg"></i>
-               
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center"><%= cartCount %></span>
               </a>
             </li>
             <li class="relative">
-              <a
-                href="/wishlist"
-                class="flex items-center hover:text-lime-200 transition-colors space-x-1 group"
-              >
+              <a href="/wishlist" class="flex items-center hover:text-lime-200 transition-colors space-x-1 group relative">
                 <i class="fa-regular fa-heart text-lg"></i>
-                </a>
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center"><%= wishlistCount %></span>
+              </a>
+            </li>
 
             <!-- User Dropdown -->
             <% if(locals.user){ %>

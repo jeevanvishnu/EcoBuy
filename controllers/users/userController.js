@@ -6,6 +6,7 @@ import bcrypt from "bcrypt";
 import Category from "../../models/categorySchema.js";
 import Product from "../../models/productSchema.js";
 import Banner from "../../models/bannerSchema.js";
+import Wishlist from "../../models/wishlistSchema.js"
 import Cart from "../../models/cartSchema.js";
 // Setup Signup page
 const loadSignUp = (req, res) => {
@@ -44,9 +45,15 @@ const loadHome = async (req, res) => {
       quantity: { $gt: 0 },
     });
 
+    const wishlistItems = await Wishlist.find({ user: user }).select('product');
+    const wishlistProductIds = wishlistItems.map(item => item.product.toString());
+    const wishlistCount = wishlistItems.length
+
     console.log(productData);
     productData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
     productData = productData.slice(0, 12);
+
+    let cartCount = 0
 
     if (user) {
       const cart = await Cart.findOne({ user: user._id }).populate('items.productId'); 
@@ -54,26 +61,32 @@ const loadHome = async (req, res) => {
 
       if (cart) {
         cartItems = cart.items.map(item => item.productId._id.toString()); 
+        cartCount = cart.items.length
       }
 
       const userData = await User.findOne({_id:user});
 
       const products = productData.map(product => ({ 
         ...product.toObject(),
-        isInCart: cartItems.includes(product._id.toString())
+        isInCart: cartItems.includes(product._id.toString()),
+        isInWishlist: wishlistProductIds.includes(product._id.toString())
       }));
-      console.log(products,"Home data")
 
       console.log(userData);
       return res.render("user/home", {
         user: userData,
         products: products, 
         banner: findBanner || [],
+        wishlistCount,
+        cartCount
+       
       });
     } else {
       return res.render("user/home", {
         products: productData,
         banner: findBanner || [],
+        wishlistCount:0,
+        cartCount:0
       });
     }
   } catch (error) {
@@ -466,6 +479,8 @@ const shopController = async (req, res) => {
     const user = req.session.user;
     const userData = await User.findOne({ _id: user });
     const categories = await Category.find({ isListed: true }).lean();
+    let cartCount = 0
+    let wishlistCount = 0
 
     let sort = req.query.sort || "newest";
     let sortOptions = {}; 
@@ -510,6 +525,18 @@ const shopController = async (req, res) => {
 
     let totalPages = Math.ceil(totalProducts / itemsPerPage);
 
+    if (user) {
+      const cart = await Cart.findOne({ userId: user });
+      
+      if (cart && cart.items) {
+        cartCount = cart.items.length;
+        console.log(cartCount)
+      }
+      const wishlist = await Wishlist.find({ user: user });
+      wishlistCount = wishlist.length;
+    }
+
+
     let sortParam = sort !== "newest" ? `sort=${sort}` : "";
     let paginationBaseUrl = '/shop'; 
     res.render("user/shop", {
@@ -519,7 +546,9 @@ const shopController = async (req, res) => {
       totalPages,
       currentPage,
       sortParam,
-      paginationBaseUrl 
+      paginationBaseUrl ,
+      cartCount,
+      wishlistCount
 
     });
   } catch (error) {
