@@ -33,7 +33,7 @@ const productSchema = new Schema({
     },
     quantity:{
         type:Number,
-        default:true
+        default:0
     },
     color:{
         type:String,
@@ -50,12 +50,13 @@ const productSchema = new Schema({
     },
     status:{
         type:String,
-        email:["Available","Out of stock", "Discountinued"],
+        enum: ["Available", "Out of stock", "Discontinued"],
         required:true,
         default:"Available"
     },
-   
-}, {timeseries:true} )
+    
+    
+}, {timestamps:true} )
 
 const product = mongoose.model("Product",productSchema)
 

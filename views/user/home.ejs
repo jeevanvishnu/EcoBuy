@@ -120,9 +120,9 @@ document.addEventListener("DOMContentLoaded", function() {
             timer: 1500,
             showConfirmButton: false
           }).then(()=>{
+
             location.reload();
           })
-          
         } else {
           Swal.fire({
             title: "Error!",
@@ -148,7 +148,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
   document.addEventListener("click", function (event) {
     let button = event.target.closest("button[data-debug-id]");
-    if (!button) return; // Ignore if not clicking a button
+    if (!button) return; 
 
     event.preventDefault();
     
@@ -178,7 +178,9 @@ document.addEventListener("DOMContentLoaded", function() {
                 text: data.message || "Product added to wishlist successfully.",
                 timer: 1500,
                 showConfirmButton: false
-            });
+            }).then(()=>{
+              location.reload();
+            })
         } else {
             Swal.fire({
                 toast: true,

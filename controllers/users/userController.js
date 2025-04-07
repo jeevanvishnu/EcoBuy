@@ -547,8 +547,8 @@ const shopController = async (req, res) => {
       currentPage,
       sortParam,
       paginationBaseUrl ,
-      cartCount,
-      wishlistCount
+      cartCount:cartCount || 0,
+      wishlistCount:wishlistCount || 0
 
     });
   } catch (error) {

@@ -142,7 +142,7 @@ const productOffer = async (req, res) => {
 
         const findCategory = await Category.findOne({ _id: findProduct.category });
 
-        if (findCategory && findCategory.categorOffer > percentage) {
+        if (findCategory && findCategory.categoryOffer > percentage) {
             return res.json({ status: false, message: "This product's category already has a higher discount" });
         }
 
