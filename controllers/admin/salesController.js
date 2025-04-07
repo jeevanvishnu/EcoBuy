@@ -2,7 +2,6 @@ import Order from "../../models/orderSchema.js"
 import exceljs from 'exceljs'
 import PDFDocument from 'pdfkit'
 
-
 export const salesreport = async (req, res) => {
     try {
         res.render('admin/salesReport', {
@@ -32,9 +31,17 @@ export const generateSalesReport = async (req, res) => {
             }
             case 'weekly': {
                 const today = new Date();
+                const startOfWeek = new Date(today);
+                startOfWeek.setDate(today.getDate() - today.getDay());
+                startOfWeek.setHours(0, 0, 0, 0);
+                
+                const endOfWeek = new Date(startOfWeek);
+                endOfWeek.setDate(startOfWeek.getDate() + 6);
+                endOfWeek.setHours(23, 59, 59, 999);
+                
                 query.date = {
-                    $gte: new Date(today.setDate(today.getDate() - today.getDay())),
-                    $lte: new Date(today.setDate(today.getDate() + 6))
+                    $gte: startOfWeek,
+                    $lte: endOfWeek
                 };
                 break;
             }
@@ -42,20 +49,36 @@ export const generateSalesReport = async (req, res) => {
                 const today = new Date();
                 query.date = {
                     $gte: new Date(today.getFullYear(), today.getMonth(), 1),
-                    $lte: new Date(today.getFullYear(), today.getMonth() + 1, 0)
+                    $lte: new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59, 999)
                 };
                 break;
             }
             case 'custom': {
+                if (!startDate || !endDate) {
+                    return res.status(400).json({
+                        status: 'error',
+                        message: 'Start date and end date are required for custom reports'
+                    });
+                }
+                
+                const startDateTime = new Date(startDate);
+                startDateTime.setHours(0, 0, 0, 0);
+                
+                const endDateTime = new Date(endDate);
+                endDateTime.setHours(23, 59, 59, 999);
+                
                 query.date = {
-                    $gte: new Date(startDate),
-                    $lte: new Date(endDate)
+                    $gte: startDateTime,
+                    $lte: endDateTime
                 };
                 break;
             }
         }
 
-        const orders = await Order.find(query).populate('userId', 'name email');
+        // Get orders sorted by date in descending order
+        const orders = await Order.find(query)
+            .populate('userId', 'name email')
+            .sort({ date: -1 });
 
         const summary = {
             totalSales: orders.reduce((acc, order) => acc + order.totalPrice, 0),
@@ -70,7 +93,7 @@ export const generateSalesReport = async (req, res) => {
                 summary,
                 orders: orders.map(order => ({
                     date: order.date,
-                    orderId: order.orderId, 
+                    orderId: order._id, 
                     amount: order.totalPrice, 
                     discount: order.discount || 0, 
                     couponCode: order.couponApplied ? 'Coupon Applied' : 'No Coupon', 
@@ -136,6 +159,13 @@ export const exportSalesPDF = async (req, res) => {
                 break;
             }
             case 'custom': {
+                if (!startDate || !endDate) {
+                    return res.status(400).json({
+                        status: 'error',
+                        message: 'Start date and end date are required for custom reports'
+                    });
+                }
+                
                 const customStartDate = new Date(startDate);
                 customStartDate.setHours(0, 0, 0, 0);
                 
@@ -150,7 +180,10 @@ export const exportSalesPDF = async (req, res) => {
             }
         }
 
-        const orders = await Order.find(query).populate('userId', 'name email');
+        // Get orders sorted by date in descending order
+        const orders = await Order.find(query)
+            .populate('userId', 'name email')
+            .sort({ date: -1 });
 
         // Create PDF document with better margins
         const doc = new PDFDocument({
@@ -416,6 +449,13 @@ export const exportSalesExcel = async (req, res) => {
           break;
         }
         case 'custom': {
+          if (!startDate || !endDate) {
+            return res.status(400).json({
+              status: 'error',
+              message: 'Start date and end date are required for custom reports'
+            });
+          }
+          
           const startDateTime = new Date(startDate);
           startDateTime.setHours(0, 0, 0, 0);
           
@@ -430,7 +470,10 @@ export const exportSalesExcel = async (req, res) => {
         }
       }
       
-      const orders = await Order.find(query).populate('userId', 'name email');
+      // Get orders sorted by date in descending order
+      const orders = await Order.find(query)
+        .populate('userId', 'name email')
+        .sort({ date: -1 });
       
       const workbook = new exceljs.Workbook();
       const worksheet = workbook.addWorksheet('Sales Report');
@@ -453,15 +496,15 @@ export const exportSalesExcel = async (req, res) => {
         fgColor: { argb: 'FFE0E0E0' }
       };
       
-      // Add data rows
+      // Add data rows with correct field names to match PDF export
       orders.forEach(order => {
         worksheet.addRow({
           date: new Date(order.date).toLocaleDateString(),
-          orderId: order._id,
-          amount: order.originalPrice, // Fixed typo: orginalPrice -> originalPrice
-          discount: order.couponDiscount || 0,
-          couponCode: order.couponCode || 'No Coupon',
-          finalAmount: order.originalPrice - (order.couponDiscount || 0), // Fixed typo
+          orderId: order.orderId || (order._id ? order._id.toString() : 'N/A'),
+          amount: order.totalPrice || 0, // Corrected from originalPrice
+          discount: order.discount || 0, // Corrected from couponDiscount
+          couponCode: order.couponApplied ? 'Coupon Applied' : 'No Coupon', // Consistent with PDF export
+          finalAmount: order.finalAmount || 0, // Corrected calculation
         });
       });
       
@@ -469,8 +512,21 @@ export const exportSalesExcel = async (req, res) => {
       worksheet.addRow([]); // Empty row
       worksheet.addRow(['Summary']);
       worksheet.addRow(['Total Orders', orders.length]);
-      worksheet.addRow(['Total Sales', orders.reduce((acc, order) => acc + (order.originalPrice || 0), 0)]); // Fixed property name and added null check
-      worksheet.addRow(['Total Discounts', orders.reduce((acc, order) => acc + (order.couponDiscount || 0), 0)]);
+      worksheet.addRow(['Total Sales', orders.reduce((acc, order) => acc + (order.totalPrice || 0), 0)]); // Corrected property name
+      worksheet.addRow(['Total Discounts', orders.reduce((acc, order) => acc + (order.discount || 0), 0)]); // Corrected property name
+      worksheet.addRow(['Net Revenue', orders.reduce((acc, order) => acc + (order.finalAmount || 0), 0)]); // Added net revenue
+      
+      // Add date range information
+      worksheet.addRow([]);
+      worksheet.addRow(['Report Information']);
+      worksheet.addRow(['Report Type', reportType.charAt(0).toUpperCase() + reportType.slice(1)]);
+      worksheet.addRow(['Period', `${new Date(query.date.$gte).toLocaleDateString()} to ${new Date(query.date.$lte).toLocaleDateString()}`]);
+      worksheet.addRow(['Generated On', new Date().toLocaleString()]);
+      
+      // Style summary section
+      const summaryStartRow = orders.length + 3;
+      worksheet.getRow(summaryStartRow).font = { bold: true };
+      worksheet.getRow(summaryStartRow + 5).font = { bold: true };
       
       // Style numbers as currency
       worksheet.getColumn('amount').numFmt = '₹#,##0.00';

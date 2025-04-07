@@ -370,8 +370,7 @@
 
 
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-<script src="https://checkout.razorpay.com/v1/checkout.js"></script>  <!-- Razorpay Checkout Script -->
-
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>  
 
 
 <script>
@@ -646,6 +645,7 @@ async function removeCoupon() {
             })
           });
           const data = await response.json();
+          console.log(data)
   
           if (data.success) {
             initiateRazorpayPayment(data.order.id, data.order.amount, addressId, data.apiKey);
@@ -709,6 +709,7 @@ async function removeCoupon() {
       };
   
       const rzp = new Razorpay(options);
+      
   
       rzp.on('payment.failed', function(response) {
         console.error('Payment failed:', response.error);
@@ -739,8 +740,8 @@ async function removeCoupon() {
             Swal.fire(data.error ||'Error', 'Error saving failed order', error.message);
           });
       });
-  
-      rzp.open();
+          rzp.open();
+     
     }
   
     async function processWalletPayment(addressId) {

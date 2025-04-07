@@ -95,7 +95,7 @@ router.post('/inital-razorpay',checkoutController.initiateRazorpay)
 router.post('/verify-Payment',checkoutController.verifyPayment)
 router.post('/retry-payment',checkoutController.retryPayment)
 router.post('/payment-failed',checkoutController.paymentFailed)
-
+router.post('/paymentSucess',checkoutController.paymentSucess)
 
 // order Managment
 router.get('/order',userAuth.userAuth,orderController.orderDetails)

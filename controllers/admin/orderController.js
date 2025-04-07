@@ -124,46 +124,49 @@ const returnApprove = async (req, res) => {
     try {
       const orderId = req.params.orderid;
       const productId = req.params.productid;
-  
-      console.log(orderId, productId, "This is orderId and productId");
-  
       
+      console.log(orderId, productId, "This is orderId and productId");
+      
+     
       const order = await Order.findById(orderId).populate("orderedItem.product");
       if (!order) return res.status(404).send("Order not found");
-  
       
+     
       const itemToReturn = order.orderedItem.find(
         (item) => item.product._id.toString() === productId
       );
       if (!itemToReturn) return res.status(404).send("Product not found in order");
-  
-     
+      
+    
       if (itemToReturn.orderStatus !== "Request") {
         return res.status(400).send("Item is not in a return-requested state");
       }
-  
-    
-      const totalQuantity = order.orderedItem.reduce((sum, item) => sum + item.quantity, 0);
-  
       
+     
+      const totalQuantity = order.orderedItem.reduce((sum, item) => sum + item.quantity, 0);
+      
+     
       let refundAmount;
       if (order.couponApplied) {
-        refundAmount = (order.finalAmount / totalQuantity) * itemToReturn.quantity; 
+       
+        refundAmount = (order.finalAmount / totalQuantity) * itemToReturn.quantity;
       } else {
+       
         refundAmount = itemToReturn.price * itemToReturn.quantity;
       }
-  
-      // Add 5% to the refund amount
-      const finalRefundAmount = refundAmount * 1.05; 
-      console.log(`Refund Amount: ${refundAmount}, Final Refund with 5%: ${finalRefundAmount}`);
-  
-      // Increase product stock quantity
+      
+      
+      const finalRefundAmount = order.couponApplied ? refundAmount : refundAmount * 1.05;
+      
+      console.log(`Refund Amount: ${refundAmount}, Final Refund: ${finalRefundAmount}`);
+      
+      
       const product = await Product.findById(productId);
       if (!product) return res.status(404).send("Product not found");
-      product.quantity = (product.quantity || 0) + itemToReturn.quantity; 
+      product.quantity = (product.quantity || 0) + itemToReturn.quantity;
       await product.save();
-  
-      // Update wallet
+      
+    
       let wallet = await Wallet.findOne({ userId: order.userId });
       if (!wallet) {
         wallet = new Wallet({
@@ -172,7 +175,11 @@ const returnApprove = async (req, res) => {
           transactions: [],
         });
       }
-      wallet.balance += finalRefundAmount; 
+      
+     
+      wallet.balance += finalRefundAmount;
+      
+      
       wallet.transactions.push({
         amount: finalRefundAmount,
         transactionsMethod: "Refund",
@@ -180,11 +187,11 @@ const returnApprove = async (req, res) => {
         orderId: orderId,
       });
       await wallet.save();
-  
       
-      itemToReturn.orderStatus = "Returned"; 
+    
+      itemToReturn.orderStatus = "Returned";
       await order.save();
-  
+      
       res.redirect("/admin/orderManagment");
     } catch (error) {
       console.error("Error approving return:", error);

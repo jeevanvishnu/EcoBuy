@@ -30,7 +30,7 @@
                       <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500"><%= new Date(order.date).toLocaleDateString() %></td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">₹<%= (order.finalAmount ).toFixed(2) %></td>
                       <td class="px-6 py-4 whitespace-nowrap text-sm">
-                        <% if (order.paymentMethod === 'Online Payment' && order.paymentStatus === 'failed') { %>
+                        <% if (order.paymentMethod === 'Online Payment' && order.paymentStatus === 'pending') { %>
                           <button onclick="retryPayment('<%= order.razorpayOrderId %>')" class="bg-indigo-600 text-white px-3 py-1.5 rounded text-sm hover:bg-indigo-700 transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             Retry
                           </button>
@@ -141,7 +141,7 @@
       console.log("Server Response:", orderId);
 
       if (data.success) {
-        initiateRazorpayPayment(data.razorpayOrderId, data.amount);
+        initiateRazorpayPayment(data.razorpayOrderId, data.amount, data.apiKey);
       } else {
         Swal.fire({
           icon: "error",
@@ -168,7 +168,7 @@
       description: "Purchase Payment",
       order_id: orderId,
       handler: function (response) {
-        fetch("/verify-Payment", {
+        fetch("/paymentSucess", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",

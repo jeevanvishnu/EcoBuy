@@ -393,154 +393,329 @@ const invoiceController = {
   generateAndDownload: async (req, res) => {
     try {
       const { orderId } = req.params;
-
+  
       if (!orderId || !orderId.match(/^[0-9a-fA-F]{24}$/)) {
         return res.status(400).json({
           success: false,
           message: "Invalid order ID format",
         });
       }
-
+  
       const order = await Order.findById(orderId)
         .populate("orderedItem.product")
         .populate("userId");
-
+  
       if (!order) {
         return res.status(404).json({
           success: false,
           message: "Order not found",
         });
       }
-
+  
       // Create PDF document
       const doc = new PDFDocument({
         margin: 50,
         size: "A4",
       });
-
+  
       // Set response headers
       res.setHeader("Content-Type", "application/pdf");
       res.setHeader(
         "Content-Disposition",
         `attachment; filename=invoice-${orderId}.pdf`
       );
-
+  
       // Pipe the PDF directly to the response
       doc.pipe(res);
-
-      // Add content to PDF
-      // Header
-      doc.fontSize(20).text("INVOICE", { align: "center" }).moveDown();
-
-      // Company Details
-      doc
-        .fontSize(12)
-        .text("EcoBuy", { align: "left" })
-        .text("Email: EcoBuy@company.com")
-        .moveDown();
-
-      // Invoice Details
-      const createdAt = order.createdAt
-        ? new Date(order.createdAt)
-        : new Date();
-      const dueDate = new Date(createdAt.getTime() + 30 * 24 * 60 * 60 * 1000);
-
-      doc
-        .text(`Invoice #: ${orderId}`)
-        .text(`Date: ${createdAt.toLocaleDateString()}`)
-        .text(`Due Date: ${dueDate.toLocaleDateString()}`)
-        .moveDown();
-
-      // Customer Details
-      doc.text("Bill To:");
-      order.deliveryAddress.forEach((address) => {
+  
+      // Define colors that match HTML design
+      const primaryColor = '#4361ee';
+      const textColor = '#333333';
+      const lightTextColor = '#6c757d';
+      const borderColor = '#dee2e6';
+  
+      // Helper function for drawing styled sections
+      const drawSection = (title, content, x, y, width) => {
+        // Section background
         doc
-          .text(order.userId?.email || "N/A")
-          .text(order.userId?.mobile || "N/A")
-          .text(address.addressType || "N/A")
-          .text(
-            `${address.city || "N/A"}, ${address.state || "N/A"} ${
-              address.pincode || "N/A"
-            }`
-          )
-          .text(address.landMark || "N/A")
-          .moveDown();
-      });
-
-      // Table Header
-      const tableTop = doc.y;
-      const columnWidth = (doc.page.width - 100) / 6;
-
-      ["Product", "Quantity", "Price", "Status", "Total"].forEach(
-        (header, i) => {
-          doc.text(header, 50 + i * columnWidth, tableTop, {
-            width: columnWidth,
-            align: "left",
-          });
-        }
-      );
-
-      // Draw line under headers
+          .rect(x, y, width, 120)
+          .fillAndStroke('#f9f9f9', borderColor);
+        
+        // Left accent border
+        doc
+          .rect(x, y, 4, 120)
+          .fill(primaryColor);
+        
+        // Title
+        doc
+          .font('Helvetica-Bold')
+          .fontSize(14)
+          .fillColor(primaryColor)
+          .text(title, x + 15, y + 15, { width: width - 30 });
+        
+        // Divider
+        doc
+          .moveTo(x + 15, y + 40)
+          .lineTo(x + width - 15, y + 40)
+          .strokeColor(borderColor)
+          .stroke();
+        
+        // Content
+        doc
+          .font('Helvetica')
+          .fontSize(10)
+          .fillColor(textColor)
+          .text(content, x + 15, y + 50, { width: width - 30 });
+      };
+  
+      // Header
       doc
-        .moveTo(50, tableTop + 20)
-        .lineTo(doc.page.width - 50, tableTop + 20)
-        .stroke();
-
-      // Table Content
-      let tableContentTop = tableTop + 30;
-      order.orderedItem.forEach((item, index) => {
-        const y = tableContentTop + index * 20;
-
-        doc.fontSize(10);
-
-        doc.text(item.product?.productName || "Product Unavailable", 50, y, {
-          width: columnWidth,
-          align: "left",
-        });
-
-        doc.text(item.quantity.toString(), 50 + columnWidth * 2, y, {
-          width: columnWidth,
-          align: "left",
-        });
-
-        doc.text(`₹${Number(item.price).toFixed(2)}`, 50 + columnWidth * 3, y, {
-          width: columnWidth,
-          align: "left",
-        });
-
-        doc.text(item.orderStatus || "N/A", 50 + columnWidth * 4, y, {
-          width: columnWidth,
-          align: "left",
-        });
-
-        doc.text(
-          `₹${(item.quantity * Number(item.price)).toFixed(2)}`,
-          50 + columnWidth * 5,
-          y,
-          {
-            width: columnWidth,
-            align: "left",
-          }
-        );
-      });
-
-      // Total Amount
+        .rect(50, 50, doc.page.width - 100, 80)
+        .fillAndStroke('white', borderColor);
+  
+      // Company Logo/Name box
       doc
-        .moveDown()
-        .moveTo(50, doc.y)
-        .lineTo(doc.page.width - 50, doc.y)
-        .stroke()
-        .moveDown();
-
+        .rect(70, 60, 150, 60)
+        .fillAndStroke(primaryColor);
+      
       doc
+        .font('Helvetica-Bold')
+        .fontSize(16)
+        .fillColor('white')
+        .text('EcoBuy', 70, 80, { width: 150, align: 'center' });
+  
+      // Invoice Title
+      doc
+        .font('Helvetica-Bold')
+        .fontSize(24)
+        .fillColor(primaryColor)
+        .text('INVOICE', doc.page.width - 200, 65, { align: 'right' });
+      
+      doc
+        .font('Helvetica')
         .fontSize(12)
-        .text(`Total Amount: ₹${Number(order.totalPrice).toFixed(2)}`, {
-          align: "right",
-        })
-        .text(`Payment Method: ${order.paymentMethod || "N/A"}`, {
-          align: "right",
-        });
-
+        .fillColor(lightTextColor)
+        .text(`Invoice #${orderId}`, doc.page.width - 200, 95, { align: 'right' });
+  
+      // Calculate dates
+      const createdAt = order.createdAt ? new Date(order.createdAt) : new Date();
+      const dueDate = new Date(createdAt.getTime() + 30 * 24 * 60 * 60 * 1000);
+      const invoiceDate = createdAt.toLocaleDateString();
+      const invoiceDueDate = dueDate.toLocaleDateString();
+  
+      // Customer and Company Information Grid
+      const sectionY = 150;
+      const sectionWidth = (doc.page.width - 120) / 2;
+  
+      // Customer Details
+      let customerInfo = '';
+      if (order.userId) {
+        customerInfo += `Name: ${order.userId.name || 'N/A'}\n`;
+        customerInfo += `Email: ${order.userId.email || 'N/A'}\n`;
+        customerInfo += `Phone: ${order.userId.mobile || 'N/A'}`;
+      } else {
+        customerInfo = 'Customer information not available';
+      }
+      drawSection('Customer Details', customerInfo, 50, sectionY, sectionWidth);
+  
+      // Company Details
+      let companyInfo = '';
+      companyInfo += 'EcoBuy\n';
+      companyInfo += 'Address: 123 Eco Street, Green City\n';
+      companyInfo += 'Email: EcoBuy@company.com\n';
+      companyInfo += 'Phone: +91 98765 43210\n';
+      companyInfo += 'GST: 29AADCB2230M1ZT';
+      drawSection('Company Details', companyInfo, 50 + sectionWidth + 20, sectionY, sectionWidth);
+  
+      // Shipping and Invoice Details
+      const sectionY2 = sectionY + 140;
+      
+      // Shipping Address
+      let shippingInfo = '';
+      if (order.deliveryAddress && order.deliveryAddress.length > 0) {
+        const address = order.deliveryAddress[0];
+        shippingInfo += `Type: ${address.addressType || 'N/A'}\n`;
+        shippingInfo += `${address.city || 'N/A'}, ${address.state || 'N/A'}\n`;
+        shippingInfo += `Pincode: ${address.pincode || 'N/A'}\n`;
+        shippingInfo += `Landmark: ${address.landMark || 'N/A'}`;
+      } else {
+        shippingInfo = 'Shipping information not available';
+      }
+      drawSection('Shipping Address', shippingInfo, 50, sectionY2, sectionWidth);
+  
+      // Invoice Details
+      let invoiceInfo = '';
+      invoiceInfo += `Invoice Date: ${invoiceDate}\n`;
+      invoiceInfo += `Due Date: ${invoiceDueDate}\n`;
+      invoiceInfo += `Payment Method: ${order.paymentMethod || 'N/A'}`;
+      drawSection('Invoice Details', invoiceInfo, 50 + sectionWidth + 20, sectionY2, sectionWidth);
+  
+      // Products Table
+      const tableTop = sectionY2 + 140;
+      
+      // Table Header Background
+      doc
+        .rect(50, tableTop, doc.page.width - 100, 30)
+        .fill(primaryColor);
+      
+      // Table Headers
+      const columns = [
+        { header: 'Product', width: 0.35 },
+        { header: 'Quantity', width: 0.15 },
+        { header: 'Price', width: 0.15 },
+        { header: 'Total', width: 0.15 },
+        { header: 'Status', width: 0.20 }
+      ];
+      
+      let xPosition = 60;
+      columns.forEach(column => {
+        const columnWidth = (doc.page.width - 120) * column.width;
+        doc
+          .font('Helvetica-Bold')
+          .fontSize(12)
+          .fillColor('white')
+          .text(column.header, xPosition, tableTop + 10);
+        xPosition += columnWidth;
+      });
+  
+      // Table Content
+      let yPosition = tableTop + 40;
+      let rowColor = false; // For alternating row colors
+      
+      order.orderedItem.forEach((item, index) => {
+        // Row background for alternating colors
+        if (rowColor) {
+          doc
+            .rect(50, yPosition - 10, doc.page.width - 100, 30)
+            .fill('#f8f9fa');
+        }
+        rowColor = !rowColor;
+  
+        // Item content
+        let xPos = 60;
+        const productName = item.product?.productName || 'Product Unavailable';
+        const quantity = item.quantity.toString();
+        const price = `₹${Number(item.price).toFixed(2)}`;
+        const total = `₹${(item.quantity * Number(item.price)).toFixed(2)}`;
+        const status = item.orderStatus || 'N/A';
+  
+        // Print row data
+        doc.font('Helvetica').fontSize(10).fillColor(textColor);
+        
+        // Product name
+        doc.text(productName, xPos, yPosition);
+        xPos += (doc.page.width - 120) * 0.35;
+        
+        // Quantity
+        doc.text(quantity, xPos, yPosition);
+        xPos += (doc.page.width - 120) * 0.15;
+        
+        // Price
+        doc.text(price, xPos, yPosition);
+        xPos += (doc.page.width - 120) * 0.15;
+        
+        // Total
+        doc.text(total, xPos, yPosition);
+        xPos += (doc.page.width - 120) * 0.15;
+        
+        // Status - with styled "tag"
+        let statusColor;
+        switch(status.toLowerCase()) {
+          case 'delivered': 
+            statusColor = '#38b000'; break;
+          case 'shipped': 
+            statusColor = '#ff9e00'; break;
+          default: 
+            statusColor = '#4cc9f0'; break;
+        }
+        
+        // Draw status tag background
+        doc
+          .roundedRect(xPos, yPosition - 5, 80, 20, 10)
+          .fill(statusColor);
+        
+        // Status text
+        doc
+          .font('Helvetica-Bold')
+          .fontSize(10)
+          .fillColor('white')
+          .text(status, xPos + 10, yPosition);
+        
+        yPosition += 30;
+      });
+  
+      // Summary Section
+      const summaryY = yPosition + 20;
+      const summaryWidth = 250;
+      const summaryX = doc.page.width - 50 - summaryWidth;
+      
+      // Summary box
+      doc
+        .rect(summaryX, summaryY, summaryWidth, 90)
+        .fillAndStroke('white', borderColor);
+      
+      // Summary rows
+      doc.font('Helvetica').fontSize(12).fillColor(textColor);
+      
+      // Subtotal
+      doc.text('Subtotal:', summaryX + 20, summaryY + 15);
+      doc.text(`₹${Number(order.finalAmount).toFixed(2)}`, summaryX + summaryWidth - 70, summaryY + 15, { align: 'right' });
+      
+      // Draw divider
+      doc
+        .moveTo(summaryX + 20, summaryY + 35)
+        .lineTo(summaryX + summaryWidth - 20, summaryY + 35)
+        .strokeColor(borderColor)
+        .stroke();
+      
+      // Tax
+      doc.text('Tax (Included):', summaryX + 20, summaryY + 45);
+      doc.text('₹0.00', summaryX + summaryWidth - 70, summaryY + 45, { align: 'right' });
+      
+      // Shipping
+      doc.text('Shipping:', summaryX + 20, summaryY + 65);
+      doc.text('₹0.00', summaryX + summaryWidth - 70, summaryY + 65, { align: 'right' });
+  
+      // Final total background
+      doc
+        .rect(summaryX, summaryY + 90, summaryWidth, 40)
+        .fill(primaryColor);
+      
+      // Final total
+      doc
+        .font('Helvetica-Bold')
+        .fontSize(14)
+        .fillColor('white')
+        .text('Total:', summaryX + 20, summaryY + 105);
+        
+      doc
+        .font('Helvetica-Bold')
+        .fontSize(14)
+        .fillColor('white')
+        .text(`₹${Number(order.finalAmount).toFixed(2)}`, summaryX + summaryWidth - 70, summaryY + 105, { align: 'right' });
+      
+      // Thank you message
+      doc
+        .font('Helvetica-Bold')
+        .fontSize(16)
+        .fillColor(primaryColor)
+        .text('Thank you for your business!', 50, summaryY + 150, { align: 'center' });
+      
+      // Footer
+      const footerY = doc.page.height - 100;
+      doc
+        .moveTo(50, footerY)
+        .lineTo(doc.page.width - 50, footerY)
+        .strokeColor(borderColor)
+        .stroke();
+      
+      doc
+        .font('Helvetica')
+        .fontSize(10)
+        .fillColor(lightTextColor)
+        .text('This is a computer-generated invoice and does not require a signature.', 50, footerY + 20, { align: 'center' })
+        .text('For any questions regarding this invoice, please contact our support team.', 50, footerY + 40, { align: 'center' });
+  
       // Finalize the PDF
       doc.end();
     } catch (error) {
