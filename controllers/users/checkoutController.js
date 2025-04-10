@@ -433,6 +433,7 @@ const placeOrder = async (req, res) => {
             couponCode: couponUsed ? couponUsed.couponCode : null,
             couponApplied:couponUsed ? true :false,
             couponDiscount: discountAmount,
+            paymentStatus:'paid'
         });
         
 

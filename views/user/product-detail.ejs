@@ -679,7 +679,9 @@
                     icon: "success",
                     timer: 1500,
                     showConfirmButton: false
-                });
+                }).then(()=>{
+                    location.reload()
+                })
 
             } else {
                 Swal.fire({

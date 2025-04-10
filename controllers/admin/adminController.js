@@ -65,7 +65,7 @@ const loadDashboard = async (req, res) => {
   try {
       console.log("Starting dashboard data fetch...");
 
-      // Get time range filter from query params (default to yearly)
+      
       const timeRange = req.query.timeRange || 'yearly';
       
       // Set date filter based on time range
@@ -99,7 +99,7 @@ const loadDashboard = async (req, res) => {
           };
       }
 
-      // 1. Calculate total revenue and profit
+      
       const totalRevenueData = await Order.aggregate([
           { $unwind: "$orderedItem" },
           { $match: { "orderedItem.orderStatus": "Delivered" } },
@@ -109,7 +109,7 @@ const loadDashboard = async (req, res) => {
                   totalRevenue: { $sum: "$finalAmount" },
                   totalProfit: { $sum: { $multiply: [
                       "$finalAmount", 
-                      0.2 // Assuming 20% profit margin for simplicity
+                      0.2 
                   ]}}
               }
           }
@@ -160,7 +160,7 @@ const loadDashboard = async (req, res) => {
               { $sort: { "_id.day": 1 } }
           ];
           
-          // Generate array of days in current month
+         
           const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
           salesDataLabels = Array.from({ length: daysInMonth }, (_, i) => (i + 1).toString());
       } else if (timeRange === 'weekly') {

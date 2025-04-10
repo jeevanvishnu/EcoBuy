@@ -259,7 +259,8 @@ export const exportSalesPDF = async (req, res) => {
 
         // Create table with improved styling
         const tableTop = doc.y;
-        const tableHeaders = ['Date', 'Order ID', 'Amount', 'Discount', 'Coupon', 'Final Amount'];
+        // Added 'Status' to the table headers
+        const tableHeaders = ['Date', 'Order ID', 'Amount', 'Discount', 'Coupon', 'Status', 'Final Amount'];
         const columnWidth = pageWidth / tableHeaders.length;
 
         // Draw table header with gradient
@@ -330,12 +331,14 @@ export const exportSalesPDF = async (req, res) => {
             // Get order ID safely
             const orderId = order.orderId || (order._id ? order._id.toString().slice(-8) : 'N/A');
             
+            // Added status to the row data
             const rowData = [
                 new Date(order.date).toLocaleDateString(),
                 orderId,
                 formatCurrency(order.totalPrice || 0),
                 formatCurrency(order.discount || 0),
                 order.couponApplied ? 'Coupon Applied' : 'No Coupon',
+                order.orderedItem.map(item => item.orderStatus || 'Processing'), // Added status with default value
                 formatCurrency(order.finalAmount || 0)
             ];
 
@@ -478,13 +481,14 @@ export const exportSalesExcel = async (req, res) => {
       const workbook = new exceljs.Workbook();
       const worksheet = workbook.addWorksheet('Sales Report');
       
-      // Style the headers
+      // Style the headers - Added status column
       worksheet.columns = [
         { header: 'Date', key: 'date', width: 15 },
         { header: 'Order ID', key: 'orderId', width: 20 },
         { header: 'Amount', key: 'amount', width: 15 },
         { header: 'Discount', key: 'discount', width: 15 },
         { header: 'Coupon Used', key: 'couponCode', width: 15 },
+        { header: 'Status', key: 'status', width: 15 }, // Added status column
         { header: 'Final Amount', key: 'finalAmount', width: 15 },
       ];
       
@@ -501,10 +505,11 @@ export const exportSalesExcel = async (req, res) => {
         worksheet.addRow({
           date: new Date(order.date).toLocaleDateString(),
           orderId: order.orderId || (order._id ? order._id.toString() : 'N/A'),
-          amount: order.totalPrice || 0, // Corrected from originalPrice
-          discount: order.discount || 0, // Corrected from couponDiscount
-          couponCode: order.couponApplied ? 'Coupon Applied' : 'No Coupon', // Consistent with PDF export
-          finalAmount: order.finalAmount || 0, // Corrected calculation
+          amount: order.totalPrice || 0,
+          discount: order.discount || 0,
+          couponCode: order.couponApplied ? 'Coupon Applied' : 'No Coupon',
+          status: order.orderedItem.map(item => item.orderStatus || 'Processing'), 
+          finalAmount: order.finalAmount || 0,
         });
       });
       
@@ -512,9 +517,16 @@ export const exportSalesExcel = async (req, res) => {
       worksheet.addRow([]); // Empty row
       worksheet.addRow(['Summary']);
       worksheet.addRow(['Total Orders', orders.length]);
-      worksheet.addRow(['Total Sales', orders.reduce((acc, order) => acc + (order.totalPrice || 0), 0)]); // Corrected property name
-      worksheet.addRow(['Total Discounts', orders.reduce((acc, order) => acc + (order.discount || 0), 0)]); // Corrected property name
-      worksheet.addRow(['Net Revenue', orders.reduce((acc, order) => acc + (order.finalAmount || 0), 0)]); // Added net revenue
+      worksheet.addRow(['Total Sales', orders.reduce((acc, order) => acc + (order.totalPrice || 0), 0)]);
+      worksheet.addRow(['Total Discounts', orders.reduce((acc, order) => acc + (order.discount || 0), 0)]);
+      worksheet.addRow([
+        'Delivered Products Total',
+        orders.reduce((acc, order) => {
+          return acc + order.orderedItem
+            .filter(item => item.orderStatus === 'Delivered')
+            .reduce((sum, item) => sum + (item.price || 0), 0);
+        }, 0)
+      ]);
       
       // Add date range information
       worksheet.addRow([]);
