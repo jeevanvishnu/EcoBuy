@@ -10,6 +10,7 @@ import productController from "../../controllers/admin/productControll.js";
 import bannerController from "../../controllers/admin/bannerController.js"
 import orderController from "../../controllers/admin/orderController.js";
 import * as saleController from '../../controllers/admin/salesController.js'
+import walletController from "../../controllers/admin/walletController.js";
 
 import multer from "multer";
 import storage from "../../helpers/upload.js";
@@ -94,6 +95,12 @@ router.get('/saleReport', adminAuth, saleController.salesreport);
 router.post('/generate-sales-report',adminAuth,saleController.generateSalesReport)
 router.post('/export-sales-pdf',adminAuth,saleController.exportSalesPDF)
 router.post('/export-sales-excel',adminAuth,saleController.exportSalesExcel)
+
+// walletmanagment
+router.get('/wallet',adminAuth,walletController.getAllWallet)
+router.get('/transactions',adminAuth,walletController.getWalletTransaction)
+router.get('/transactions/:transactionId',adminAuth,walletController.getTransactionById)
+router.get('/wallet/transactions/:walletId',adminAuth,walletController.getWalletTransactionsByWalletId)
 
 
 export default router;
