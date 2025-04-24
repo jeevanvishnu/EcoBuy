@@ -59,9 +59,13 @@ const loadHome = async (req, res) => {
       const cart = await Cart.findOne({ user: user._id }).populate('items.productId'); 
       let cartItems = [];
 
-      if (cart) {
-        cartItems = cart.items.map(item => item.productId._id.toString()); 
-        cartCount = cart.items.length
+      if (user) {
+        const cart = await Cart.findOne({ userId: user });
+            
+        if (cart && cart.items) {
+          cartCount = cart.items.length;
+          console.log(cartCount)
+        }
       }
 
       const userData = await User.findOne({_id:user});
@@ -85,8 +89,7 @@ const loadHome = async (req, res) => {
       return res.render("user/home", {
         products: productData,
         banner: findBanner || [],
-        wishlistCount:0,
-        cartCount:0
+       
       });
     }
   } catch (error) {
