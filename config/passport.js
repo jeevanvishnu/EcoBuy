@@ -8,7 +8,7 @@ import { Strategy as GoogleStrategy } from 'passport-google-oauth20';
 passport.use(new GoogleStrategy({
     clientID: process.env.GOOGLE_CLIENT_ID,
     clientSecret: process.env.GOOGLE_CLIENT_SECERT,
-    callbackURL: 'http://localhost:4001/auth/google/callback'
+    callbackURL: 'https://ecobuy-pz4m.onrender.com/auth/google/callback'
 },
     async function (accessToken, refreshToken, profile, done) {
         try {
