@@ -1,14 +1,43 @@
 <%- include('../partials/admin/header.ejs') %>
 
 <head>
-  <link href="
-https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css
-" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css" rel="stylesheet">
 
   <style>
     .error-message {
       color: red;
       display: none;
+    }
+    
+    .cropper-container {
+      max-width: 100%;
+    }
+    
+    .image-preview-container {
+      position: relative;
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    
+    .preview-wrapper {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    
+    .image-preview {
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+    }
+    
+    .cropped-preview {
+      max-width: 100%;
+      max-height: 300px;
+      object-fit: contain;
+      border: 1px solid #ddd;
+      margin-top: 0.5rem;
     }
   </style>
 </head>
@@ -29,18 +58,17 @@ https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css
       </div>
 
       <div class="mb-4">
-        <label for="product_name" class="block text-gray-700 font-medium">Brand Name</label>
-        <input type="text" name="brand" value="<%=product.brand%>" id="product_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200" />
-        <span id="productName-error" class="error-message"></span>
+        <label for="brand_name" class="block text-gray-700 font-medium">Brand Name</label>
+        <input type="text" name="brand" value="<%=product.brand%>" id="brand_name" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200" />
+        <span id="brand-error" class="error-message"></span>
       </div>
-
 
       <!-- Description -->
       <div class="mb-4">
         <label class="block text-gray-700 font-medium">Full Description</label>
         <textarea name="description" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring focus:ring-blue-200" rows="4"><%= product.description %></textarea>
         <span id="description-error" class="error-message"></span>
-    </div>
+      </div>
     
       <!-- Pricing & Quantity -->
       <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -79,238 +107,229 @@ https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css
                 </option>
             <% } %>
         </select>
-    </div>
+      </div>
     
       <!-- Image Upload -->
       <div class="mb-6">
-        <h4 class="text-lg font-medium text-gray-800 mb-4">Choose Images</h4>
-        <div id="addedImagesContainer" class="flex flex-wrap gap-4">
+        <h4 class="text-lg font-medium text-gray-800 mb-4">Product Images</h4>
+        <div id="addedImagesContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <% let images = product.productImage ? product.productImage : []; %>
           <% for (let i = 0; i < images.length; i++) { %>
-          <div class="flex flex-col items-center">
-            <!-- Original Image Preview -->
-            <img id="imgView<%= i %>" src="/uploads/re-image/<%= images[i] %>" class="w-20 h-20 rounded-md border border-gray-300" />
-      
-            <!-- Cropped Image Preview -->
-            <img id="croppedImg<%= i %>" class="w-20 h-20 rounded-md border border-gray-300 mt-2 hidden" />
+          <div class="flex flex-col border rounded-lg p-4 bg-gray-50">
+            <div class="preview-wrapper">
+              <!-- Original Image Preview -->
+              <img id="imgView<%= i %>" src="/uploads/re-image/<%= images[i] %>" class="image-preview" />
+              
+              <!-- Cropped Image Preview (initially hidden) -->
+              <img id="croppedImg<%= i %>" class="cropped-preview hidden" />
+            </div>
       
             <!-- File Input -->
             <input class="imageName mt-2 px-4 py-2 border border-gray-300 rounded-lg cursor-pointer text-gray-700" 
-            type="file" name="images" id="input<%= i %>" 
-            accept="image/png, image/jpeg, image/jpg" 
-            onchange="viewImage(event, <%= i %>)" />
+              type="file" name="images" id="input<%= i %>" 
+              accept="image/png, image/jpeg, image/jpg" 
+              onchange="viewImage(event, <%= i %>)" />
      
-            <!-- "Save" Button for Cropping -->
-            <button type="button" id="saveButton<%= i %>" class="bg-green-500 text-white px-3 py-2 mt-2 hidden">
-              Save
-            </button>
+            <div class="flex gap-2 mt-3">
+              <!-- Crop Button -->
+              <button type="button" id="cropButton<%= i %>" class="bg-blue-500 text-white px-3 py-2 rounded hidden">
+                Crop
+              </button>
+              
+              <!-- Save Button for Cropping -->
+              <button type="button" id="saveButton<%= i %>" class="bg-green-500 text-white px-3 py-2 rounded hidden">
+                Save
+              </button>
+              
+              <!-- Cancel Button for Cropping -->
+              <button type="button" id="cancelButton<%= i %>" class="bg-gray-500 text-white px-3 py-2 rounded hidden">
+                Cancel
+              </button>
       
-            <!-- Delete Button -->
-            <button type="button" class="delete-btn bg-red-500 text-white px-3 py-2 mt-2" data-image="<%= images[i] %>" data-product="<%= product._id %>">
-              Delete
-            </button>
+              <!-- Delete Button -->
+              <button type="button" class="delete-btn bg-red-500 text-white px-3 py-2 rounded" 
+                data-image="<%= images[i] %>" data-product="<%= product._id %>">
+                Delete
+              </button>
+            </div>
           </div>
           <% } %>
         </div>
       </div>
-      
-
 
       <!-- Submit Button -->
-      <button onclick="validateAndSubmit()" type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">
-        Update
+      <button type="submit" class="w-full bg-blue-500 text-white py-2 px-4 rounded-lg hover:bg-blue-600 transition">
+        Update Product
       </button>
     </form>
   </div>
 </section>
+
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+
 <script>
-  function viewImage1(event) {
-    document.getElementById('imgView1').src = URL.createObjectURL(event.target.files[0])
-  }
-
-
-  function viewImage2(event) {
-    document.getElementById('imgView2').src = URL.createObjectURL(event.target.files[0])
-  }
-
-
-  function viewImage3(event) {
-    document.getElementById('imgView3').src = URL.createObjectURL(event.target.files[0])
-  }
-
-
-  function viewImage4(event) {
-    document.getElementById('imgView4').src = URL.createObjectURL(event.target.files[0])
-  }
-
-
-
+  // Global object to store cropper instances
+  let croppers = {};
+  
   function viewImage(event, index) {
-    let input = event.target;
-    let reader = new FileReader();
-
+    const input = event.target;
+    const file = input.files[0];
+    
+    if (!file) return;
+    
+    const reader = new FileReader();
+    
     reader.onload = function() {
-      let image = document.getElementById('imgView' + index);
-      let saveButton = document.getElementById('saveButton' + index);
-
-
-      if (!image || !saveButton) {
-        console.error(`Error: Missing image elements for index ${index}`);
-        return;
+      const imgView = document.getElementById('imgView' + index);
+      const croppedImg = document.getElementById('croppedImg' + index);
+      const cropButton = document.getElementById('cropButton' + index);
+      const saveButton = document.getElementById('saveButton' + index);
+      const cancelButton = document.getElementById('cancelButton' + index);
+      
+      // Reset any existing cropper
+      if (croppers[index]) {
+        croppers[index].destroy();
+        croppers[index] = null;
       }
-
-
-      image.src = reader.result;
-      saveButton.classList.remove("hidden");
-
-
-      if (image.cropper) {
-        image.cropper.destroy();
-      }
-
-
-      let cropper = new Cropper(image, {
-        aspectRatio: 1,
-        viewMode: 1,
-        guides: true,
-        background: false,
-        autoCropArea: 1,
-        zoomable: true
-      });
-
-
-      saveButton.onclick = async function() {
-        let croppedCanvas = cropper.getCroppedCanvas({
-          width: 400,
-          height: 400
+      
+      // Set the image source and display crop button
+      imgView.src = reader.result;
+      imgView.style.display = 'block';
+      croppedImg.classList.add('hidden');
+      cropButton.classList.remove('hidden');
+      saveButton.classList.add('hidden');
+      cancelButton.classList.add('hidden');
+      
+      // Click handler for crop button
+      cropButton.onclick = function() {
+        // Initialize cropper
+        croppers[index] = new Cropper(imgView, {
+          viewMode: 2,
+          aspectRatio: NaN, // Free aspect ratio
+          autoCropArea: 1,
+          zoomable: true,
+          scalable: true,
+          movable: true,
+          guides: true,
+          responsive: true,
+          highlight: true,
+          cropBoxResizable: true,
+          dragMode: 'move'
         });
-
-
-        image.src = croppedCanvas.toDataURL('image/jpeg', 1.0);
-        cropper.destroy();
-
-        let timestamp = new Date().getTime();
-        let fileName = `cropped-img-${timestamp}-${index}.png`;
-
-
-        await croppedCanvas.toBlob(blob => {
-          let imgFile = new File([blob], fileName, {
-            type: "image/png"
-          });
-
-          let inputFile = document.getElementById('input' + index);
-          const fileList = new DataTransfer();
-          fileList.items.add(imgFile);
-          inputFile.files = fileList.files;
+        
+        // Show save and cancel buttons
+        cropButton.classList.add('hidden');
+        saveButton.classList.remove('hidden');
+        cancelButton.classList.remove('hidden');
+      };
+      
+      // Save cropped image
+      saveButton.onclick = function() {
+        if (!croppers[index]) return;
+        
+        // Get cropped canvas at high quality
+        const croppedCanvas = croppers[index].getCroppedCanvas({
+          maxWidth: 4096,
+          maxHeight: 4096,
+          fillColor: '#fff',
+          imageSmoothingEnabled: true,
+          imageSmoothingQuality: 'high'
         });
-
-        saveButton.classList.add("hidden");
+        
+        if (!croppedCanvas) {
+          console.error('Failed to create cropped canvas');
+          return;
+        }
+        
+        // Show cropped preview
+        croppedImg.src = croppedCanvas.toDataURL('image/png', 1.0);
+        croppedImg.classList.remove('hidden');
+        
+        // Clean up and hide cropper
+        croppers[index].destroy();
+        croppers[index] = null;
+        imgView.style.display = 'none';
+        
+        // Create file from canvas
+        croppedCanvas.toBlob(function(blob) {
+          const fileName = `cropped-img-${Date.now()}-${index}.png`;
+          const croppedFile = new File([blob], fileName, { type: 'image/png' });
+          
+          // Replace the file in the input
+          const dataTransfer = new DataTransfer();
+          dataTransfer.items.add(croppedFile);
+          input.files = dataTransfer.files;
+        }, 'image/png', 1.0);
+        
+        // Reset buttons
+        saveButton.classList.add('hidden');
+        cancelButton.classList.add('hidden');
+      };
+      
+      // Cancel cropping
+      cancelButton.onclick = function() {
+        if (croppers[index]) {
+          croppers[index].destroy();
+          croppers[index] = null;
+        }
+        
+        // Show original image
+        imgView.style.display = 'block';
+        croppedImg.classList.add('hidden');
+        
+        // Reset buttons
+        cropButton.classList.remove('hidden');
+        saveButton.classList.add('hidden');
+        cancelButton.classList.add('hidden');
       };
     };
-
-    reader.readAsDataURL(input.files[0]);
+    
+    reader.readAsDataURL(file);
   }
 
-
-
-
-  document.addEventListener("DOMContentLoaded", () => {
-    document.querySelectorAll('.imageNamw').forEach(input => {
-      input.addEventListener("change", handleFileSelect);
-    });
-  });
-
-
-  function handleFileSelect(event) {
-    const addedImagesContainer = document.getElementById("addedImagesContainer");
-
-
-    if (!addedImagesContainer) {
-      console.error("Error: #addedImagesContainer not found in the DOM!");
-      return;
-    }
-
-    addedImagesContainer.innerHTML = "";
-
-    const files = Array.from(event.target.files);
-    files.forEach((file, index) => {
-      const thumbnail = document.createElement("div");
-      thumbnail.classList.add("thumbnail");
-
-      const img = document.createElement("img");
-      img.src = URL.createObjectURL(file);
-      img.alt = "thumbnail";
-      img.style.width = "100px";
-      img.style.height = "100px";
-
-      const removeIcon = document.createElement("span");
-      removeIcon.classList.add("remove-icon");
-      removeIcon.innerHTML = "&times;";
-      removeIcon.addEventListener("click", function() {
-        thumbnail.remove();
-      });
-
-      thumbnail.appendChild(img);
-      thumbnail.appendChild(removeIcon);
-      addedImagesContainer.appendChild(thumbnail);
-    });
-  }
-
-
+  // Form validation
   function validateForm() {
     let isValid = true;
-
-    // Get input values
-    let regularPrice = document.querySelector('input[name="regularPrice"]');
-    let salePrice = document.querySelector('input[name="salePrice"]');
-    let quantity = document.querySelector('input[name="quantity"]');
-
-    // Get error message elements
-    let regularPriceError = document.getElementById('regularPrice-error');
-    let salePriceError = document.getElementById('salePrice-error');
-    let quantityError = document.getElementById('quantity-error');
-
+    const fields = [
+      { name: 'regularPrice', error: 'regularPrice-error', message: 'Regular price cannot be negative!' },
+      { name: 'salePrice', error: 'salePrice-error', message: 'Sale price cannot be negative!' },
+      { name: 'quantity', error: 'quantity-error', message: 'Quantity cannot be negative!' }
+    ];
+    
     // Reset error messages
-    regularPriceError.innerText = "";
-    salePriceError.innerText = "";
-    quantityError.innerText = "";
-
-    // Check for negative values
-    if (regularPrice.value < 0) {
-      regularPriceError.innerText = "Regular price cannot be negative!";
-      regularPriceError.style.display = "block";
-      isValid = false;
-    }
-
-    if (salePrice.value < 0) {
-      salePriceError.innerText = "Sale price cannot be negative!";
-      salePriceError.style.display = "block";
-      isValid = false;
-    }
-
-    if (quantity.value < 0) {
-      quantityError.innerText = "Quantity cannot be negative!";
-      quantityError.style.display = "block";
-      isValid = false;
-    }
-
+    fields.forEach(field => {
+      const errorEl = document.getElementById(field.error);
+      errorEl.innerText = '';
+      errorEl.style.display = 'none';
+    });
+    
+    // Validate fields
+    fields.forEach(field => {
+      const inputEl = document.querySelector(`input[name="${field.name}"]`);
+      const errorEl = document.getElementById(field.error);
+      
+      if (parseFloat(inputEl.value) < 0) {
+        errorEl.innerText = field.message;
+        errorEl.style.display = 'block';
+        isValid = false;
+      }
+    });
+    
     return isValid;
   }
 
-
+  // Delete image
   document.addEventListener("click", function(event) {
     if (event.target.classList.contains("delete-btn")) {
-      let imageName = event.target.getAttribute("data-image");
-      let productId = event.target.getAttribute("data-product");
-
-      deleteStringImage(imageName, productId);
+      const imageName = event.target.getAttribute("data-image");
+      const productId = event.target.getAttribute("data-product");
+      deleteImage(imageName, productId);
     }
   });
 
-  function deleteStringImage(imageName, productId) {
+  function deleteImage(imageName, productId) {
     Swal.fire({
       title: "Are you sure?",
       text: "This image will be permanently deleted!",
