@@ -223,7 +223,7 @@ const getEditProduct = async (req, res) => {
         })
 
     } catch (error) {
-        console.log(error.message, "getEditProduct")
+        console.log(error.message,)
         res.redirect('pageerror')
 
     }
