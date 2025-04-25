@@ -148,7 +148,7 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
 <script>
-document.addEventListener("DOMContentLoaded", function () {
+    document.addEventListener("DOMContentLoaded", function () {
     const inputs = document.querySelectorAll("input");
     const form = document.getElementById("addressForm");
 
@@ -175,19 +175,52 @@ document.addEventListener("DOMContentLoaded", function () {
         input.addEventListener("blur", checkInput);
     });
 
+    
     form.addEventListener("submit", function (event) {
-        event.preventDefault(); // Prevents form submission temporarily
-
-        Swal.fire({
-            title: "Success!",
-            text: "Your address has been saved successfully.",
-            icon: "success",
-            confirmButtonText: "OK"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                form.submit(); // Submits form after confirmation
+        event.preventDefault(); 
+        
+        // Check each required input
+        let isValid = true;
+        inputs.forEach((input) => {
+            if (input.hasAttribute("required") && input.value.trim() === "") {
+                isValid = false;
+                input.classList.add("border-red-500");
+              
+                input.animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-5px)' },
+                    { transform: 'translateX(5px)' },
+                    { transform: 'translateX(0)' }
+                ], {
+                    duration: 200,
+                    iterations: 3
+                });
+            } else {
+                input.classList.remove("border-red-500");
             }
         });
+
+        if (isValid) {
+            
+            Swal.fire({
+                title: "Success!",
+                text: "Your address has been saved successfully.",
+                icon: "success",
+                confirmButtonText: "OK"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit(); 
+                }
+            });
+        } else {
+            // Show error message
+            Swal.fire({
+                title: "Error!",
+                text: "Please fill in all required fields properly.",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+        }
     });
 });
-</script>  
+</script>
