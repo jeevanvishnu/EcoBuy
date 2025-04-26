@@ -68,7 +68,7 @@ EcoBuy/
 
 1. Clone the repository
    ```bash
-   git clone https://github.com/your-username/ecobuy.git
+   https://github.com/jeevanvishnu/EcoBuy.git
    cd ecobuy
    ```
 2. Install dependencies
