@@ -1,0 +1,21 @@
+<%- include("../partials/users/header.ejs") %>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enter New Email</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-200 to-purple-300">
+    <form action="/update-email" method="post" class="flex items-center justify-center h-full w-full">
+        <div class="bg-white p-8 rounded-xl shadow-lg w-96 text-center">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">Enter Your New Email</h2>
+            <input name="email" type="email" id="email" placeholder="Enter your email" class="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 mb-4">
+            <button id="submit-btn" class="w-full py-3 text-white font-semibold rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 transition-all shadow-md">
+                Submit
+            </button>
+        </div>
+    </form>
+</body>
+</html>

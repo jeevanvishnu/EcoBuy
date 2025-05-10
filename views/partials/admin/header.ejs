@@ -5,15 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <script src="https://cdn.tailwindcss.com"></script>
     <title>EcoBuy Admin Dashboard</title>
+    <link rel="icon" href="assets/Logo-img.png">
+    <script src="https://unpkg.com/@heroicons/vue@2.0.13/dist/index.umd.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
 </head>
-<body class="bg-gray-100">
+<body class="bg-gray-100 font-[Roboto]">
 
     <!-- Sidebar -->
     <div class="flex">
         <!-- Mobile Overlay -->
         <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden md:hidden"></div>
 
-        <aside id="sidebar" class="w-64 bg-gray-800 text-white min-h-screen fixed md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
+        <aside id="sidebar" class="w-64 bg-black text-white min-h-screen fixed md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300 ease-in-out">
             <!-- Sidebar Header -->
             <div class="p-4 flex justify-between items-center border-b border-gray-700">
                 <span class="text-xl font-bold">EcoBuy Admin</span>
@@ -23,18 +27,44 @@
             <!-- Navigation Menu -->
             <nav class="mt-4">
                 <ul>
-                    <li class="p-3 hover:bg-gray-700"><a href="/admin">Dashboard</a></li>
-                    <li class="p-3 hover:bg-gray-700"><a href="/admin/Users">Customers</a></li>
-                    <li class="p-3 hover:bg-gray-700"><a href="/admin/category">Categories</a></li>
-                    <li class="p-3 hover:bg-gray-700"><a href="#">Brands</a></li>
-                    <li class="p-3 hover:bg-gray-700"><a href="#">Add Products</a></li>
-                    <li class="p-3 hover:bg-gray-700"><a href="#">Products</a></li>
-                    <li class="p-3 hover:bg-gray-700"><a href="#">Coupons</a></li>
-                    <li class="p-3 hover:bg-gray-700"><a href="#">Banners</a></li>
-                    <li class="p-3 hover:bg-gray-700"><a href="#">Orders</a></li>
+                    <li class="p-3 hover:bg-gray-700">
+                        <i class="fas fa-chart-line"></i>
+                        <a href="/admin">Dashboard</a></li>
+                    <li class="p-3 hover:bg-gray-700">
+                        <i class="fas fa-users"></i>
+                        <a href="/admin/Users">Customers</a></li>
+                    <li class="p-3 hover:bg-gray-700">
+                        <i class="fas fa-th-list"></i>
+                        <a href="/admin/category">Categories</a></li>
+                    <!-- <li class="p-3 hover:bg-gray-700"><a href="#">Brands</a></li> -->
+                    <li class="p-3 hover:bg-gray-700">
+                        <i class="fas fa-plus-circle"></i>
+                        <a href="/admin/addProducts">Add Products</a></li>
+                    <li class="p-3 hover:bg-gray-700">
+                        <i class="fas fa-box"></i>
+                        <a href="/admin/products">Products</a></li>
+                    <li class="p-3 hover:bg-gray-700">
+                        <i class="fas fa-users"></i>
+                        <a href="/admin/coupons">Coupons</a></li>
+                    <li class="p-3 hover:bg-gray-700">
+                        <i class="fas fa-ticket-alt"></i>
+                        <a href="/admin/banner">Banners</a></li>
+                    <li class="p-3 hover:bg-gray-700">
+                        <i class="fas fa-image"></i>
+                        <a href="/admin/orderManagment">Orders</a></li>
+                    <li class="p-3 hover:bg-gray-700">
+                        <i class="fas fa-file-invoice"></i>
+                        <a href="/admin/saleReport">SaleReport</a></li>
+                    <li class="p-3 hover:bg-gray-700">
+                        <i class="fas fa-wallet"></i>
+                        <a href="/admin/wallet">wallet</a></li>
                     
                 </ul>
             </nav>
         </aside>
+
+        
+        
+   
 
     

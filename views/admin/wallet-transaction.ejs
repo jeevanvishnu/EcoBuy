@@ -1,0 +1,49 @@
+<%- include('../partials/admin/header.ejs') %>
+
+<div class="content-wrapper px-6 py-8">
+  <div class="mb-6">
+    <h1 class="text-2xl font-bold text-gray-800">Wallet Transactions</h1>
+  </div>
+
+  <div class="bg-white shadow-md rounded-lg overflow-hidden">
+    <div class="p-4 overflow-x-auto">
+      <table class="min-w-full divide-y divide-gray-200">
+        <thead class="bg-gray-50 text-left text-xs font-semibold text-gray-600 uppercase">
+          <tr>
+            <th class="px-4 py-3">Date</th>
+            <th class="px-4 py-3">Order ID</th>
+            <th class="px-4 py-3">Type</th>
+            <th class="px-4 py-3">Amount</th>
+            <th class="px-4 py-3">Status</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100 text-sm text-gray-700">
+          <% if (transactions && transactions.length > 0) { %>
+            <% transactions.forEach(tx => { %>
+              <tr class="hover:bg-gray-50">
+                <td class="px-4 py-2"><%= new Date(tx.date).toLocaleString() %></td>
+                <td class="px-4 py-2"><%= tx.orderId?.["_id"] || tx.razorpayOrderId || '—' %></td>
+                <td class="px-4 py-2 capitalize"><%= tx.type %></td>
+                <td class="px-4 py-2 text-green-600 font-medium">₹<%= tx.amount.toFixed(2) %></td>
+                <td class="px-4 py-2">
+                  <span class="px-2 py-1 rounded text-xs font-medium 
+                    <%= tx.status === 'completed' 
+                      ? 'bg-green-100 text-green-700' 
+                      : tx.status === 'pending' 
+                      ? 'bg-yellow-100 text-yellow-700' 
+                      : 'bg-red-100 text-red-700' %>">
+                    <%= tx.status %>
+                  </span>
+                </td>
+              </tr>
+            <% }) %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="px-4 py-4 text-center text-gray-500">No transactions found</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>

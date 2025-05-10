@@ -1,0 +1,270 @@
+<%- include('../partials/admin/header.ejs') %>
+<head>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.css"
+    />
+</head>
+  
+<div class="container mx-auto p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <h2 class="text-2xl font-bold text-gray-800">Products</h2>
+  </div>
+
+  <!-- Search Bar -->
+  <div class="flex justify-center mb-6">
+    <form action="" method="get" class="w-full max-w-lg">
+      <div class="flex items-center border border-gray-300 rounded-full px-4 py-2">
+        <input
+          type="text"
+          class="w-full bg-transparent outline-none px-2"
+          placeholder="Search products or brands"
+          name="search"
+        />
+        <button
+          class="bg-blue-500 text-white px-4 py-1 rounded-full hover:bg-blue-600 transition"
+        >
+          Search
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <!-- Table -->
+  <div class="overflow-x-auto">
+    <table class="w-full table-auto bg-white border border-gray-300 rounded-lg shadow-md">
+      <thead class="bg-gray-200 text-gray-700">
+        <tr>
+          <th class="px-6 py-3 text-left">Product Name</th>
+          <th class="px-6 py-3 text-left">Brand</th>
+          <th class="px-6 py-3 text-left">Category</th>
+          <th class="px-6 py-3 text-left">Sale Price</th>
+          <th class="px-6 py-3 text-left">Offer Price</th>
+          <th class="px-6 py-3 text-left">Quantity</th>
+          <th class="px-6 py-3 text-left">Offer</th>
+          <th class="px-6 py-3 text-left">Action</th>
+          <th class="px-6 py-3 text-left">Edit</th>
+          <th class="px-6 py-3 text-left">Delete</th>
+        </tr>
+      </thead>
+      <tbody class="text-gray-600">
+        <% for (let i = data.length - 1; i >= 0; i--) { %>
+        <tr class="border-b border-gray-300">
+          <td class="px-6 py-3"><%= data[i].productName %></td>
+          <td class="px-6 py-3"><%= data[i].brand %></td>
+          <td class="px-6 py-3"><%= data[i].category ? data[i].category.name : 'No category' %></td>
+          <td class="px-6 py-3"><%= data[i].salePrice %></td>
+          <td class="px-6 py-3">
+            <% if (data[i].productOffer) { %>
+              <%= data[i].productOffer %>
+            <% } else { %>
+              0%
+            <% } %>
+          </td>
+          <td class="px-6 py-3"><%= data[i].quantity %></td>
+          <td class="px-6 py-3">
+            <div class="flex space-x-2">
+              <% if (data[i].productOffer === 0) { %>
+                <a onclick="addOffer('<%= data[i]._id %>')" href="#" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">Add Offer</a>
+              <% } else { %>
+                <a onclick="removeOffer('<%= data[i]._id %>')" href="#" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">Remove</a>
+              <% } %>
+            </div>
+          </td>
+          <td class="px-6 py-3">
+            <div class="flex space-x-2">
+              <% if(data[i].isBlocked === false) {%>
+              <a href="#" onclick="blockProduct(event,'<%= data[i]._id %>')" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">Block</a>
+              <% } else { %>
+              <a href="#"  onclick="unblockProduct(event,'<%= data[i]._id %>')"  class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 transition">Unblock</a>
+              <% } %>
+            </div>
+          </td>
+          <td class="px-6 py-3">
+            <a href="/admin/editProduct?id=<%= data[i]._id %>" class="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 transition">Edit</a>
+          </td>
+
+          <td class="px-6 py-3">
+            <button onclick="confirmDelete('<%= data[i]._id %>')" 
+                    class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
+                Delete
+            </button>
+        </td>
+        </tr>
+        <% } %>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Pagination -->
+  <div class="container mt-3 flex justify-center">
+    <nav aria-label="Page navigation">
+      <ul class="flex space-x-2">
+        <% for (let i = 1; i <= totalPages; i++) { %>
+        <li>
+          <% if (i === currentPage) { %>
+            <a href="?page=<%= i %>" class="px-4 py-2 border rounded-md bg-blue-600 text-white">
+              <%= i %>
+            </a>
+          <% } else { %>
+            <a href="?page=<%= i %>" class="px-4 py-2 border rounded-md bg-gray-100 text-gray-700 hover:bg-blue-500 hover:text-white">
+              <%= i %>
+            </a>
+          <% } %>
+        </li>
+        <% } %>
+      </ul>
+    </nav>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10/dist/sweetalert2.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+<script>
+  async function addOffer(productId) {
+    const { value: amount } = await Swal.fire({
+      title: "Offer in percentage",
+      input: 'number',
+      inputLabel: "percentage",
+      inputPlaceholder: '%'
+    });
+
+    if (amount) {
+      $.ajax({
+        url: '/admin/addProduct',
+        method: 'POST',
+        data: {
+          percentage: amount,
+          productId: productId
+        },
+        success: (response) => {
+          if (response.status === true) {
+            Swal.fire('Offer added', 'The offer has been added', 'success').then(() => {
+              location.reload();
+            });
+          } else {
+            Swal.fire('Failed', 'Failed to add offer', 'error');
+          }
+        }
+      });
+    }
+  }
+
+  function removeOffer(productId) {
+    Swal.fire({
+      title: "Remove offer",
+      text: "Are you sure you want to remove this offer?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: 'red',
+      cancelButtonColor: 'd33',
+      confirmButtonText: 'Yes, remove it!',
+      timer: 5000,
+      timerProgressBar: true
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        $.ajax({
+          url: '/admin/removeProductOffer',
+          method: 'POST',
+          data: {
+            productId: productId
+          },
+          success: (response) => {
+            if (response.status === true) {
+              Swal.fire("Removed!", "The offer has been removed", "success");
+              location.reload();
+            } else {
+              Swal.fire('Failed', 'Failed to remove offer', 'error');
+            }
+          }
+        });
+      }
+    });
+  }
+
+
+
+  function blockProduct(event, productId) {
+    event.preventDefault();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You are about to block this product!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Block!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/admin/blockProduct?id=" + productId;
+      }
+    });
+  }
+
+
+  function unblockProduct(event, productId) {
+    event.preventDefault();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You are about to unblock this product!",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Unblock!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href = "/admin/unblockProduct?id=" + productId;
+      }
+    });
+  }
+
+  function confirmDelete(productId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "You won't be able to revert this!",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            fetch(`/admin/deleteProduct?id=${productId}`, {
+                method: "GET"
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    Swal.fire("Deleted!", "Your product has been deleted.", "success")
+                    .then(() => location.reload()); // Refresh the page
+                } else {
+                    Swal.fire("Error!", "Failed to delete the product.", "error");
+                }
+            })
+            .catch(error => {
+                console.error("Error:", error);
+                Swal.fire("Error!", "Something went wrong.", "error");
+            });
+        }
+    });
+}
+
+function confirmDelete(productId) {
+        Swal.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.location.href = `/admin/deleteProduct?id=${productId}`;
+            }
+        });
+    }
+
+</script>

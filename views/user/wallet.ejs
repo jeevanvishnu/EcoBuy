@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Wallet - EcoBuy</title>
+    <link rel="icon" href="assets/Logo.png">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+    <style>
+        /* Improved Typography & General Styles */
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #f7f9fc;
+            color: #1a202c;
+            margin: 0;
+            padding: 0;
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 20px auto;
+            padding: 0 20px;
+        }
+
+        /* Content Section */
+        .content-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            margin-bottom: 1.5rem;
+        }
+
+        /* Wallet Card */
+        .wallet-card {
+            background-color: #fff;
+            border-radius: 16px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            padding: 28px;
+            margin-bottom: 28px;
+        }
+
+        .wallet-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+        }
+
+        .wallet-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a202c;
+            letter-spacing: -0.5px;
+            margin: 0;
+        }
+
+        .wallet-icon {
+            width: 38px;
+            height: 38px;
+            color: #3182ce;
+        }
+
+        .wallet-details {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* Balance Container */
+        .balance-container {
+            background: linear-gradient(135deg, #e6f7ff, #f0f9ff);
+            border-radius: 12px;
+            padding: 28px;
+            text-align: center;
+            border: 1px solid rgba(49, 130, 206, 0.1);
+        }
+
+        .balance-label {
+            font-size: 16px;
+            font-weight: 500;
+            color: #4a5568;
+            margin-bottom: 8px;
+            letter-spacing: 0.3px;
+        }
+
+        .balance-amount {
+            font-size: 42px;
+            font-weight: 700;
+            color: #2b6cb0;
+            margin: 0;
+            letter-spacing: -0.5px;
+        }
+
+        /* Transactions Container */
+        .transactions-container {
+            background-color: #fff;
+            border-radius: 14px;
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+            padding: 28px;
+        }
+
+        .transactions-title {
+            font-size: 22px;
+            font-weight: 600;
+            color: #1a202c;
+            margin-bottom: 24px;
+            letter-spacing: -0.3px;
+        }
+
+        .transaction-item {
+            border-bottom: 1px solid #edf2f7;
+            padding: 18px 0;
+            transition: background-color 0.2s;
+        }
+
+        .transaction-item:hover {
+            background-color: #f9fafb;
+        }
+
+        .transaction-item:last-child {
+            border-bottom: none;
+        }
+
+        .transaction-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .transaction-info {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .transaction-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .refund-icon {
+            background-color: #c6f6d5;
+            color: #38a169;
+        }
+
+        .transaction-details h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2d3748;
+            margin: 0 0 6px 0;
+        }
+
+        .order-id {
+            font-size: 14px;
+            color: #718096;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .transaction-amount {
+            text-align: right;
+        }
+
+        .amount {
+            font-size: 19px;
+            font-weight: 700;
+            color: #2d3748;
+            margin: 0 0 4px 0;
+        }
+
+        .transaction-date {
+            font-size: 14px;
+            color: #718096;
+            margin: 0;
+            font-weight: 500;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 14px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-completed {
+            background-color: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .status-pending {
+            background-color: #fefcbf;
+            color: #975a16;
+        }
+
+        .no-transactions {
+            text-align: center;
+            color: #718096;
+            font-size: 16px;
+            padding: 24px;
+            font-weight: 500;
+        }
+
+        /* Create Wallet */
+        .create-wallet {
+            margin-top: 32px;
+            text-align: center;
+        }
+
+        .create-wallet button {
+            padding: 14px 28px;
+            font-size: 16px;
+            background-color: #3182ce;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            font-weight: 600;
+            letter-spacing: 0.2px;
+        }
+
+        .create-wallet button:hover {
+            background-color: #2b6cb0;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(43, 108, 176, 0.2);
+        }
+
+        .create-wallet button:active {
+            transform: translateY(0);
+        }
+
+        /* Pagination */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.8rem;
+            margin-top: 2rem;
+        }
+
+        .page-link {
+            padding: 0.7rem 1.2rem;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            color: #4a5568;
+            text-decoration: none;
+            font-size: 15px;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+
+        .page-link:hover {
+            background-color: #f7fafc;
+        }
+
+        .page-link.active {
+            background-color: #4f46e5;
+            color: white;
+            border-color: #4f46e5;
+            font-weight: 600;
+        }
+
+        /* Add Money Button */
+        .add-money {
+            display: flex;
+            justify-content: flex-end;
+            margin-top: -20px;
+            margin-bottom: 20px;
+        }
+
+        #add-money-btn {
+            background: linear-gradient(135deg, #3182ce, #2c5282);
+            color: white;
+            font-size: 16px;
+            font-weight: 600;
+            padding: 10px 16px;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            letter-spacing: 0.2px;
+            box-shadow: 0 4px 12px rgba(49, 130, 206, 0.2);
+        }
+
+        #add-money-btn:hover {
+            background: linear-gradient(135deg, #2b6cb0, #2a4365);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(49, 130, 206, 0.3);
+        }
+
+        #add-money-btn:active {
+            transform: translateY(0);
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0 12px;
+            }
+
+            .content-section {
+                padding: 1.5rem;
+            }
+
+            .wallet-title {
+                font-size: 24px;
+            }
+
+            .balance-amount {
+                font-size: 36px;
+            }
+
+            .add-money {
+                margin-top: 0;
+            }
+
+            #add-money-btn {
+                font-size: 14px;
+                padding: 8px 14px;
+            }
+            
+            .transaction-icon {
+                width: 42px;
+                height: 42px;
+            }
+        }
+        
+        /* Page Container */
+        .page-container {
+            flex-grow: 1;
+            padding: 22px;
+            overflow-x: auto;
+        }
+        
+        .main-content {
+            width: 100%;
+        }
+        
+        /* Additional Refinements */
+        .flex {
+            display: flex;
+        }
+        
+        .min-h-screen {
+            min-height: 100vh;
+        }
+    </style>
+</head>
+
+<body>
+    <%- include("../partials/users/header.ejs") %>
+
+    <div class="flex min-h-screen">
+        <%- include("../partials/users/sidebar.ejs") %>
+
+        <div class="page-container">
+            <div id="wallet-section" class="content-section">
+                
+                <div class="wallet-details">
+                    <div class="wallet-header">
+                        <h2 class="wallet-title">My Wallet</h2>
+                        <div class="add-money">
+                            <button id="add-money-btn" onclick="addMoney()">
+                                <i class="fas fa-wallet"></i> Add Money
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <div class="balance-container">
+                        <p class="balance-label">Current Balance</p>
+                        <p class="balance-amount">₹<%= walletBalance.toFixed(2) %></p>
+                    </div>
+
+                    <% if (walletBalance === 0 && (!transactions || transactions.length === 0)) { %>
+                        <div class="create-wallet">
+                            <button id="create-wallet-btn" onclick="createWallet()">Create Wallet</button>
+                        </div>
+                    <% } %>
+                </div>
+
+                <div class="transactions-container">
+                    <h3 class="transactions-title">Recent Transactions</h3>
+                    <% if (transactions && transactions.length > 0) { %>
+                        <% transactions.forEach(function(transaction) { %>
+                            <div class="transaction-item">
+                                <div class="transaction-header">
+                                    <div class="transaction-info">
+                                        <div class="transaction-icon refund-icon">
+                                            <i class="fas fa-exchange-alt"></i>
+                                        </div>
+                                        <div class="transaction-details">
+                                            <h3><%= transaction.transactionsMethod %></h3>
+                                            <p class="order-id">Order ID: <%= transaction.orderId || transaction.razorpayOrderId%></p>
+                                        </div>
+                                    </div>
+                                    <div class="transaction-amount">
+                                        <p class="amount">₹<%= transaction.amount.toFixed(2) %></p>
+                                        <p class="transaction-date"><%= transaction.date.toLocaleDateString() %></p>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    <% } else { %>
+                        <p class="no-transactions">No transactions found</p>
+                    <% } %>
+                </div>
+
+                <% if (totalPages > 1) { %>
+                    <div class="pagination">
+                        <% if (currentPage > 1) { %>
+                            <a href="?page=<%= currentPage - 1 %>" class="page-link">← Previous</a>
+                        <% } %>
+
+                        <% for (let i = 1; i <= totalPages; i++) { %>
+                            <a href="?page=<%= i %>" class="page-link <%= currentPage === i ? 'active' : '' %>">
+                                <%= i %>
+                            </a>
+                        <% } %>
+
+                        <% if (currentPage < totalPages) { %>
+                            <a href="?page=<%= currentPage + 1 %>" class="page-link">Next →</a>
+                        <% } %>
+                    </div>
+                <% } %>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        function addMoney() {
+            // Add money functionality
+            console.log('Add money button clicked');
+        }
+        
+        function createWallet() {
+            // Create wallet functionality
+            console.log('Create wallet button clicked');
+        }
+    </script>
+</body>
+
+</html>
+    <%- include("../partials/users/footer.ejs") %>
+
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+
+    <script>
+        async function addMoney() {
+            const {
+                value: amount
+            } = await Swal.fire({
+                title: 'Enter Amount',
+                input: 'number',
+                inputPlaceholder: 'Enter amount to add',
+                showCancelButton: true,
+                confirmButtonText: 'Add Money',
+                inputValidator: (value) => {
+                    if (!value || value <= 0) {
+                        return 'Please enter a valid amount!';
+                    }
+                }
+            });
+
+            if (!amount) return;
+
+            try {
+                const response = await fetch('/add-money', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: parseFloat(amount)
+                    }),
+                    credentials: 'same-origin',
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to initiate payment.');
+                }
+
+                const options = {
+                    key: '<%= process.env.Razorpay_API %>',
+                    amount: result.order.amount,
+                    currency: 'INR',
+                    name: 'EcoBuy',
+                    description: 'Add Money to Wallet',
+                    order_id: result.order.id,
+                    handler: async function (paymentResponse) {
+                        await verifyPayment(paymentResponse, amount);
+                    },
+                    prefill: {
+                        name: '<%= user?.name %>',
+                        email: '<%= user?.email %>',
+                    },
+                    theme: {
+                        color: '#3399cc'
+                    },
+                };
+
+                const rzp = new Razorpay(options);
+                rzp.open();
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    timer: 3000,
+                    showConfirmButton: true,
+                });
+            }
+        }
+
+        async function verifyPayment(paymentResponse, amount) {
+            try {
+                const response = await fetch('/verify-wallet-payment', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        razorpay_payment_id: paymentResponse.razorpay_payment_id,
+                        razorpay_order_id: paymentResponse.razorpay_order_id,
+                        razorpay_signature: paymentResponse.razorpay_signature,
+                        amount: amount,
+                    }),
+                    credentials: 'same-origin',
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Payment verification failed.');
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Payment Successful!',
+                    text: `₹${amount} added to your wallet!`,
+                    timer: 3000,
+                    showConfirmButton: true,
+                });
+
+                setTimeout(() => {
+                    location.reload();
+                }, 3000);
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    timer: 3000,
+                    showConfirmButton: true,
+                });
+            }
+        }
+
+        async function createWallet() {
+            try {
+                const response = await fetch('/create-wallet', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    credentials: 'same-origin',
+                });
+
+                const result = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(result.message || 'Failed to create wallet.');
+                }
+
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Wallet Created!',
+                    text: 'Your wallet has been created with a balance of ₹0.',
+                    timer: 3000,
+                    showConfirmButton: true,
+                });
+
+
+                location.reload();
+            } catch (error) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: error.message,
+                    timer: 3000,
+                    showConfirmButton: true,
+                });
+            }
+        }
+    </script>
+
+</body>
+
+</html>

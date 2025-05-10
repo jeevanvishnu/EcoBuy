@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Banner Management</title>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
+</head>
+<body class="bg-gray-50 min-h-screen">
+  <%- include('../partials/admin/header.ejs') %>
+  
+  <div class="max-w-6xl mx-auto px-4 py-8" style="width: 100%;">
+    <!-- Header -->
+    <div class="flex justify-between items-center mb-6">
+      <h2 class="text-2xl font-bold text-gray-900">Banners</h2>
+    </div>
+    
+    <!-- Banners Table -->
+    <div class="bg-white shadow rounded-lg overflow-hidden mb-6">
+      <table class="w-full">
+        <thead>
+          <tr class="bg-gray-50 text-left text-gray-700">
+            <th class="px-6 py-3 font-medium">Image</th>
+            <th class="px-6 py-3 font-medium">Title</th>
+            <th class="px-6 py-3 font-medium">Description</th>
+            <th class="px-6 py-3 font-medium">Active</th>
+            <th class="px-6 py-3 font-medium">Delete</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-200">
+          <% if (data.length > 0) { %>
+            <% for(let i = 0; i < data.length; i++){ %>
+              <tr class="hover:bg-gray-50 transition">
+                <td class="px-6 py-4">
+                  <img src="/banners/<%= data[i].image %>" alt="Banner" class="h-12 w-20 object-cover rounded shadow">
+                </td>
+                <td class="px-6 py-4 font-medium text-gray-900"><%= data[i].title %></td>
+                <td class="px-6 py-4 text-gray-600">
+                  <div class="line-clamp-2 max-w-xs"><%= data[i].description %></div>
+                </td>
+                <td class="px-6 py-4">
+                  <% if (data[i].startDate < Date.now() && data[i].endDate > Date.now()) { %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Active</span>
+                  <% } else { %>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Not Active</span>
+                  <% } %>
+                </td>
+                <td class="px-6 py-4">
+                  <a href="#" class="text-red-600 hover:text-red-800 transition" onclick="return deleteBanner(event, '<%= data[i]._id %>')">
+                    <i class="fas fa-trash"></i>
+                  </a>
+                </td>
+              </tr>
+            <% } %>
+          <% } else { %>
+            <tr>
+              <td colspan="5" class="px-6 py-8 text-center text-gray-500">No Banners Available</td>
+            </tr>
+          <% } %>
+        </tbody>
+      </table>
+    </div>
+    
+    <!-- Add Banner Button -->
+    <div class="flex justify-center mt-6">
+      <a href="/admin/addBanner" class="inline-flex items-center px-4 py-2 bg-blue-600 border border-transparent rounded-md font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-sm transition">
+        <i class="fas fa-plus mr-2"></i> Add Banner
+      </a>
+    </div>
+  </div>
+  <!-- SweetAlert2 CDN -->
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+</body>
+</html>
+
+<script>
+function deleteBanner(event, bannerId) {
+  event.preventDefault(); // Prevent the default link action
+
+  Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, delete it!"
+  }).then((result) => {
+      if (result.isConfirmed) {
+          window.location.href = `/admin/deleteBanner?id=${bannerId}`;
+      }
+  });
+
+  return false;
+}
+</script>
