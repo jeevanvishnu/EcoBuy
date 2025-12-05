@@ -5,7 +5,7 @@
 EcoBuy is a modern, user-friendly **E-Commerce website** for buying **Electronic Gadgets**.  
 It is built using **Node.js**, **Express**, **MongoDB**, **EJS**, and **TailwindCSS** for a smooth, responsive experience.
 
-🌐 **Live Demo:** [EcoBuy Website](https://ecobuy-pz4m.onrender.com/)
+🌐 **Live Demo:** [EcoBuy Website](https://ecobuy-1.onrender.com/)
 
 ---
 
