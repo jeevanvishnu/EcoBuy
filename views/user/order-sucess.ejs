@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Order Confirmation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="font-sans bg-gradient-to-br from-gray-100 to-gray-200 min-h-screen flex flex-col">
+    <%- include("../partials/users/header.ejs") %>
+
+    <div class="max-w-3xl mx-auto mt-10 p-10 bg-white shadow-lg rounded-2xl animate-slide-down">
+        <div class="w-20 h-20 bg-green-500 rounded-full flex items-center justify-center mx-auto mb-6 animate-checkmark">
+            <span class="text-white text-3xl">✓</span>
+        </div>
+
+        <div class="text-center">
+            <h1 class="text-3xl text-gray-800 font-semibold mb-4 animate-fade-in">Order Confirmed!</h1>
+            <p class="text-lg text-gray-600 mb-8 animate-fade-in">Thank you for shopping with us. Your order has been successfully placed.</p>
+
+            <div class="bg-gray-100 p-6 rounded-lg mb-8 animate-fade-in">
+                <p>Date: <%= new Date().toLocaleDateString() %></p>
+                <p>You will receive a confirmation email shortly.</p>
+            </div>
+
+            <div class="flex justify-center gap-8 mt-8 animate-fade-in">
+                <a href="/shop" class="px-6 py-3 bg-green-500 text-white rounded-full shadow-lg hover:transform hover:translate-y-1 hover:shadow-2xl transition duration-300">Continue Shopping</a>
+                <a href="/order" class="px-6 py-3 bg-blue-500 text-white rounded-full shadow-lg hover:transform hover:translate-y-1 hover:shadow-2xl transition duration-300">View Orders</a>
+            </div>
+        </div>
+    </div>
+
+   
+
+    <style>
+        @keyframes slide-down {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes checkmark {
+            0% { transform: scale(0); opacity: 0; }
+            50% { transform: scale(1.2); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animate-slide-down {
+            animation: slide-down 0.8s ease-out;
+        }
+
+        .animate-fade-in {
+            animation: fade-in 0.8s ease-out;
+        }
+
+        .animate-checkmark {
+            animation: checkmark 0.5s ease-in-out 0.5s both;
+        }
+
+        @media (max-width: 768px) {
+            .animate-slide-down {
+                margin: 20px;
+                padding: 30px;
+            }
+
+            .flex {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .px-6 {
+                width: 100%;
+            }
+        }
+    </style>
+</body>
+</html>
+
+<%- include("../partials/users/footer.ejs") %>

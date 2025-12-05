@@ -1,0 +1,74 @@
+<%- include('../partials/admin/header.ejs') %>
+
+<div class="content-wrapper">
+  <div class="px-4 py-6">
+    <div class="mb-4">
+      <h1 class="text-2xl font-semibold text-gray-800">Wallet Management</h1>
+    </div>
+
+    <div class="bg-white shadow-md rounded-lg overflow-hidden">
+      <div class="flex items-center justify-between px-4 py-3 border-b">
+        <h3 class="text-lg font-medium text-gray-700">User Wallets</h3>
+        <a href="/admin/transactions" class="inline-block bg-blue-600 text-white text-sm px-4 py-2 rounded hover:bg-blue-700">
+          View All Transactions
+        </a>
+      </div>
+
+      <div class="p-4 overflow-x-auto">
+        <table class="min-w-full table-auto text-sm text-left text-gray-700">
+          <thead class="bg-gray-100 text-gray-600 uppercase">
+            <tr>
+              <th class="px-4 py-2">User ID</th>
+              <th class="px-4 py-2">User Name</th>
+              <th class="px-4 py-2">Email</th>
+              <th class="px-4 py-2">Balance</th>
+              <th class="px-4 py-2">Transaction Count</th>
+              <th class="px-4 py-2">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% if (wallets && wallets.length > 0) { %>
+              <% wallets.forEach(wallet => { %>
+                <tr class="border-b hover:bg-gray-50">
+                  <td class="px-4 py-2"><%= wallet.userId._id %></td>
+                  <td class="px-4 py-2"><%= wallet.userId.name %></td>
+                  <td class="px-4 py-2"><%= wallet.userId.email %></td>
+                  <td class="px-4 py-2">₹<%= wallet.balance.toFixed(2) %></td>
+                  <td class="px-4 py-2"><%= wallet.transactions.length %></td>
+                  <td class="px-4 py-2">
+                    <button class="bg-indigo-500 text-white px-3 py-1 text-xs rounded hover:bg-indigo-600 view-transactions"
+                            data-wallet-id="<%= wallet._id %>"
+                            data-user-name="<%= wallet.userId.name %>">
+                            
+                      <i class="fas fa-list"></i> View Wallet Transactions
+
+
+                    </button>
+                  </td>
+                </tr>
+              <% }) %>
+            <% } else { %>
+              <tr>
+                <td colspan="6" class="text-center text-gray-500 py-4">No wallets found</td>
+              </tr>
+            <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+    document.querySelectorAll('.view-transactions').forEach(button => {
+    button.addEventListener('click', function() {
+        const walletId = this.getAttribute('data-wallet-id');
+        const userName = this.getAttribute('data-user-name');
+        
+       
+        window.location.href = `/admin/wallet/transactions/${walletId}`;
+       
+    });
+});
+</script>

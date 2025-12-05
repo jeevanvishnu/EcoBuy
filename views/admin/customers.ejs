@@ -1,6 +1,6 @@
 <%- include('../partials/admin/header.ejs') %>
 
-
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <body class="bg-gray-100 font-sans">
     <div class="container mx-auto px-4 py-8">
       <div class="flex flex-col md:flex-row justify-between items-center mb-6">
@@ -49,19 +49,80 @@
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <% if (data[i].isBlocked === false) { %>
-                    <a href="/admin/blockCustomer?id=<%= data[i]._id %>" class="text-blue-600 hover:text-blue-900 mr-3">Block</a>
+                    <a href="#" onclick="confirmBlock(event,'<%-data[i]._id%>')" class="text-blue-600 hover:text-blue-900 mr-3">Block</a>
+                    
+
                   <% } else { %>
-                    <a href="/admin/unblockCustomer?id=<%= data[i]._id %>" class="text-red-600 hover:text-red-900">Unblock</a>
+                    <a href="#" onclick="confirmUnblock(event,'<%-data[i]._id%>')" class="text-red-600 hover:text-red-900">Unblock</a>
                   <% } %>
                 </td>
               </tr>
             <% }; %>
           </tbody>
         </table>
+      
       </div>
-  
-     
-  
+      <div class="container mt-3 flex justify-center">
+        <nav aria-label="Page navigation">
+          <ul class="flex space-x-2">
+            <% for (let i = 1; i <= totalPages; i++) { %>
+            <li>
+              <% if (i === currentPage) { %>
+                <a href="?page=<%= i %>" class="px-4 py-2 border rounded-md bg-blue-600 text-white">
+                  <%= i %>
+                </a>
+              <% } else { %>
+                <a href="?page=<%= i %>" class="px-4 py-2 border rounded-md bg-gray-100 text-gray-700 hover:bg-blue-500 hover:text-white">
+                  <%= i %>
+                </a>
+              <% } %>
+            </li>
+            <% } %>
+          </ul>
+        </nav>
+      </div>
+    </div> 
+      
+      
     </div>
   </body>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script>
+  
+      function confirmBlock(event, user_id) {
+    event.preventDefault();
+    Swal.fire({
+      title: "Are you sure?",
+      text: "You are about to block this user!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Block!",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        window.location.href="/admin/blockCustomer?id="+user_id
+      }
+      })
+    }
+
+    function confirmUnblock(event,user_id){
+      event.preventDefault()
+      Swal.fire({
+        title: "Are you sure?",
+      text: "You are about to unblock this user!",
+      icon: "info",
+      showCancelButton: true,
+      confirmButtonColor: "#28a745",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Yes, Unblock!",
+      }).then(result =>{
+        if(result.isConfirmed){
+          window.location.href="/admin/unblockCustomer?id="+user_id
+        }
+      })
+    }
+
+  </script>
+  
   

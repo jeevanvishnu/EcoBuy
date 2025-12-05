@@ -9,11 +9,22 @@ import userRouter from "./router/userRouter/userRouter.js";
 import session from "express-session";
 import passport from "./config/passport.js";
 import adminRouter from './router/adminRouter/adminRouter.js'
+import morgan from "morgan";
+import MongoStore from "connect-mongo";
+import cors from 'cors'
+
+app.use(cors({
+  origin:'http://localhost:4001',
+  credentials: true
+}))
 
 // ENV config
 dotEnv.config();
 // connect to Database
 db();
+
+// setUp on morgan
+app.use(morgan('tiny'))
 
 // setup filename
 const __filename = fileURLToPath(import.meta.url);
@@ -27,6 +38,7 @@ app.use(session({
   secret:process.env.SECRECT_KEY,
   resave:false,
   saveUninitialized:true,
+  store:MongoStore.create({mongoUrl:process.env.MONGODB_URL}),
   cookie:{
     secure:false,
     httpOnly:true,

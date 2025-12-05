@@ -46,45 +46,69 @@
               <td class="px-6 py-4 text-sm text-gray-900"><%= category.categoryOffer ? category.categoryOffer + '%' : 'No Offer' %></td>
               <td class="px-6 py-4">
                 
-                <span class="px-2 py-1 text-xs font-semibold rounded-full <%= category.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800' %>">
-                  <%= category.status %>
+                 <% if(category.isListed) {%>
+
+                 <span class="px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">
+                    Listed
                 </span>
-              </td>
+                <% }else {%>
+                <span class="px-2 py-1 text-xs font-semibold rounded-full bg-red-100 text-red-800">
+                    Unlisted
+                </span>
+                <% } %> 
+              </td> 
              
               <td class="px-6 py-4 flex flex-wrap justify-center gap-2">
                 <!-- Edit button -->
-                <button class="text-blue-600 hover:text-blue-900 p-1" title="Edit">
-                  <i class="fas fa-edit"></i>
-                </button>
+                <a href="/admin/editCategory?id=<%= category._id %>" 
+                    class="inline-block text-white bg-blue-600 hover:bg-blue-900 px-4 py-2 rounded-md shadow-md transition duration-300 ease-in-out">
+                    Edit
+                 </a>
+                 
                 
-                <!-- Delete button -->
+                
+                <form onsubmit="return confirmDelete(event)" action="/admin/deleteCategory/?id=<%=category._id %>" method="post" >
                 <button class="text-red-600 hover:text-red-900 p-1" title="Delete">
-                  <i class="fas fa-trash-alt"></i>
+                    <i class="fas fa-trash-alt"></i>
                 </button>
+                </form>
                 
                 <!-- Offer management buttons -->
-                 <% if(category.categoryOffer ===0){%>
-                    <button 
-                    class="text-green-600 hover:text-green-900 p-1" 
-                    title="Add Offer" 
-                    onclick="addOffer('<%=category._id %>')">
-                    <i class="fas fa-plus-circle"></i>
-                </button>
-                
-                <% }else{ %>
-                <button 
-                class="text-yellow-600 hover:text-yellow-900 p-1" title="Remove Offer"
-                onclick="removeOffer('<%=category._id %>')"">
-                  <i class="fas fa-minus-circle"></i>
-                </button>
-                <% } %>
+                <% if(category.categoryOffer === 0) { %>
+                  <button 
+                      class="px-4 py-2 bg-green-600 text-white font-semibold rounded-lg shadow-md hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-opacity-50 transition duration-300"
+                      title="Add Offer" 
+                      onclick="confirmAddOffer('<%=category._id %>')">
+                      + Add Offer
+                  </button>
+              <% } else { %>
+                  <button 
+                      class="px-4 py-2 bg-red-500 text-white font-semibold rounded-lg shadow-md hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500 focus:ring-opacity-50 transition duration-300"
+                      title="Remove Offer"
+                      onclick="confirmRemoveOffer('<%=category._id %>')">
+                      Remove
+                  </button>
+              <% } %>
+              
                 <!-- Status management buttons -->
-                <button class="text-blue-600 hover:text-blue-900 p-1 <%= category.status === 'active' ? 'hidden' : '' %>" title="List">
-                  <i class="fas fa-toggle-on"></i>
-                </button>
-                <button class="text-gray-600 hover:text-gray-900 p-1 <%= category.status !== 'active' ? 'hidden' : '' %>" title="Unlist">
-                  <i class="fas fa-toggle-off"></i>
-                </button>
+                 <% if(category.isListed){ %>
+                  <a href="/admin/listCategory?id=<%=category._id %>">
+                    <button 
+                        class="px-4 py-2 bg-blue-600 text-white font-semibold rounded-lg shadow-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 transition duration-300"
+                        title="List">
+                        📋 Listed
+                    </button>
+                </a>
+                
+                <% } else {%>
+                  <a href="/admin/unListeCategory?id=<%=category._id %>">
+                    <button 
+                        class="px-4 py-2 bg-gray-600 text-white font-semibold rounded-lg shadow-md hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-opacity-50 transition duration-300"
+                        title="Unlist">
+                        🚫 Unlist
+                    </button>
+                </a>
+                <% } %>
               </td>
 
 
@@ -93,7 +117,28 @@
           </tbody>
         </table>
       </div>
+      <div class="container mt-3 flex justify-center">
+        <nav aria-label="Page navigation">
+          <ul class="flex space-x-2">
+            <% for (let i = 1; i <= totalPages; i++) { %>
+            <li>
+              <% if (i === currentPage) { %>
+                <a href="?page=<%= i %>" class="px-4 py-2 border rounded-md bg-blue-600 text-white">
+                  <%= i %>
+                </a>
+              <% } else { %>
+                <a href="?page=<%= i %>" class="px-4 py-2 border rounded-md bg-gray-100 text-gray-700 hover:bg-blue-500 hover:text-white">
+                  <%= i %>
+                </a>
+              <% } %>
+            </li>
+            <% } %>
+          </ul>
+        </nav>
+      </div>
     </div>
+    </div>
+    
   
     <!-- Add/Edit Category Modal -->
     <div class="fixed inset-0 bg-gray-500 bg-opacity-75 flex items-center justify-center hidden" id="categoryModal">
@@ -112,8 +157,8 @@
             <textarea id="description" rows="3" class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"></textarea>
           </div>
           <div class="flex justify-end pt-4">
-            <button type="button" id="cancelBtn" class="mr-2 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
-              Cancel
+            <button  type="button" id="cancelBtn" class="mr-2 px-4 py-2 border border-gray-300 rounded-md text-sm font-medium text-gray-700 bg-white hover:bg-gray-50">
+                Cancel
             </button>
             <button type="submit" class="px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 transition-colors duration-300">
               Save Category
@@ -121,8 +166,14 @@
           </div>
         </form>
       </div>
+     
+     
     </div>
-  
+
+ 
+
+       
+    
     <script>
     document.getElementById('categoryForm').addEventListener('submit', function (e) {
     e.preventDefault();
@@ -166,7 +217,7 @@ async function addOffer(categoryId) {
         inputPlaceholder: "%"
     });
     
-    if (amount) {  // Fixed: was 'amout' instead of 'amount'
+    if (amount) {  
         try {
             const response = await fetch('/admin/addCategoryOffer', {
                 method: "POST",
@@ -295,9 +346,99 @@ document.getElementById('cancelBtn').addEventListener('click', () => {
     document.getElementById('categoryModal').classList.add('hidden');
 });
 
+
+document.querySelectorAll('.delete-btn').forEach(button => {
+        button.addEventListener('click', async function() {
+            const categoryId = this.getAttribute('data-id');
+
+            Swal.fire({
+                title: "Are you sure?",
+                text: "You won't be able to revert this!",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Yes, delete it!"
+            }).then(async (result) => {
+                if (result.isConfirmed) {
+                    try {
+                        const response = await fetch(`/admin/deleteCategory/${categoryId}`, {
+                            method: "DELETE",
+                        });
+
+                        const data = await response.json();
+
+                        if (response.ok) {
+                            Swal.fire("Deleted!", data.message, "success").then(() => {
+                                location.reload(); // Refresh the page
+                            });
+                        } else {
+                            Swal.fire("Error!", data.error, "error");
+                        }
+                    } catch (error) {
+                        Swal.fire("Error!", "Something went wrong!", "error");
+                    }
+                }
+            });
+        });
+    });
+
+
+    function confirmAddOffer(categoryId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to add an offer to this category?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonColor: "#3085d6",
+        cancelButtonColor: "#d33",
+        confirmButtonText: "Yes, add it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            addOffer(categoryId);
+        }
+    });
+}
+
+function confirmRemoveOffer(categoryId) {
+    Swal.fire({
+        title: "Are you sure?",
+        text: "Do you want to remove the offer from this category?",
+        icon: "warning",
+        showCancelButton: true,
+        confirmButtonColor: "#d33",
+        cancelButtonColor: "#3085d6",
+        confirmButtonText: "Yes, remove it!"
+    }).then((result) => {
+        if (result.isConfirmed) {
+            removeOffer(categoryId);
+        }
+    });
+}
+
+
+function confirmDelete(event) {
+        event.preventDefault(); // Prevent form submission
+        Swal.fire({
+            title: "Are you sure?",
+            text: "You won't be able to revert this!",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonColor: "#d33",
+            cancelButtonColor: "#3085d6",
+            confirmButtonText: "Yes, delete it!"
+        }).then((result) => {
+            if (result.isConfirmed) {
+                event.target.submit(); // Proceed with form submission
+            }
+        });
+    }
+
+
     </script>
   </body>
   </html>
+  
   
 
   

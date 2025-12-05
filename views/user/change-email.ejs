@@ -1,0 +1,30 @@
+<div class="flex flex-col min-h-screen">
+    <%- include("../partials/users/header.ejs") %>
+
+    <main class="flex flex-grow justify-center items-center">
+        <form action="/change-email" method="post">
+        <div class="bg-white p-8 rounded-lg shadow-lg w-96 text-center">
+            <h2 class="text-2xl font-bold text-gray-700 mb-4">Enter Your Current Email</h2>
+            <input name="email" type="email" id="email" placeholder="Enter your email" class="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500" required>
+            <p class="text-red-500 text-sm mt-2" id="error-msg"></p>
+            <button onclick="validateEmail()" class="w-full mt-4 p-3 text-white font-semibold rounded-lg bg-gradient-to-r from-pink-500 to-orange-500 hover:opacity-80 transition">Submit</button>
+        </div>
+        </form>
+    </main>
+
+</div>
+
+<script>
+    function validateEmail() {
+        const emailInput = document.getElementById("email");
+        const errorMsg = document.getElementById("error-msg");
+        const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        
+        if (!emailPattern.test(emailInput.value)) {
+            errorMsg.textContent = "Please enter a valid email address.";
+        } else {
+            errorMessage.classList.add('hidden');
+            this.submit();
+}
+    }
+</script>

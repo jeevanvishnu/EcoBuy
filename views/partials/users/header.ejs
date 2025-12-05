@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>EcoBuy</title>
+    <link rel="icon" type="image/png" href="assets/Logo-img.png" class="rounded-full">
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="assets/Logo.png">
     <link rel="stylesheet" href="./style.css" />
     <link
       rel="stylesheet"
@@ -13,181 +15,348 @@
       crossorigin="anonymous"
       referrerpolicy="no-referrer"
     />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.css"
+    />
     <script src="https://cdn.jsdelivr.net/npm/swiper@10/swiper-bundle.min.js"></script>
-</head>
-<body>
-    <nav class="bg-gray-700 shadow-lg fixed top-0 left-0 w-full z-50">
-        <div class="max-w-screen-xl mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
-                <!-- Logo -->
-                <a href="#" class="flex items-center space-x-3 text-white text-2xl font-bold">
-                    <img src="https://flowbite.com/docs/images/logo.svg" class="h-8" alt="EcoBuy Logo">
-                    <span>EcoBuy</span>
-                </a>
+    <style>
+      /* Custom gradient animation for navbar */
+      .eco-gradient {
+        background: linear-gradient(135deg, #1e6a50, #2d9674);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      }
 
-                <!-- Search Bar -->
-                <div class="hidden md:flex items-center bg-gray-100 rounded-lg px-3 py-2 w-72">
-                    <input type="text" placeholder="Search..." class="bg-transparent outline-none text-gray-700 w-full">
-                    <i class="fa-solid fa-magnifying-glass text-gray-500"></i>
-                </div>
+      /* Animated elements */
+      .nav-link-hover {
+        position: relative;
+      }
 
-                <!-- Menu Button (Mobile) -->
-                <button id="menu-toggle" class="md:hidden text-white text-xl">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
+      .nav-link-hover::after {
+        content: "";
+        position: absolute;
+        width: 0;
+        height: 2px;
+        bottom: -4px;
+        left: 0;
+        background-color: #a3e635;
+        transition: width 0.3s ease;
+      }
 
-                <!-- Navigation Links -->
-                <ul class="hidden md:flex space-x-6 text-white font-medium items-center">
-                    <li><a href="#" class="hover:text-gray-300">Home</a></li>
-                    <li><a href="#" class="hover:text-gray-300">About</a></li>
-                    <li><a href="#" class="hover:text-gray-300">Contact</a></li>
-                    <li class="relative">
-                        <a href="#" class="hover:text-gray-300">
-                            <i class="fa-solid fa-cart-shopping"></i> Cart
-                            <span class="absolute -top-2 -right-2 bg-red-500 text-xs text-white rounded-full px-1">3</span>
-                        </a>
-                    </li>
-                    <li class="relative">
-                        <a href="#" class="hover:text-gray-300">
-                            <i class="fa-regular fa-heart"></i> Wishlist
-                            <span class="absolute -top-2 -right-2 bg-red-500 text-xs text-white rounded-full px-1">5</span>
-                        </a>
-                    </li>
+      .nav-link-hover:hover::after {
+        width: 100%;
+      }
 
-                    <!-- User Dropdown -->
-                    <% if(locals.user){ %>
-
-                    <li class="relative" id="dropdownContainer">
-                      <button 
-                          id="dropdownButton"
-                          class="flex items-center space-x-1 text-white hover:text-gray-300 focus:outline-none">
-                          <i class="fa-regular fa-user"></i>
-                          <span class="ml-1"><%= locals.user.name || "Guest" %></span>
-                          <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
-                      </button>
-                      
-                      <!-- Dropdown Menu -->
-                      <div id="dropdownMenu" class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 hidden z-50">
-                          <div class="py-1">
-                              <a href="/userprofile" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                  <i class="fa-regular fa-user mr-2"></i>Profile
-                              </a>
-                              <a href="/logout" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
-                                  <i class="fa-solid fa-sign-out-alt mr-2"></i>Logout
-                              </a>
-                          </div>
-                      </div>
-                  </li>
-                  
-                    
-                </ul>
+      /* Badge styling */
+      .eco-badge {
+        background: #a3e635;
+        color: #166534;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+  <body class="bg-gray-50">
+    <nav
+      class="eco-gradient fixed top-0 left-0 w-full z-50 transition-all duration-300"
+    >
+      <div class="max-w-screen-xl mx-auto px-4">
+        <div class="flex justify-between items-center py-4">
+          <!-- Logo -->
+          <a
+            href="#"
+            class="flex items-center space-x-3 text-white text-2xl font-bold transition-transform duration-300 hover:scale-105"
+          >
+            <div class="bg-white p-1 rounded-full">
+              <img
+                src="https://flowbite.com/docs/images/logo.svg"
+                class="h-8"
+                alt="EcoBuy Logo"
+              />
             </div>
+            <span class="text-white"
+              >Eco<span class="text-lime-300">Buy</span></span
+            >
+          </a>
+
+          <!-- Search Bar -->
+          <form action="/search" method="get">
+            <div
+              class="hidden md:flex items-center bg-white/90 rounded-full px-4 py-2 w-80 border border-lime-100 shadow-sm"
+            >
+              <input
+                name="search"
+                type="text"
+                placeholder="Search sustainable products..."
+                class="bg-transparent outline-none text-gray-700 w-full text-sm"
+              />
+              <button
+                class="bg-lime-500 hover:bg-lime-600 transition-all p-1 rounded-full text-white ml-2"
+              >
+                <i class="fa-solid fa-magnifying-glass px-2"></i>
+              </button>
+            </div>
+          </form>
+
+          <!-- Menu Button (Mobile) -->
+          <button
+            id="menu-toggle"
+            class="md:hidden text-white text-xl bg-lime-600 hover:bg-lime-700 p-2 rounded-lg transition-all"
+          >
+            <i class="fa-solid fa-bars"></i>
+          </button>
+
+          <!-- Navigation Links -->
+          <ul
+            class="hidden md:flex space-x-8 text-white font-medium items-center"
+          >
+            <li>
+              <a
+                href="/"
+                class="nav-link-hover hover:text-lime-200 transition-colors"
+                >Home</a
+              >
+            </li>
+            <li>
+              <a
+                href="/shop"
+                class="nav-link-hover hover:text-lime-200 transition-colors"
+                >Shop</a
+              >
+            </li>
+            <li class="relative">
+              <a href="/cart" class="flex items-center hover:text-lime-200 transition-colors space-x-1 group relative">
+                <i class="fa-solid fa-cart-shopping text-lg"></i>
+                <% if(typeof cartCount !== 'undefined' && cartCount > 0) { %>
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center"><%= cartCount %></span>
+                <% } %>
+              </a>
+            </li>
+            <li class="relative">
+              <a href="/wishlist" class="flex items-center hover:text-lime-200 transition-colors space-x-1 group relative">
+                <i class="fa-regular fa-heart text-lg"></i>
+                <% if(typeof wishlistCount !== 'undefined' && wishlistCount > 0) { %>
+                <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center"><%= wishlistCount %></span>
+                <% } %>
+              </a>
+            </li>
+
+            <!-- User Dropdown -->
+            <% if(locals.user){ %>
+            <li class="relative" id="dropdownContainer">
+              <button
+                id="dropdownButton"
+                class="flex items-center space-x-1 text-white bg-lime-700/50 px-3 py-1.5 rounded-full hover:bg-lime-700 focus:outline-none transition-colors"
+              >
+                <i class="fa-regular fa-user"></i>
+                <span class="ml-1"><%= locals.user.name %></span>
+                <i class="fa-solid fa-chevron-down text-xs ml-1"></i>
+              </button>
+
+              <!-- Dropdown Menu -->
+              <div
+                id="dropdownMenu"
+                class="absolute right-0 mt-2 w-48 rounded-lg shadow-lg bg-white ring-1 ring-lime-100 hidden z-50 overflow-hidden"
+              >
+                <div class="py-1">
+                  <a
+                    href="/userProfile"
+                    class="group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-lime-50 transition-colors"
+                  >
+                    <i class="fa-regular fa-user mr-2 text-lime-600"></i>
+                    <span>Profile</span>
+                  </a>
+                  <a
+                    href="/logout"
+                    class="group flex items-center px-4 py-2.5 text-sm text-gray-700 hover:bg-lime-50 transition-colors"
+                  >
+                    <i class="fa-solid fa-sign-out-alt mr-2 text-lime-600"></i>
+                    <span>Logout</span>
+                  </a>
+                </div>
+              </div>
+            </li>
+            <% } else { %>
+            <a
+              href="/login"
+              class="flex items-center space-x-2 bg-lime-600 hover:bg-lime-700 text-white py-1.5 px-4 rounded-full transition-colors"
+            >
+              <i class="fa-regular fa-user"></i>
+              <span>Login</span>
+            </a>
+            <% } %>
+          </ul>
         </div>
-        <% }else {%>
-          <a href="/login" class="block hover:text-gray-300"><i class="fa-regular fa-user"></i> Login</a>
-          <a href="/signup" class="block hover:text-gray-300"><i class="fa-solid fa-right-to-bracket"></i> Signup</a>
-
-          <% } %>
-        <!-- Mobile Menu -->
-         <!-- Mobile Menu Button -->
-
-
-<!-- Mobile Menu -->
-<div id="mobile-menu" class="hidden md:hidden bg-gray-800 text-white py-3 px-4 space-y-2 absolute w-full left-0 top-[72px]">
-  <a href="#" class="block hover:text-gray-300 py-2">Home</a>
-  <a href="#" class="block hover:text-gray-300 py-2">About</a>
-  <a href="#" class="block hover:text-gray-300 py-2">Contact</a>
-  <a href="#" class="block hover:text-gray-300 py-2">
-      <i class="fa-solid fa-cart-shopping mr-2"></i> Cart
-      <span class="bg-red-500 text-xs rounded-full px-2 py-1 ml-2">3</span>
-  </a>
-  <a href="#" class="block hover:text-gray-300 py-2">
-      <i class="fa-regular fa-heart mr-2"></i> Wishlist
-      <span class="bg-red-500 text-xs rounded-full px-2 py-1 ml-2">5</span>
-  </a>
-  
-  <!-- Mobile User Menu -->
-  <div class="border-t border-gray-700 mt-2 pt-2">
-      <button id="mobile-user-toggle" class="flex items-center w-full py-2 hover:text-gray-300">
-          <i class="fa-regular fa-user mr-2"></i>
-          <span>John Doe</span>
-          <i class="fa-solid fa-chevron-down ml-auto"></i>
-      </button>
-      
-      <div id="mobile-user-dropdown" class="hidden bg-gray-900 mt-1 rounded-md">
-          <a href="#" class="block px-4 py-2 hover:bg-gray-700">
-              <i class="fa-regular fa-user mr-2"></i>Profile
-          </a>
-          <a href="#" class="block px-4 py-2 hover:bg-gray-700">
-              <i class="fa-solid fa-sign-out-alt mr-2"></i>Logout
-          </a>
       </div>
-  </div>
-</div>
 
-        
+      <!-- Mobile Menu -->
+      <div
+        id="mobile-menu"
+        class="hidden md:hidden bg-green-900/95 backdrop-blur-sm text-white py-3 px-4 space-y-1 absolute w-full left-0 top-[72px] border-t border-green-700 shadow-lg"
+      >
+        <form action="/search" method="get" class="mb-4">
+          <div
+            class="flex items-center bg-white/90 rounded-full px-3 py-2 border border-lime-200"
+          >
+            <input
+              name="search"
+              type="text"
+              placeholder="Search..."
+              class="bg-transparent outline-none text-gray-700 w-full"
+            />
+            <button
+              class="bg-lime-600 hover:bg-lime-700 transition-colors p-1 rounded-full text-white"
+            >
+              <i class="fa-solid fa-magnifying-glass px-2"></i>
+            </button>
+          </div>
+        </form>
+
+        <a
+          href="#"
+          class="flex items-center hover:bg-lime-800/50 rounded-lg py-3 px-3 transition-colors"
+        >
+          <i class="fa-solid fa-home mr-3 text-lime-300 w-6 text-center"></i>
+          Home
+        </a>
+        <a
+          href="#"
+          class="flex items-center hover:bg-lime-800/50 rounded-lg py-3 px-3 transition-colors"
+        >
+          <i class="fa-solid fa-store mr-3 text-lime-300 w-6 text-center"></i>
+          Shop
+        </a>
+        <a
+          href="#"
+          class="flex items-center justify-between hover:bg-lime-800/50 rounded-lg py-3 px-3 transition-colors"
+        >
+          <div>
+            <i
+              class="fa-solid fa-cart-shopping mr-3 text-lime-300 w-6 text-center"
+            ></i>
+            Cart
+          </div>
+          <span class="eco-badge text-xs rounded-full px-2 py-1">3</span>
+        </a>
+        <a
+          href="#"
+          class="flex items-center justify-between hover:bg-lime-800/50 rounded-lg py-3 px-3 transition-colors"
+        >
+          <div>
+            <i
+              class="fa-regular fa-heart mr-3 text-lime-300 w-6 text-center"
+            ></i>
+            Wishlist
+          </div>
+          <span class="eco-badge text-xs rounded-full px-2 py-1">5</span>
+        </a>
+
+        <!-- Mobile User Menu -->
+        <div class="border-t border-green-700 mt-2 pt-2">
+          <button
+            id="mobile-user-toggle"
+            class="flex items-center w-full py-3 px-3 hover:bg-lime-800/50 rounded-lg transition-colors"
+          >
+            <i
+              class="fa-regular fa-user mr-3 text-lime-300 w-6 text-center"
+            ></i>
+            <span>John Doe</span>
+            <i class="fa-solid fa-chevron-down ml-auto text-lime-300"></i>
+          </button>
+
+          <div
+            id="mobile-user-dropdown"
+            class="hidden bg-green-950 mt-1 rounded-lg overflow-hidden"
+          >
+            <a
+              href="#"
+              class="flex items-center px-4 py-3 hover:bg-lime-900/50 transition-colors"
+            >
+              <i
+                class="fa-regular fa-user mr-3 text-lime-300 w-6 text-center"
+              ></i>
+              Profile
+            </a>
+            <a
+              href="#"
+              class="flex items-center px-4 py-3 hover:bg-lime-900/50 transition-colors"
+            >
+              <i
+                class="fa-solid fa-sign-out-alt mr-3 text-lime-300 w-6 text-center"
+              ></i>
+              Logout
+            </a>
+          </div>
+        </div>
+      </div>
     </nav>
-</body>
-</html>
-  <!-- Add margin-top to content to prevent overlapping -->
-   <div class="mt-16 p-4">
-     
- </div> 
 
-  
-    <!-- navbar ending -->
-
+    <!-- Add margin-top to content to prevent overlapping -->
+    <div class="mt-28 p-4 max-w-screen-xl mx-auto"></div>
 
     <script>
- 
- // Close dropdown when clicking outside
- document.addEventListener('DOMContentLoaded', function() {
-    const dropdownButton = document.getElementById('dropdownButton');
-    const dropdownMenu = document.getElementById('dropdownMenu');
-    const dropdownContainer = document.getElementById('dropdownContainer');
+      // Close dropdown when clicking outside
+      document.addEventListener("DOMContentLoaded", function () {
+        const dropdownButton = document.getElementById("dropdownButton");
+        const dropdownMenu = document.getElementById("dropdownMenu");
+        const dropdownContainer = document.getElementById("dropdownContainer");
 
-    // Toggle dropdown when button is clicked
-    dropdownButton.addEventListener('click', function(e) {
-        e.stopPropagation();
-        dropdownMenu.classList.toggle('hidden');
-    });
-
-    // Close dropdown when clicking outside
-    document.addEventListener('click', function(e) {
-        if (!dropdownContainer.contains(e.target)) {
-            dropdownMenu.classList.add('hidden');
+        // Toggle dropdown when button is clicked
+        if (dropdownButton) {
+          dropdownButton.addEventListener("click", function (e) {
+            e.stopPropagation();
+            dropdownMenu.classList.toggle("hidden");
+          });
         }
-    });
 
-    // Prevent dropdown from closing when clicking inside it
-    dropdownMenu.addEventListener('click', function(e) {
-        e.stopPropagation();
-    });
-});
+        // Close dropdown when clicking outside
+        document.addEventListener("click", function (e) {
+          if (dropdownContainer && !dropdownContainer.contains(e.target)) {
+            dropdownMenu.classList.add("hidden");
+          }
+        });
 
+        // Prevent dropdown from closing when clicking inside it
+        if (dropdownMenu) {
+          dropdownMenu.addEventListener("click", function (e) {
+            e.stopPropagation();
+          });
+        }
 
-// moble resposive
-const mobileUserToggle = document.getElementById("mobile-user-toggle");
-const mobileUserDropdown = document.getElementById("mobile-user-dropdown");
+        // Mobile menu functionality
+        const menuToggle = document.getElementById("menu-toggle");
+        const mobileMenu = document.getElementById("mobile-menu");
+        const mobileUserToggle = document.getElementById("mobile-user-toggle");
+        const mobileUserDropdown = document.getElementById(
+          "mobile-user-dropdown"
+        );
 
-// Toggle the dropdown on button click
-mobileUserToggle.addEventListener("click", () => {
-    mobileUserDropdown.classList.toggle("hidden");
-});
+        if (menuToggle) {
+          menuToggle.addEventListener("click", () => {
+            mobileMenu.classList.toggle("hidden");
+          });
+        }
 
+        // Toggle the mobile dropdown on button click
+        if (mobileUserToggle) {
+          mobileUserToggle.addEventListener("click", () => {
+            mobileUserDropdown.classList.toggle("hidden");
+          });
+        }
 
-
-      const menuToggle = document.getElementById('menu-toggle');
-      const mobileMenu = document.getElementById('mobile-menu');
-
-menuToggle.addEventListener('click', () => {
-  mobileMenu.classList.toggle('hidden');
-});
-
+        // Add scroll effect to navbar
+        window.addEventListener("scroll", function () {
+          const navbar = document.querySelector("nav");
+          if (window.scrollY > 10) {
+            navbar.classList.add("py-1");
+            navbar.classList.add("shadow-md");
+          } else {
+            navbar.classList.remove("py-1");
+            navbar.classList.remove("shadow-md");
+          }
+        });
+      });
     </script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/1.6.5/flowbite.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
   </body>
 </html>

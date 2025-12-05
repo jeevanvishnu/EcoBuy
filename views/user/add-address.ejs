@@ -1,0 +1,226 @@
+<%- include("../partials/users/header.ejs") %>
+
+<div class="flex">
+    <%- include("../partials/users/sidebar.ejs") %>
+    <body class="bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center min-h-screen">
+        <div class="w-full max-w-4xl px-8 py-3 ml-[110px]">
+            <div class="bg-white shadow-2xl rounded-2xl overflow-hidden">
+                <div class="bg-gradient-to-r from-indigo-500 to-purple-600 text-white p-6">
+                    <h2 class="text-3xl font-bold tracking-wide">Add New Address</h2>
+                    <p class="text-indigo-100 mt-2">Please provide your complete address details</p>
+                </div>
+
+                <form action="/addAddress" method="post" id="addressForm" class="p-10 space-y-10">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="relative">
+                            <input 
+                                name="name"
+                                type="text" 
+                                id="name" 
+                                required 
+                                class="peer w-full border-b-2 border-gray-300 focus:border-indigo-500 transition-all duration-300 pt-6 pb-2 px-3 outline-none text-lg"
+                            >
+                            <label 
+                                for="fullName" 
+                                class="absolute left-3 top-6 text-gray-500 transition-all label"
+                            >
+                                Full Name
+                            </label>
+                        </div>
+
+                        <div class="relative">
+                            <input 
+                                name="addressType"
+                                type="text" 
+                                id="addressType" 
+                                required 
+                                class="peer w-full border-b-2 border-gray-300 focus:border-indigo-500 transition-all duration-300 pt-6 pb-2 px-3 outline-none text-lg"
+                            >
+                            <label 
+                                for="streetAddress" 
+                                class="absolute left-3 top-6 text-gray-500 transition-all label"
+                            >
+                                Street Address
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+                        <div class="relative">
+                            <input 
+                                name="city"
+                                type="text" 
+                                id="city" 
+                                required 
+                                class="peer w-full border-b-2 border-gray-300 focus:border-indigo-500 transition-all duration-300 pt-6 pb-2 px-3 outline-none text-lg"
+                            >
+                            <label 
+                                for="city" 
+                                class="absolute left-3 top-6 text-gray-500 transition-all label"
+                            >
+                                City
+                            </label>
+                        </div>
+
+                        <div class="relative">
+                            <input 
+                                name="state"
+                                type="text" 
+                                id="state" 
+                                required 
+                                class="peer w-full border-b-2 border-gray-300 focus:border-indigo-500 transition-all duration-300 pt-6 pb-2 px-3 outline-none text-lg"
+                            >
+                            <label 
+                                for="state" 
+                                class="absolute left-3 top-6 text-gray-500 transition-all label"
+                            >
+                                State
+                            </label>
+                        </div>
+
+                        <div class="relative">
+                            <input 
+                                name="pincode"
+                                type="text" 
+                                id="pincode" 
+                                required 
+                                class="peer w-full border-b-2 border-gray-300 focus:border-indigo-500 transition-all duration-300 pt-6 pb-2 px-3 outline-none text-lg"
+                            >
+                            <label 
+                                for="postalCode" 
+                                class="absolute left-3 top-6 text-gray-500 transition-all label"
+                            >
+                                Postal Code
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+                        <div class="relative">
+                            <input 
+                                name="landMark"
+                                type="text" 
+                                id="landMark" 
+                                required 
+                                class="peer w-full border-b-2 border-gray-300 focus:border-indigo-500 transition-all duration-300 pt-6 pb-2 px-3 outline-none text-lg"
+                            >
+                            <label 
+                                for="country" 
+                                class="absolute left-3 top-6 text-gray-500 transition-all label"
+                            >
+                                Country
+                            </label>
+                        </div>
+
+                        <div class="relative">
+                            <input 
+                                name="phone"
+                                type="tel" 
+                                id="phone" 
+                                required 
+                                class="peer w-full border-b-2 border-gray-300 focus:border-indigo-500 transition-all duration-300 pt-6 pb-2 px-3 outline-none text-lg"
+                            >
+                            <label 
+                                for="phoneNumber" 
+                                class="absolute left-3 top-6 text-gray-500 transition-all label"
+                            >
+                                Phone Number
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="mt-10">
+                        <button 
+                            type="submit" 
+                            class="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-4 rounded-xl hover:from-indigo-600 hover:to-purple-700 transition duration-300 transform hover:scale-105 shadow-xl hover:shadow-2xl"
+                        >
+                            Save Address
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </body>
+</div>
+
+<%- include('../partials/users/footer.ejs') %>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
+<script>
+    document.addEventListener("DOMContentLoaded", function () {
+    const inputs = document.querySelectorAll("input");
+    const form = document.getElementById("addressForm");
+
+    inputs.forEach((input) => {
+        const label = input.nextElementSibling;
+
+        function checkInput() {
+            if (input.value.trim() !== "") {
+                label.classList.add("top-2", "text-xs", "text-indigo-500");
+                label.classList.remove("top-6", "text-gray-500");
+            } else {
+                label.classList.add("top-6", "text-gray-500");
+                label.classList.remove("top-2", "text-xs", "text-indigo-500");
+            }
+        }
+
+        checkInput();
+
+        input.addEventListener("focus", function () {
+            label.classList.add("top-2", "text-xs", "text-indigo-500");
+            label.classList.remove("top-6", "text-gray-500");
+        });
+
+        input.addEventListener("blur", checkInput);
+    });
+
+    
+    form.addEventListener("submit", function (event) {
+        event.preventDefault(); 
+        
+        // Check each required input
+        let isValid = true;
+        inputs.forEach((input) => {
+            if (input.hasAttribute("required") && input.value.trim() === "") {
+                isValid = false;
+                input.classList.add("border-red-500");
+              
+                input.animate([
+                    { transform: 'translateX(0)' },
+                    { transform: 'translateX(-5px)' },
+                    { transform: 'translateX(5px)' },
+                    { transform: 'translateX(0)' }
+                ], {
+                    duration: 200,
+                    iterations: 3
+                });
+            } else {
+                input.classList.remove("border-red-500");
+            }
+        });
+
+        if (isValid) {
+            
+            Swal.fire({
+                title: "Success!",
+                text: "Your address has been saved successfully.",
+                icon: "success",
+                confirmButtonText: "OK"
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    form.submit(); 
+                }
+            });
+        } else {
+            // Show error message
+            Swal.fire({
+                title: "Error!",
+                text: "Please fill in all required fields properly.",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+        }
+    });
+});
+</script>

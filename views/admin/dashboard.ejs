@@ -3,83 +3,372 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <title>EcoBuy Admin Dashboard</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/feather-icons/4.29.0/feather.min.js"></script>
 </head>
-<body class="bg-gray-100">
-
-    <!-- Sidebar -->
-    <!-- <div class="flex"> -->
-        <!-- Mobile Overlay -->
-        <!-- <div id="overlay" class="fixed inset-0 bg-black bg-opacity-50 hidden md:hidden"></div> -->
-
-        <%- include('../partials/admin/header.ejs') %>
+<body class="bg-slate-100 font-[Roboto]">
+    <header class="fixed top-0 w-full z-50 shadow px-6 py-4 flex justify-between items-center" style="background-color: black;">
+        <div class="text-xl font-semibold text-white">Welcome, Admin</div>
+        <form action="/admin/logout" method="get">
+            <button type="submit" class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-md">Logout</button>
+        </form>
+    </header>
+    
+    
+    <div class="min-h-screen flex mt-[75px]">
+        <!-- Sidebar -->
+        <aside class="w-64 bg-slate-800 text-white">
+            <%- include('../partials/admin/header.ejs') %>
+        </aside>
 
         <!-- Main Content -->
-        <div class="flex-1 ml-0 md:ml-64 transition-all duration-300 "
-        style="margin-left: 1px;">
-            <!-- Header -->
-            <header class="bg-white shadow-md flex justify-between items-center p-4">
-                <button id="menu-button" class="md:hidden text-gray-800">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                    </svg>
-                </button>
-                
-                <h1 class="text-xl font-semibold">Dashboard</h1>
-                <div class="flex items-center space-x-4">
-                    <span>Admin</span>
-                    <img src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full">
-                   <a href="/admin/logout"> <button>Logout</button></a>
-                </div>
-            </header>
-
-            <!-- Dashboard Content -->
+        <main class="flex-1 overflow-y-auto">
             <div class="p-6">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h2 class="text-lg font-bold">Total Customers</h2>
-                        <p class="text-2xl">1200</p>
+                <div class="flex justify-between items-center mb-6">
+                    <h1 class="text-2xl font-bold text-slate-800">Dashboard</h1>
+                    <div class="flex space-x-2">
+                        <button id="weeklyBtn" class="px-4 py-2 bg-slate-200 rounded-md hover:bg-slate-300" data-range="weekly">Weekly</button>
+                        <button id="monthlyBtn" class="px-4 py-2 bg-slate-200 rounded-md hover:bg-slate-300" data-range="monthly">Monthly</button>
+                        <button id="yearlyBtn" class="px-4 py-2 bg-slate-800 text-white rounded-md" data-range="yearly">Yearly</button>
                     </div>
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h2 class="text-lg font-bold">Orders</h2>
-                        <p class="text-2xl">350</p>
+                </div>
+
+                <!-- Summary Cards -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-sm text-slate-500 font-medium">Total Revenue</h3>
+                                <p class="text-2xl font-bold text-slate-800" id="totalRevenue">$0</p>
+                            </div>
+                            <div class="h-10 w-10 bg-emerald-100 flex items-center justify-center rounded-full">
+                                <span data-feather="dollar-sign" class="text-emerald-500"></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h2 class="text-lg font-bold">Revenue</h2>
-                        <p class="text-2xl">$25,000</p>
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-sm text-slate-500 font-medium">Total Profit</h3>
+                                <p class="text-2xl font-bold text-slate-800" id="totalProfit">$0</p>
+                            </div>
+                            <div class="h-10 w-10 bg-blue-100 flex items-center justify-center rounded-full">
+                                <span data-feather="trending-up" class="text-blue-500"></span>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-white p-4 shadow rounded-lg">
-                        <h2 class="text-lg font-bold">Products</h2>
-                        <p class="text-2xl">500</p>
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-sm text-slate-500 font-medium">Total Orders</h3>
+                                <p class="text-2xl font-bold text-slate-800" id="totalOrders">0</p>
+                            </div>
+                            <div class="h-10 w-10 bg-amber-100 flex items-center justify-center rounded-full">
+                                <span data-feather="shopping-bag" class="text-amber-500"></span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <h3 class="text-sm text-slate-500 font-medium">Active Users</h3>
+                                <p class="text-2xl font-bold text-slate-800" id="totalUsers">0</p>
+                            </div>
+                            <div class="h-10 w-10 bg-purple-100 flex items-center justify-center rounded-full">
+                                <span data-feather="user" class="text-purple-500"></span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                    <!-- Sales Chart -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Sales Overview</h3>
+                        <div class="relative h-80">
+                            <canvas id="salesChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Category Distribution -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Category Distribution</h3>
+                        <div class="relative h-80">
+                            <canvas id="categoryChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <!-- Top Products -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Top Products</h3>
+                        <div class="overflow-y-auto max-h-96" id="topProductsList">
+                            <div class="animate-pulse">
+                                <div class="h-6 bg-slate-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-6 bg-slate-200 rounded w-2/3 mb-2"></div>
+                                <div class="h-6 bg-slate-200 rounded w-3/4 mb-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Categories -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Top Categories</h3>
+                        <div class="overflow-y-auto max-h-96" id="topCategoriesList">
+                            <div class="animate-pulse">
+                                <div class="h-6 bg-slate-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-6 bg-slate-200 rounded w-2/3 mb-2"></div>
+                                <div class="h-6 bg-slate-200 rounded w-3/4 mb-2"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Top Brands -->
+                    <div class="bg-white rounded-lg shadow p-4">
+                        <h3 class="text-lg font-semibold text-slate-800 mb-4">Top Brands</h3>
+                        <div class="overflow-y-auto max-h-96" id="topBrandsList">
+                            <div class="animate-pulse">
+                                <div class="h-6 bg-slate-200 rounded w-3/4 mb-2"></div>
+                                <div class="h-6 bg-slate-200 rounded w-2/3 mb-2"></div>
+                                <div class="h-6 bg-slate-200 rounded w-3/4 mb-2"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </main>
     </div>
 
-    <!-- JavaScript for Sidebar Toggle -->
     <script>
-        const menuButton = document.getElementById("menu-button");
-        const closeButton = document.getElementById("close-button");
-        const sidebar = document.getElementById("sidebar");
-        const overlay = document.getElementById("overlay");
-
-        menuButton.addEventListener("click", () => {
-            sidebar.classList.remove("-translate-x-full");
-            overlay.classList.remove("hidden");
+        // Initialize Feather Icons
+        document.addEventListener('DOMContentLoaded', () => {
+            feather.replace();
+            loadDashboardData('yearly');
+            setupTimeRangeButtons();
         });
 
-        closeButton.addEventListener("click", () => {
-            sidebar.classList.add("-translate-x-full");
-            overlay.classList.add("hidden");
-        });
+        // Setup time range filter buttons
+        function setupTimeRangeButtons() {
+            const timeButtons = document.querySelectorAll('[data-range]');
+            timeButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    // Reset all buttons
+                    timeButtons.forEach(b => {
+                        b.classList.remove('bg-slate-800', 'text-white');
+                        b.classList.add('bg-slate-200');
+                    });
+                    
+                    // Highlight selected button
+                    e.target.classList.remove('bg-slate-200');
+                    e.target.classList.add('bg-slate-800', 'text-white');
+                    
+                    // Load data for selected time range
+                    loadDashboardData(e.target.dataset.range);
+                });
+            });
+        }
 
-        overlay.addEventListener("click", () => {
-            sidebar.classList.add("-translate-x-full");
-            overlay.classList.add("hidden");
-        });
+        // Format currency values
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('en-US', {
+                style: 'currency',
+                currency: 'USD',
+                minimumFractionDigits: 2
+            }).format(value);
+        }
+
+        // Load dashboard data from API
+        function loadDashboardData(timeRange) {
+            fetch(`/admin?timeRange=${timeRange}`, {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                updateDashboard(data);
+            })
+            .catch(error => {
+                console.error('Error loading dashboard data:', error);
+            });
+        }
+
+        // Chart instances
+        let salesChart = null;
+        let categoryChart = null;
+
+        // Update dashboard with API data
+        function updateDashboard(data) {
+            // Update summary cards
+            document.getElementById('totalRevenue').textContent = formatCurrency(data.totalRevenue);
+            document.getElementById('totalProfit').textContent = formatCurrency(data.totalProfit);
+            document.getElementById('totalOrders').textContent = data.totalOrders.toLocaleString();
+            document.getElementById('totalUsers').textContent = data.totalUsers.toLocaleString();
+            
+            // Update sales chart
+            updateSalesChart(data.salesData);
+            
+            // Update category chart
+            updateCategoryChart(data.categoryData);
+            
+            // Update top products list
+            const topProductsList = document.getElementById('topProductsList');
+            topProductsList.innerHTML = data.topProducts.map((product, index) => `
+                <div class="flex items-center justify-between py-2 ${index < data.topProducts.length - 1 ? 'border-b border-slate-200' : ''}">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 flex items-center justify-center bg-slate-200 rounded-full mr-3 text-sm font-medium">${index + 1}</div>
+                        <span class="font-medium">${product.productName}</span>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-slate-600">${product.totalSales.toLocaleString()} sold</p>
+                        <p class="font-medium">${formatCurrency(product.revenue)}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update top categories list
+            const topCategoriesList = document.getElementById('topCategoriesList');
+            topCategoriesList.innerHTML = data.topCategories.map((category, index) => `
+                <div class="flex items-center justify-between py-2 ${index < data.topCategories.length - 1 ? 'border-b border-slate-200' : ''}">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 flex items-center justify-center bg-slate-200 rounded-full mr-3 text-sm font-medium">${index + 1}</div>
+                        <span class="font-medium">${category.name}</span>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-slate-600">${category.totalSales.toLocaleString()} sold</p>
+                        <p class="font-medium">${formatCurrency(category.revenue)}</p>
+                    </div>
+                </div>
+            `).join('');
+            
+            // Update top brands list
+            const topBrandsList = document.getElementById('topBrandsList');
+            topBrandsList.innerHTML = data.topBrands.map((brand, index) => `
+                <div class="flex items-center justify-between py-2 ${index < data.topBrands.length - 1 ? 'border-b border-slate-200' : ''}">
+                    <div class="flex items-center">
+                        <div class="w-8 h-8 flex items-center justify-center bg-slate-200 rounded-full mr-3 text-sm font-medium">${index + 1}</div>
+                        <span class="font-medium">${brand.name}</span>
+                    </div>
+                    <div class="text-right">
+                        <p class="text-sm text-slate-600">${brand.totalSales.toLocaleString()} sold</p>
+                        <p class="font-medium">${formatCurrency(brand.revenue)}</p>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Update sales chart
+        function updateSalesChart(salesData) {
+            const ctx = document.getElementById('salesChart').getContext('2d');
+            
+            if (salesChart) {
+                salesChart.destroy();
+            }
+            
+            salesChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: salesData.labels,
+                    datasets: [
+                        {
+                            label: 'Revenue',
+                            data: salesData.values,
+                            backgroundColor: 'rgba(59, 130, 246, 0.5)',
+                            borderColor: 'rgb(59, 130, 246)',
+                            borderWidth: 1
+                        },
+                        {
+                            label: 'Profit',
+                            data: salesData.profits,
+                            backgroundColor: 'rgba(16, 185, 129, 0.5)',
+                            borderColor: 'rgb(16, 185, 129)',
+                            borderWidth: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return '$' + value.toLocaleString();
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    label += formatCurrency(context.parsed.y);
+                                    return label;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Update category chart
+        function updateCategoryChart(categoryData) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            
+            if (categoryChart) {
+                categoryChart.destroy();
+            }
+            
+            // Generate array of colors for categories
+            const colors = categoryData.labels.map((_, i) => {
+                const hue = (i * 137.5) % 360; // Golden angle approximation for good color distribution
+                return `hsl(${hue}, 70%, 65%)`;
+            });
+            
+            categoryChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: categoryData.labels,
+                    datasets: [{
+                        data: categoryData.values,
+                        backgroundColor: colors,
+                        borderWidth: 1,
+                        borderColor: '#fff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 12
+                            }
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                    const percentage = ((value / total) * 100).toFixed(1);
+                                    return `${value.toLocaleString()} products (${percentage}%)`;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
     </script>
-
 </body>
 </html>

@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Profile Sidebar</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <style>
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+        .gradient-animation {
+            background-size: 200% 200%;
+            animation: gradientShift 5s ease infinite;
+        }
+        .sidebar-shadow {
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1), 
+                        0 10px 20px -5px rgba(0, 0, 0, 0.05);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-gray-50 to-gray-100 flex items-center justify-center min-h-screen p-4">
+    <div class="w-72 bg-white sidebar-shadow rounded-3xl overflow-hidden transform transition-all duration-300 hover:scale-[1.02]">
+        <!-- Profile Header -->
+        <div class="bg-gradient-to-r from-blue-600 to-purple-600 text-white p-6 relative">
+            <div class="absolute top-4 right-4">
+                <i class="ph ph-gear text-xl opacity-70 hover:opacity-100 transition"></i>
+            </div>
+            <div class="flex flex-col items-center">
+                <div class="w-24 h-24 rounded-full border-4 border-white/30 mb-4 flex items-center justify-center 
+                    bg-white/20 text-3xl font-bold shadow-lg">
+                    <%= user.name.charAt(0).toUpperCase() %>
+                </div>
+                <h2 class="text-xl font-bold tracking-wide"><%= user.name %></h2>
+                <p class="text-sm opacity-80 mt-1"><%= user.email %></p>
+            </div>
+        </div>
+
+        <!-- Navigation Menu -->
+        <nav class="p-4 space-y-2">
+            <a href="/userProfile" class="menu-item group flex items-center px-4 py-3 rounded-xl transition-all duration-300 
+                hover:bg-blue-50 hover:text-blue-600" data-id="profile">
+                <div class="bg-blue-100 text-blue-600 rounded-lg p-2 mr-4 group-hover:bg-blue-200 transition">
+                    <i class="ph ph-user-circle text-xl"></i>
+                </div>
+                <span class="font-semibold">Profile</span>
+                <i class="ph ph-caret-right ml-auto opacity-0 group-hover:opacity-100 transition"></i>
+            </a>
+
+            <a href="/order" class="menu-item group flex items-center px-4 py-3 rounded-xl transition-all duration-300 
+                hover:bg-purple-50 hover:text-purple-600" data-id="orders">
+                <div class="bg-purple-100 text-purple-600 rounded-lg p-2 mr-4 group-hover:bg-purple-200 transition">
+                    <i class="ph ph-shopping-cart text-xl"></i>
+                </div>
+                <span class="font-semibold">My Orders</span>
+                <i class="ph ph-caret-right ml-auto opacity-0 group-hover:opacity-100 transition"></i>
+            </a>
+
+            <a href="/address" class="menu-item group flex items-center px-4 py-3 rounded-xl transition-all duration-300 
+                hover:bg-green-50 hover:text-green-600" data-id="address">
+                <div class="bg-green-100 text-green-600 rounded-lg p-2 mr-4 group-hover:bg-green-200 transition">
+                    <i class="ph ph-map-pin text-xl"></i>
+                </div>
+                <span class="font-semibold">Add Address</span>
+                <i class="ph ph-caret-right ml-auto opacity-0 group-hover:opacity-100 transition"></i>
+            </a>
+
+            <a href="/wallet" class="menu-item group flex items-center px-4 py-3 rounded-xl transition-all duration-300 
+                hover:bg-yellow-50 hover:text-yellow-600" data-id="wallet">
+                <div class="bg-yellow-100 text-yellow-600 rounded-lg p-2 mr-4 group-hover:bg-yellow-200 transition">
+                    <i class="ph ph-wallet text-xl"></i>
+                </div>
+                <span class="font-semibold">Wallet</span>
+                <i class="ph ph-caret-right ml-auto opacity-0 group-hover:opacity-100 transition"></i>
+            </a>
+        </nav>
+
+        <!-- Logout Button -->
+        <div class="p-4 border-t border-gray-100">
+            <a href="/logout" id="logout-btn" class="flex items-center justify-center px-4 py-3 
+                bg-gradient-to-r from-red-500 to-pink-600 text-white rounded-xl 
+                hover:from-red-600 hover:to-pink-700 transition-all duration-300 
+                gradient-animation">
+                <i class="ph ph-sign-out text-xl mr-3"></i>
+                Logout
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const menuItems = document.querySelectorAll(".menu-item");
+            const currentPath = window.location.pathname;
+
+            menuItems.forEach(item => {
+                const itemPath = item.getAttribute("href");
+                
+                if (currentPath === itemPath) {
+                    item.classList.add("bg-blue-50", "text-blue-600");
+                    item.querySelector('div').classList.add("bg-blue-200");
+                } else {
+                    item.classList.remove("bg-blue-50", "text-blue-600");
+                    item.querySelector('div').classList.remove("bg-blue-200");
+                }
+            });
+        });
+    </script>
+</body>
+</html>

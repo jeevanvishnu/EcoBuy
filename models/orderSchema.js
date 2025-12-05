@@ -9,6 +9,15 @@ const orderSchema = new Schema({
         default:()=>uuidv4(),
         unique:true
     },
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: 'User',
+        required: true
+    },
+    cartId: {
+        type: Schema.Types.ObjectId,
+        ref: 'Cart'
+    },
     orderedItem:[{
         product:{
             type:Schema.Types.ObjectId,
@@ -22,7 +31,21 @@ const orderSchema = new Schema({
         price:{
             type:Number,
             default:0
-        }
+        },
+        orderStatus:{
+            type:String,
+            required:true,
+            enum:['Pending','Processing','Shipped','Delivered','Cancelled','Return Declined','Request','Returned'],
+            default:"Pending"
+        },
+        cancelReason:{
+            type:String,
+            default:null
+        },
+        returnReason: {
+             type: String, 
+            default: null 
+        },
 
     }],
     totalPrice:{
@@ -38,19 +61,26 @@ const orderSchema = new Schema({
         required:true,
 
     },
-    address:{
-        type:Schema.Types.ObjectId,
-        ref:"User",
-        required:true
+    
+    deliveryAddress: {
+        type: Array,
+        required: true
     },
+   
+
     invoiceDate:{
         type:Date
     },
-    status:{
-        type:String,
-        required:true,
-        enum:['Pending','Processing','Shipped','Cancellec','Return','Request','Returned']
+    paymentMethod: {
+        type: String,
+        required: true,
+        enum: ['Cash on Delivery','Online Payment','Wallet']
     },
+    razorpayOrderId: { 
+        type: String, 
+        default: null 
+    },
+   
     createdon:{
         type:Date,
         default:Date.now(),
@@ -60,7 +90,21 @@ const orderSchema = new Schema({
     couponApplied:{
         type:Boolean,
         default:false
+    },
+    paymentId: {
+        type: String
+    },
+    paymentStatus: {
+        type: String,
+        enum: ['pending', 'paid', 'failed'],
+        default: 'pending'
+    },
+    date: {
+        type: Date,
+        default: Date.now,
+        required: true
     }
+
 })
 
 const order = mongoose.model("Order",orderSchema)
